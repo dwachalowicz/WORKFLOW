@@ -54,6 +54,8 @@ export const applyCookieConsents = async (consents: CookieConsents | null) => {
       removeScript('gryf-marketing-script');
     }
   } catch (err) {
+    const error = err as { isAbort?: boolean; status?: number };
+    if (error?.isAbort || error?.status === 0) return;
     if (import.meta.env.DEV) {
       console.warn("Failed to load scripts from DB:", err);
     }

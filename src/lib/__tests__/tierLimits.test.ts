@@ -54,7 +54,7 @@ describe('getTierLimits', () => {
     const limits = getTierLimits();
     expect(limits.maxWorkspaces).toBe(1);
     expect(limits.maxProcesses).toBe(10);
-    expect(limits.aiAccess).toBe('none');
+    expect(limits.aiAccess).toBe('byok');
   });
 
   it('returns limits for MEDIUM tier', () => {

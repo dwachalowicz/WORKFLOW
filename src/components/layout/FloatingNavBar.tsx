@@ -147,7 +147,7 @@ export const FloatingNavBar = () => {
                   }`}
                 >
                   <BarChart3 size={18} />
-                  {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-1 -right-1 text-muted-foreground" />}
+                  {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
                 </button>
               </SimpleTooltip>
 
@@ -182,7 +182,7 @@ export const FloatingNavBar = () => {
                   }`}
                 >
                   {isSimulating ? <Square size={16} fill="currentColor" /> : <Play size={18} className="ml-0.5" />}
-                  {!limits.canPresent && <Lock size={12} className="absolute -bottom-1 -right-1 text-muted-foreground" />}
+                  {!limits.canPresent && <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
                 </button>
               </SimpleTooltip>
 
@@ -389,7 +389,7 @@ export const FloatingNavBar = () => {
                   >
                     <div className="relative">
                       <BarChart3 size={16} />
-                      {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-1 -right-1 text-muted-foreground" />}
+                      {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
                     </div>
                     {t('nav.stats')}
                   </button>

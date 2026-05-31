@@ -350,6 +350,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Count unread notifications
         await get().fetchUnreadNotificationsCount();
       } catch (err) {
+        const error = err as { isAbort?: boolean; status?: number };
+        if (error?.isAbort || error?.status === 0) return;
         console.error('Error fetching workspaces:', err);
       }
     })();

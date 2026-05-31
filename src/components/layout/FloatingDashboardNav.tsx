@@ -95,7 +95,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
             >
               <Network size={18} />
               {!limits.canUseProcessMap && (
-                <Lock size={12} className="absolute -bottom-1 -right-1 text-muted-foreground" />
+                <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />
               )}
             </button>
           </SimpleTooltip>
@@ -246,7 +246,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
         <button onClick={() => limits.canUseProcessMap && setActiveTab('processmap')} className={`flex items-center justify-center p-2 rounded-xl transition-colors ${!limits.canUseProcessMap ? 'text-muted-foreground/40 cursor-not-allowed' : activeTab === 'processmap' ? 'text-brand-gold bg-brand-gold/10 cursor-pointer' : 'text-muted-foreground cursor-pointer'}`}>
           <div className="relative">
             <Network size={22} />
-            {!limits.canUseProcessMap && <Lock size={14} className="absolute -bottom-1 -right-1 text-muted-foreground" />}
+            {!limits.canUseProcessMap && <Lock size={14} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
           </div>
         </button>
         <button onClick={() => setActiveTab('members')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'members' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>

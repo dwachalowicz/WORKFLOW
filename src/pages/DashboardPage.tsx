@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
@@ -53,17 +53,9 @@ export const DashboardPage = () => {
   const { user, logout } = useAuthStore();
   const limits = getTierLimits(user?.tier);
   
-  const [activeTab, setActiveTab] = useState<TabType>(
-    (urlTab && VALID_TABS.includes(urlTab as TabType)) ? (urlTab as TabType) : 'processes'
-  );
-
-  useEffect(() => {
-    if (urlTab && VALID_TABS.includes(urlTab as TabType)) {
-      setActiveTab(urlTab as TabType);
-    } else if (!urlTab) {
-      setActiveTab('processes');
-    }
-  }, [urlTab]);
+  const activeTab: TabType = (urlTab && VALID_TABS.includes(urlTab as TabType)) 
+    ? (urlTab as TabType) 
+    : 'processes';
 
   // Tier gate: redirect from processmap if not allowed
   useEffect(() => {

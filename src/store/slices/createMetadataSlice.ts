@@ -72,8 +72,8 @@ export const createMetadataSlice: StateCreator<CanvasState, [], [], MetadataSlic
       }
       set({ incomingLinks: linkMap });
     } catch (err: unknown) {
-      if ((err as { isAbort?: boolean })?.isAbort) {
-        // Ignore log error if request was intentionally aborted by PocketBase
+      if ((err as { isAbort?: boolean })?.isAbort || (err as { status?: number })?.status === 0) {
+        // Ignore log error if request was intentionally aborted by PocketBase or page unloaded
         return;
       }
       console.error('Error fetching incoming links:', err);

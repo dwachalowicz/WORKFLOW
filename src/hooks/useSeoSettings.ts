@@ -22,6 +22,8 @@ export const useSeoSettings = () => {
           if (ogDesc) ogDesc.setAttribute('content', settings.seo_description as string);
         }
       } catch (err) {
+        const error = err as { isAbort?: boolean; status?: number };
+        if (error?.isAbort || error?.status === 0) return;
         if (import.meta.env.DEV) {
           console.warn('Failed to load SEO settings:', err);
         }

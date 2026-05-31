@@ -192,14 +192,10 @@ export async function importGlobalBackup(file: File, userId: string) {
         
         const transformed = transformFn ? transformFn({ ...record }) : { ...record };
         
-        try {
-          const created = await pb.collection(collectionName).create(transformed);
-          if (oldId) idMap.set(oldId, created.id);
-          // Add a small delay to prevent network saturation / rate limits during heavy imports
-          await new Promise(resolve => setTimeout(resolve, 20));
-        } catch (e) {
-          throw e;
-        }
+        const created = await pb.collection(collectionName).create(transformed);
+        if (oldId) idMap.set(oldId, created.id);
+        // Add a small delay to prevent network saturation / rate limits during heavy imports
+        await new Promise(resolve => setTimeout(resolve, 20));
       }
     };
 
