@@ -21,7 +21,8 @@ export const InvitationsTab = () => {
       useToastStore.getState().showToast(t('invitations.accepted'), 'success');
     } catch (err) {
       console.error('Error accepting invitation:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      const errorMsg = (err as any)?.response?.message || t('common.error');
+      useToastStore.getState().showToast(errorMsg, 'error');
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);

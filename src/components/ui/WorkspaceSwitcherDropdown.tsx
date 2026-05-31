@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useClickOutside } from '@/hooks/useClickOutside';
-import { ChevronDown, Check, Crown, Edit3, Eye, Users } from 'lucide-react';
+import { ChevronDown, Check, Crown, Edit3, Eye, Users, Lock } from 'lucide-react';
 import { getRecordFileUrl } from '@/lib/pocketbase';
 import { useTranslation } from 'react-i18next';
 
@@ -29,7 +29,10 @@ export const WorkspaceSwitcherDropdown = () => {
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group px-2 py-1 -ml-2 rounded-lg hover:bg-secondary/50"
         >
-          <span className="font-medium text-sm">{activeWorkspace.name}</span>
+          <span className="font-medium text-sm flex items-center gap-1.5">
+            {activeWorkspace.name}
+            {activeWorkspace.isLocked && <Lock size={12} className="text-muted-foreground" title={t('common.locked', 'Zablokowany')} />}
+          </span>
           <ChevronDown 
             size={14} 
             className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} 
@@ -57,10 +60,11 @@ export const WorkspaceSwitcherDropdown = () => {
                     {ws.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex items-center gap-2">
                   <div className={`text-sm truncate ${activeWorkspace.id === ws.id ? 'font-bold text-brand-gold' : 'font-medium text-foreground'}`}>
                     {ws.name}
                   </div>
+                  {ws.isLocked && <Lock size={12} className="text-muted-foreground shrink-0" title={t('common.locked', 'Zablokowany')} />}
                 </div>
                 {activeWorkspace.id === ws.id && (
                   <Check size={14} className="text-brand-gold shrink-0" />

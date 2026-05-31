@@ -40,6 +40,7 @@ interface AuthState {
   isAuthenticated: boolean;
   workspaces: Workspace[];
   pendingInvitations: PendingInvitation[];
+  sentJoinRequests: PendingInvitation[];
   pendingMembersCount: number;
   unreadNotificationsCount: number;
   activeWorkspace: Workspace | null;
@@ -72,6 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   workspaces: [],
   pendingInvitations: [],
+  sentJoinRequests: [],
   pendingMembersCount: 0,
   unreadNotificationsCount: 0,
   activeWorkspace: null,
@@ -98,6 +100,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isAuthenticated: false,
       workspaces: [],
       pendingInvitations: [],
+      sentJoinRequests: [],
       pendingMembersCount: 0,
       activeWorkspace: null
     });
@@ -193,10 +196,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         const workspaceMap = new Map<string, Workspace>();
         const pendingInvites: PendingInvitation[] = [];
+        const sentRequests: PendingInvitation[] = [];
 
         const limits = getTierLimits(get().user?.tier);
 
-        owned.forEach((w, index) => {
+        owned.forEach((w) => {
           workspaceMap.set(w.id, { 
             id: w.id, 
             name: w.name, 
@@ -204,7 +208,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             avatar: w.avatar || undefined, 
             icon: w.icon || undefined,
             role: 'admin',
-            isLocked: index >= limits.maxWorkspaces,
+            isLocked: false,
             joinCode: w.join_code
           });
         });
@@ -223,7 +227,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               });
             }
           } else if (m.status === 'pending') {
-            pendingInvites.push({
+            const inviteObj = {
               id: m.id,
               workspaceId: m.expand?.workspace?.id || m.workspace,
               workspaceName: m.expand?.workspace?.name || i18n.t('authStore.pendingWorkspaceName', { defaultValue: 'Workspace' }),
@@ -232,11 +236,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 name: m.expand.invited_by.name,
                 email: m.expand.invited_by.email
               } : undefined
-            });
+            };
+            if (m.invited_by) {
+              pendingInvites.push(inviteObj);
+            } else {
+              sentRequests.push(inviteObj);
+            }
           }
         });
 
         let wsList = Array.from(workspaceMap.values());
+
+        // --- Fetch Locked Workspaces ---
+        try {
+          const lockedIds: string[] = await pb.send(`/api/locked-workspaces?t=${Date.now()}`, { method: 'GET' });
+          if (Array.isArray(lockedIds)) {
+            wsList = wsList.map(ws => ({
+              ...ws,
+              isLocked: lockedIds.includes(ws.id)
+            }));
+            
+            // Update map in case it's used later
+            wsList.forEach(ws => workspaceMap.set(ws.id, ws));
+          }
+        } catch (lockedErr) {
+          console.error("Error fetching locked workspaces", lockedErr);
+        }
 
         // --- New user bootstrap: create default workspace + sample folder ---
         if (wsList.length === 0 && pendingInvites.length === 0) {
@@ -326,6 +351,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({
           workspaces: wsList,
           pendingInvitations: pendingInvites,
+          sentJoinRequests: sentRequests,
           activeWorkspace: nextActiveWs
         });
 
@@ -578,6 +604,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         workspaces: [],
         pendingInvitations: [],
+        sentJoinRequests: [],
         pendingMembersCount: 0,
         activeWorkspace: null
       });
