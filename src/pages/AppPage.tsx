@@ -16,6 +16,7 @@ import { useProcessLock } from '@/hooks/useProcessLock';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
 import { useProcessFileOperations } from '@/hooks/useProcessFileOperations';
 import { getDefaultProcessNodes } from '@/lib/templates/defaultProcess';
+import { PanelErrorBoundary } from '@/components/ui/PanelErrorBoundary';
 
 // Lazy-load heavy panels — reduces initial bundle by ~170KB
 const PropertiesPanel = lazy(() => import('@/components/panels/PropertiesPanel').then(m => ({ default: m.PropertiesPanel })));
@@ -251,7 +252,9 @@ export const AppPage = () => {
 
       <ReactFlowProvider>
         <Suspense fallback={null}>
-          <LinterPanel />
+          <PanelErrorBoundary panelName="Linter">
+            <LinterPanel />
+          </PanelErrorBoundary>
         </Suspense>
         
         {/* Main Canvas Area */}
@@ -262,13 +265,17 @@ export const AppPage = () => {
 
         {/* Properties Panel */}
         <Suspense fallback={null}>
-          <PropertiesPanel />
+          <PanelErrorBoundary panelName="Properties">
+            <PropertiesPanel />
+          </PanelErrorBoundary>
         </Suspense>
       </ReactFlowProvider>
 
       {/* Version History — right-side slide panel */}
       <Suspense fallback={null}>
-        <VersionHistoryPanel />
+        <PanelErrorBoundary panelName="VersionHistory">
+          <VersionHistoryPanel />
+        </PanelErrorBoundary>
       </Suspense>
 
       <ShareModal 

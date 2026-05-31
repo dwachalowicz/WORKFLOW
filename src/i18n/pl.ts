@@ -170,6 +170,7 @@ export const pl = {
     title: 'Coś poszło nie tak',
     desc: 'Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę.',
     refresh: 'Odśwież stronę',
+    panelCrash: 'Ten panel napotkał błąd.',
   },
   notifications: {
     title: 'Powiadomienia',

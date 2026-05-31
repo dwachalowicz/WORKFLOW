@@ -162,6 +162,7 @@ export const en = {
     title: 'Something went wrong',
     desc: 'An unexpected error occurred. Try refreshing the page.',
     refresh: 'Refresh page',
+    panelCrash: 'This panel encountered an error.',
   },
   notifications: {
     title: 'Notifications',

@@ -9,6 +9,7 @@ import { SearchPanel } from '@/components/panels/SearchPanel';
 import { StatsPanel } from '@/components/panels/StatsPanel';
 import { AiAssistantPanel } from '@/components/panels/AiAssistantPanel';
 import { ChecklistPanel } from '@/components/panels/ChecklistPanel';
+import { PanelErrorBoundary } from '@/components/ui/PanelErrorBoundary';
 import { useTranslation } from 'react-i18next';
 import { getTierLimits } from '@/lib/tierLimits';
 import { UserAvatarButton } from '@/components/ui/UserAvatarButton';
@@ -308,9 +309,15 @@ export const FloatingNavBar = () => {
 
     {/* Floating Panels — rendered outside hidden md:block container so they work on mobile */}
     <SearchPanel />
-    <StatsPanel />
-    <AiAssistantPanel />
-    <ChecklistPanel />
+    <PanelErrorBoundary panelName="Stats">
+      <StatsPanel />
+    </PanelErrorBoundary>
+    <PanelErrorBoundary panelName="AI Assistant">
+      <AiAssistantPanel />
+    </PanelErrorBoundary>
+    <PanelErrorBoundary panelName="Checklist">
+      <ChecklistPanel />
+    </PanelErrorBoundary>
 
     {/* Mobile Bottom Navigation — visible only below md breakpoint */}
     <div className="fixed bottom-0 left-0 right-0 z-[120] md:hidden bg-surface-nav border-t border-border shadow-2xl">
