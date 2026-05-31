@@ -38,6 +38,7 @@ export async function getAiUserConfig(userId: string): Promise<AiUserConfig | nu
   try {
     const userRecord = await pb.collection('WORKFLOW_users').getOne(userId, {
       fields: 'id,ai_provider,ai_model,ai_temperature,ai_custom_memory',
+      requestKey: null,
     });
 
     // Check key existence via server-side endpoint

@@ -1425,6 +1425,25 @@ routerAdd("POST", "/api/process/lock", (e) => {
         let success = false;
         e.app.runInTransaction((txApp) => {
             const record = txApp.findRecordById("WORKFLOW_processes", processId);
+            
+            // --- Security Check ---
+            const wsId = record.get("workspace");
+            let hasAccess = false;
+            if (wsId && e.auth.id) {
+                try {
+                    const ws = txApp.findRecordById("WORKFLOW_workspaces", wsId);
+                    if (ws.get("owner") === e.auth.id) hasAccess = true;
+                } catch(err) {}
+                if (!hasAccess) {
+                    try {
+                        const members = txApp.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: wsId, user: e.auth.id });
+                        if (members && members.length > 0) hasAccess = true;
+                    } catch(err) {}
+                }
+            }
+            if (!hasAccess) throw new Error("UNAUTHORIZED_WORKSPACE");
+            // ----------------------
+            
             const currentLocker = record.get("locked_by");
             const lockedAtStr = record.get("locked_at");
 
@@ -1460,6 +1479,109 @@ routerAdd("POST", "/api/process/lock", (e) => {
         }
     } catch (err) {
         return e.json(500, { message: err.message || "Internal server error" });
+    }
+});
+
+// =====================================================
+// ROUTE: POST /api/process/has-password
+// =====================================================
+routerAdd("POST", "/api/process/has-password", (e) => {
+    if (!e.auth) {
+        return e.json(401, { message: "Not authenticated" });
+    }
+    const data = e.requestInfo().body || {};
+    const processId = data.processId;
+    if (!processId) {
+        return e.json(400, { message: "processId is required" });
+    }
+    try {
+        const record = e.app.findRecordById("WORKFLOW_processes", processId);
+        
+        // --- Security Check ---
+        const wsId = record.get("workspace");
+        let hasAccess = false;
+        if (wsId && e.auth.id) {
+            try {
+                const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+                if (ws.get("owner") === e.auth.id) hasAccess = true;
+            } catch(err) {}
+            if (!hasAccess) {
+                try {
+                    const members = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: wsId, user: e.auth.id });
+                    if (members && members.length > 0) hasAccess = true;
+                } catch(err) {}
+            }
+        }
+        if (!hasAccess && !record.get("isPublic")) {
+            return e.json(403, { message: "No access to this workspace" });
+        }
+        // ----------------------
+        
+        const pwd = record.get("publicPassword");
+        return e.json(200, { hasPassword: !!pwd });
+    } catch(err) {
+        return e.json(404, { message: "Process not found" });
+    }
+});
+
+// =====================================================
+// ROUTE: POST /api/process/set-password
+// =====================================================
+routerAdd("POST", "/api/process/set-password", (e) => {
+    if (!e.auth) {
+        return e.json(401, { message: "Not authenticated" });
+    }
+    const data = e.requestInfo().body || {};
+    const processId = data.processId;
+    const password = data.password || "";
+    
+    if (!processId) {
+        return e.json(400, { message: "processId is required" });
+    }
+    
+    try {
+        const record = e.app.findRecordById("WORKFLOW_processes", processId);
+        const wsId = record.get("workspace");
+        
+        let hasAccess = false;
+        
+        // Check if owner of workspace
+        try {
+            const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+            if (ws.get("owner") === e.auth.id) {
+                hasAccess = true;
+            }
+        } catch(err) {}
+        
+        // Check if admin/editor in workspace
+        if (!hasAccess) {
+            try {
+                const members = e.app.findRecordsByFilter(
+                    "WORKFLOW_workspace_members",
+                    "workspace = {:ws} && user = {:user} && status = 'active' && (role = 'admin' || role = 'editor')",
+                    "", 1, 0,
+                    { ws: wsId, user: e.auth.id }
+                );
+                if (members && members.length > 0) hasAccess = true;
+            } catch(err) {}
+        }
+        
+        if (!hasAccess) {
+            return e.json(403, { message: "No permission to edit this process" });
+        }
+        
+        if (password) {
+            const hashedPassword = $security.sha256(password + "gryf-salt-" + process.id);
+            record.set("publicPassword", hashedPassword);
+        } else {
+            record.set("publicPassword", "");
+        }
+        
+        e.app.save(record);
+        
+        return e.json(200, { hasPassword: !!password });
+    } catch(err) {
+        return e.json(500, { message: err.message || "Error setting password" });
     }
 });
 
@@ -1555,6 +1677,25 @@ routerAdd("GET", "/api/folder-stats/{workspaceId}", (e) => {
         if (!workspaceId) {
             return e.json(400, { message: "Missing workspaceId" });
         }
+        
+        // --- Security Check ---
+        let hasAccess = false;
+        if (workspaceId && e.auth.id) {
+            try {
+                const ws = e.app.findRecordById("WORKFLOW_workspaces", workspaceId);
+                if (ws.get("owner") === e.auth.id) hasAccess = true;
+            } catch(err) {}
+            if (!hasAccess) {
+                try {
+                    const members = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: workspaceId, user: e.auth.id });
+                    if (members && members.length > 0) hasAccess = true;
+                } catch(err) {}
+            }
+        }
+        if (!hasAccess) {
+            return e.json(403, { message: "Access denied" });
+        }
+        // ----------------------
 
         const db = e.app.db ? e.app.db() : $app.db();
         // Zliczamy procesy dla poszczegolnych folderow (group) w danym workspace
@@ -1634,6 +1775,25 @@ routerAdd("GET", "/api/locked-processes/{workspaceId}", (e) => {
     try {
         const workspaceId = e.request.pathValue("workspaceId");
         if (!workspaceId) return e.json(400, { message: "Missing workspaceId" });
+
+        // --- Security Check ---
+        let hasAccess = false;
+        if (workspaceId && e.auth.id) {
+            try {
+                const ws = e.app.findRecordById("WORKFLOW_workspaces", workspaceId);
+                if (ws.get("owner") === e.auth.id) hasAccess = true;
+            } catch(err) {}
+            if (!hasAccess) {
+                try {
+                    const members = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: workspaceId, user: e.auth.id });
+                    if (members && members.length > 0) hasAccess = true;
+                } catch(err) {}
+            }
+        }
+        if (workspaceId !== "debug_limits" && !hasAccess) {
+            return e.json(403, { message: "Access denied" });
+        }
+        // ----------------------
 
         let userTier = "FREE";
         const user = e.auth;

@@ -73,7 +73,10 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
     setIsSending(true);
     try {
       const comment = await addComment(processId, nodeId, user.id, newComment.trim());
-      setComments(prev => [comment, ...prev]);
+      setComments(prev => {
+        if (prev.some(c => c.id === comment.id)) return prev;
+        return [comment, ...prev];
+      });
       setNewComment('');
       inputRef.current?.focus();
       // Refresh canvas badge counts

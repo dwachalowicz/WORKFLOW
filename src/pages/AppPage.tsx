@@ -201,6 +201,10 @@ export const AppPage = () => {
             onClick={async () => {
               try {
                 await saveProcess();
+                const newId = useCanvasStore.getState().currentProcessId;
+                if (!urlProcessId && newId) {
+                  navigate(`/app/${newId}`, { replace: true });
+                }
                 showToast(t('canvas.saved'), 'success');
               } catch (e) {
                 showToast(e instanceof Error ? e.message : t('canvas.saveError'), 'error');
