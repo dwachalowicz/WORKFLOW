@@ -198,8 +198,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const pendingInvites: PendingInvitation[] = [];
         const sentRequests: PendingInvitation[] = [];
 
-        const limits = getTierLimits(get().user?.tier);
-
         owned.forEach((w) => {
           workspaceMap.set(w.id, { 
             id: w.id, 
