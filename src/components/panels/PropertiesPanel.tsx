@@ -318,7 +318,7 @@ export const PropertiesPanel = () => {
         {activeNode?.type === 'startstop' && activeNode?.data?.type === 'start' && (
           <CollapsibleSection title={t('props.trigger')} isCollapsed={!!collapsedSections['trigger']} onToggle={() => toggleSection('trigger')}>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-xs text-muted-foreground font-medium">{t('props.triggerQuestion')}</label>
               <div className="flex gap-2 flex-wrap">
                 {[

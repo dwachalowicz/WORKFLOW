@@ -169,6 +169,12 @@ export const GryfCanvas = () => {
     window.dispatchEvent(new CustomEvent('collapseAllNodes'));
   }, []);
 
+  const onNodeClick = useCallback((event: React.MouseEvent, node: import('@xyflow/react').Node) => {
+    if (useCanvasStore.getState().isVersionModalOpen) {
+      useCanvasStore.getState().setVersionModalOpen(false);
+    }
+  }, []);
+
   const onPaneContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     if (isViewMode) return; // No radial menu in view mode
@@ -335,6 +341,7 @@ export const GryfCanvas = () => {
         onDragOver={undefined}
         onDrop={undefined}
         onPaneClick={onPaneClick}
+        onNodeClick={onNodeClick}
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}
         connectionMode={ConnectionMode.Strict}

@@ -66,7 +66,7 @@ export const ActionSelector = ({
 
   const content = (
     <>
-      <div className="space-y-2">
+      <div className="space-y-3">
         <label className="text-xs text-muted-foreground font-medium">{question}</label>
         <div className="flex gap-2 flex-wrap">
           {availableActions.map((action) => {

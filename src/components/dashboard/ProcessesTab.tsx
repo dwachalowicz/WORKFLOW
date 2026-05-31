@@ -188,17 +188,13 @@ export const ProcessesTab = () => {
         // Fetch process counts per folder using a single DB query via custom endpoint
         const fetchFolderCounts = async () => {
           try {
-            const statsRes = await fetch(`${pb.baseUrl}/api/folder-stats/${activeWorkspace.id}`, {
-              headers: {
-                'Authorization': pb.authStore.token
-              }
+            const counts = await pb.send(`/api/folder-stats/${activeWorkspace.id}`, { 
+              method: 'GET',
+              requestKey: null
             });
-            
-            if (statsRes.ok) {
-              const counts = await statsRes.json();
-              setFolderCounts(counts);
-            }
+            setFolderCounts(counts);
           } catch (err) {
+            if ((err as any)?.isAbort) return;
             console.error('Error fetching folder stats:', err);
             useToastStore.getState().showToast(t('common.error'), 'error');
           }

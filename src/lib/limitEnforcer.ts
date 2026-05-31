@@ -103,14 +103,8 @@ export async function getLockedProcessIdsForWorkspace(workspaceId: string): Prom
   const lockedIds = new Set<string>();
 
   try {
-    const res = await fetch(`${pb.baseUrl}/api/locked-processes/${workspaceId}?t=${Date.now()}`, {
-      headers: {
-        'Authorization': pb.authStore.token
-      }
-    });
-
-    if (res.ok) {
-      const ids: string[] = await res.json();
+    const ids: string[] = await pb.send(`/api/locked-processes/${workspaceId}?t=${Date.now()}`, { method: 'GET' });
+    if (Array.isArray(ids)) {
       ids.forEach(id => lockedIds.add(id));
     }
   } catch (err) {
