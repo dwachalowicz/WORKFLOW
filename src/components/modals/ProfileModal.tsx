@@ -22,7 +22,7 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 
 export const ProfileModal = () => {
   const { t } = useTranslation();
-  const { user, isProfileModalOpen, setProfileModalOpen, checkAuth } = useAuthStore();
+  const { user, isProfileModalOpen, setProfileModalOpen } = useAuthStore();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [isChangingEmail, setIsChangingEmail] = useState(false);
@@ -205,14 +205,16 @@ export const ProfileModal = () => {
     setIsImporting(true);
     try {
       await importGlobalBackup(file, user.id);
+      
       useToastStore.getState().showToast(t('settingsTab.importSuccess'), 'success');
+      
       // Refresh to load all workspaces correctly after a short delay so the toast is visible
       setTimeout(() => {
         window.location.reload();
       }, 1500);
     } catch (err) {
       console.error('Import error:', err);
-      useToastStore.getState().showToast(t('settingsTab.importError'), 'error');
+      useToastStore.getState().showToast(err instanceof Error && err.message !== 'export_failed' && err.message !== 'import_failed' ? err.message : t('settingsTab.importError'), 'error');
     } finally {
       setIsImporting(false);
       if (backupInputRef.current) backupInputRef.current.value = '';
@@ -247,7 +249,7 @@ export const ProfileModal = () => {
     : modelOptions;
 
   return (
-    <ModalOverlay isOpen={isProfileModalOpen} onClose={handleClose}>
+    <ModalOverlay isOpen={isProfileModalOpen} onClose={handleClose} zIndex="high">
       <ModalContainer size="xl">
         <ModalHeader
           title={t('ui.editProfile')}

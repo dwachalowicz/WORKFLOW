@@ -305,16 +305,19 @@ const ProcessMapInner = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [layoutVersion, setLayoutVersion] = useState(0);
   const layoutVersionRef = useRef(0);
-  const { zoomIn, zoomOut, fitView: rfFitView } = useReactFlow();
+  const { zoomIn, zoomOut, fitView: rfFitView, updateNodeData } = useReactFlow();
 
   // Rotate a node's handles by 90°
   const handleRotateNode = useCallback((nodeId: string) => {
     setNodeRotations(prev => {
       const current = prev[nodeId] || 0;
-      return { ...prev, [nodeId]: (current + 90) % 360 };
+      const newRotation = (current + 90) % 360;
+      // Force React Flow to immediately update the internal node data
+      updateNodeData(nodeId, { rotation: newRotation });
+      return { ...prev, [nodeId]: newRotation };
     });
     setIsDirty(true);
-  }, []);
+  }, [updateNodeData]);
 
   const fetchData = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -590,7 +593,8 @@ const ProcessMapInner = () => {
       return prev.map(n => {
         const updated = flowMap.get(n.id);
         if (!updated) return n;
-        return { ...n, data: updated.data };
+        // CRITICAL FIX: React Flow needs a new node object reference if data deeply changes and we want xyflow to react to it
+        return { ...n, data: { ...updated.data } };
       });
     });
   }, [flowNodes, layoutVersion]);

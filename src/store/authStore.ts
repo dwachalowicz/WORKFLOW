@@ -121,8 +121,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           // Refresh the auth state from DB to get latest tier, name, avatar etc.
           const authData = await pb.collection('WORKFLOW_users').authRefresh();
           model = authData.record as WorkflowUser;
-        } catch (err: any) {
-          if (err?.isAbort) {
+        } catch (err) {
+          const error = err as Error & { isAbort?: boolean };
+          if (error?.isAbort) {
             console.warn("authRefresh was auto-cancelled, skipping.");
             return;
           }

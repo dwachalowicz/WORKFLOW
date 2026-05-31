@@ -14,7 +14,7 @@ globalThis.escapeHtml = function(str) {
 
 
 // =====================================================
-// ROUTE: POST /api/ai/chat — AI Chat Proxy
+// ROUTE: POST /api/ai/chat â€” AI Chat Proxy
 // =====================================================
 routerAdd("POST", "/api/ai/chat", (e) => {
     // INLINED HELPERS FOR GOJA
@@ -82,7 +82,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         } else {
             userCache.count++;
             if (userCache.count > 3) {
-                return e.json(429, { message: "Zbyt wiele zapytań. Spróbuj ponownie za chwilę. / Too many requests." });
+                return e.json(429, { message: "Zbyt wiele zapytaĹ„. SprĂłbuj ponownie za chwilÄ™. / Too many requests." });
             }
         }
         // ---------------------
@@ -208,14 +208,14 @@ routerAdd("POST", "/api/ai/chat", (e) => {
                 let label = (n.data && n.data.label) ? n.data.label : n.id;
                 let nType = n.type === 'startstop' ? (n.data.type === 'start' ? 'START' : 'STOP') 
                   : n.type === 'database' ? 'DATABASE' : n.type === 'subworkflow' ? 'SUBPROCESS' : 'STAGE';
-                let desc = (n.data && n.data.description) ? " — " + n.data.description : "";
+                let desc = (n.data && n.data.description) ? " â€” " + n.data.description : "";
                 let sla = (n.data && n.data.maxDuration) ? " [SLA: " + n.data.maxDuration + "]" : "";
                 let cost = (n.data && n.data.cost) ? " [Cost: " + n.data.cost + " PLN]" : "";
                 let checklistStr = "";
                 if (n.data && Array.isArray(n.data.checklist) && n.data.checklist.length > 0) {
                     checklistStr = " [Checklist: " + n.data.checklist.map(c => c.label).join('; ') + "]";
                 }
-                nodeDescsArr.push("  • [id=\"" + n.id + "\"] " + nType + ": \"" + label + "\"" + desc + sla + cost + checklistStr);
+                nodeDescsArr.push("  â€˘ [id=\"" + n.id + "\"] " + nType + ": \"" + label + "\"" + desc + sla + cost + checklistStr);
             }
         }
         let nodeDescs = nodeDescsArr.join('\n');
@@ -234,8 +234,8 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         let startInfo = startNode ? "EXISTING START NODE: id=\"" + startNode.id + "\", position: x=" + Math.round((startNode.position && startNode.position.x) || 0) + ", y=" + Math.round((startNode.position && startNode.position.y) || 0) : "NO START NODE";
         let stopInfo = stopNodes.length > 0 ? "EXISTING STOP NODES: " + stopNodes.map(s => "id=\"" + s.id + "\" (x=" + Math.round((s.position && s.position.x) || 0) + ", y=" + Math.round((s.position && s.position.y) || 0) + ")").join(', ') : "NO STOP NODE";
 
-        let langInstruction = lang === 'pl' ? "WAŻNE: Zawsze odpowiadaj po polsku." : "IMPORTANT: You must always respond in English, regardless of the prompt language. Do not use Polish.";
-        let toolsSection = toolNames.length > 0 ? (lang === 'pl' ? "\nKatalog narzędzi (" + toolNames.length + "): " + toolNames.join(', ') + "\nGdy rekomenduj narzędzia, używaj DOKŁADNYCH nazw z tego katalogu." : "\nTool catalog (" + toolNames.length + "): " + toolNames.join(', ') + "\nWhen recommending tools, use EXACT names from this catalog.") : "";
+        let langInstruction = lang === 'pl' ? "WAĹ»NE: Zawsze odpowiadaj po polsku." : "IMPORTANT: You must always respond in English, regardless of the prompt language. Do not use Polish.";
+        let toolsSection = toolNames.length > 0 ? (lang === 'pl' ? "\nKatalog narzÄ™dzi (" + toolNames.length + "): " + toolNames.join(', ') + "\nGdy rekomenduj narzÄ™dzia, uĹĽywaj DOKĹADNYCH nazw z tego katalogu." : "\nTool catalog (" + toolNames.length + "): " + toolNames.join(', ') + "\nWhen recommending tools, use EXACT names from this catalog.") : "";
 
         // Fetch prompt template
         let template = "";
@@ -247,7 +247,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         } catch(err) {}
 
         if (!template) {
-            template = lang === 'pl' ? "Jesteś Gryf — asystent AI platformy Gryf.ai. Pomagasz w procesach biznesowych. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}" : "You are Gryf — the AI assistant of Gryf.ai platform. You help with business processes. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}";
+            template = lang === 'pl' ? "JesteĹ› Gryf â€” asystent AI platformy Gryf.ai. Pomagasz w procesach biznesowych. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}" : "You are Gryf â€” the AI assistant of Gryf.ai platform. You help with business processes. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}";
         } else if (lang === 'en') {
             template = template.replace(/Odpowiadaj po polsku/gi, 'Respond in English');
         }
@@ -267,7 +267,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
             .replace(/{{FLOW}}/g, () => flow || "  (no connections)");
 
         let constraints = lang === 'pl' 
-            ? "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAĆ):\n- NIE MOŻESZ przypinać żadnych dodatkowych sub-procesów (nie używaj pola targetWorkflowId ani targetWorkflowName).\n- Limit węzłów na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedź NIE MOŻE przekroczyć tej liczby węzłów.\n- Pamiętaj, by w jsonie używać tablicy stringów dla akcji: np. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"]."
+            ? "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAÄ†):\n- NIE MOĹ»ESZ przypinaÄ‡ ĹĽadnych dodatkowych sub-procesĂłw (nie uĹĽywaj pola targetWorkflowId ani targetWorkflowName).\n- Limit wÄ™zĹ‚Ăłw na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedĹş NIE MOĹ»E przekroczyÄ‡ tej liczby wÄ™zĹ‚Ăłw.\n- PamiÄ™taj, by w jsonie uĹĽywaÄ‡ tablicy stringĂłw dla akcji: np. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"]."
             : "\nHARD CONSTRAINTS (YOU MUST FOLLOW THEM):\n- YOU CANNOT attach any additional sub-workflows (do not use targetWorkflowId or targetWorkflowName).\n- Node limit for your plan: " + maxNodesPerProcess + ". Your response MUST NOT exceed this number of nodes.\n- Remember to use an array of strings for actions in json: e.g. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].";
         
         systemContent += constraints;
@@ -313,10 +313,10 @@ routerAdd("POST", "/api/ai/chat", (e) => {
                 if (scoredFaqs.length > 0) {
                     scoredFaqs.sort((a, b) => b.score - a.score);
                     let topFaqs = scoredFaqs.slice(0, 3);
-                    let faqSection = lang === 'pl' ? "\n\nKONTEKST Z BAZY WIEDZY (FAQ - użyj tych informacji jeśli pasują do pytania użytkownika):\n" : "\n\nKNOWLEDGE BASE CONTEXT (FAQ - use this information if relevant to the user's question):\n";
+                    let faqSection = lang === 'pl' ? "\n\nKONTEKST Z BAZY WIEDZY (FAQ - uĹĽyj tych informacji jeĹ›li pasujÄ… do pytania uĹĽytkownika):\n" : "\n\nKNOWLEDGE BASE CONTEXT (FAQ - use this information if relevant to the user's question):\n";
                     for (let i = 0; i < topFaqs.length; i++) {
                         let tf = topFaqs[i];
-                        faqSection += (lang === 'pl' ? "Pytanie: " : "Question: ") + tf.q + "\n" + (lang === 'pl' ? "Odpowiedź: " : "Answer: ") + tf.a + "\n\n";
+                        faqSection += (lang === 'pl' ? "Pytanie: " : "Question: ") + tf.q + "\n" + (lang === 'pl' ? "OdpowiedĹş: " : "Answer: ") + tf.a + "\n\n";
                     }
                     systemContent += faqSection;
                 }
@@ -360,7 +360,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
 
             if (res.statusCode >= 400) {
                 console.log("AI API Error (" + res.statusCode + "): " + res.raw);
-                throw new Error("Wystąpił błąd po stronie dostawcy AI (np. nieprawidłowy klucz lub brak środków). / AI provider error (e.g. invalid key or insufficient funds).");
+                throw new Error("WystÄ…piĹ‚ bĹ‚Ä…d po stronie dostawcy AI (np. nieprawidĹ‚owy klucz lub brak Ĺ›rodkĂłw). / AI provider error (e.g. invalid key or insufficient funds).");
             }
             const d = res.json;
             responseText = (d.choices && d.choices[0] && d.choices[0].message) ? d.choices[0].message.content : "No response.";
@@ -455,7 +455,7 @@ routerAdd("POST", "/api/ai/save-config", (e) => {
             let rawKey = String(data.ai_api_secret || "").trim();
 
             if (rawKey.length > 255) {
-                return e.json(400, { message: "Klucz API jest zbyt długi (max 255 znaków). / API key is too long (max 255 characters)." });
+                return e.json(400, { message: "Klucz API jest zbyt dĹ‚ugi (max 255 znakĂłw). / API key is too long (max 255 characters)." });
             }
 
             if (rawKey === "") {
@@ -641,7 +641,7 @@ onRecordCreateRequest((e) => {
                 if (existingUser) {
                     record.set("status", "pending");
                     record.set("user", existingUser.id);
-                    // Zostawiamy invited_email jako fallback dla frontendu (gdy user ukrywa email w opcjach prywatności)
+                    // Zostawiamy invited_email jako fallback dla frontendu (gdy user ukrywa email w opcjach prywatnoĹ›ci)
                     status = "pending";
                 }
             } catch (err) {
@@ -650,7 +650,7 @@ onRecordCreateRequest((e) => {
         }
     }
 
-    // Dodatkowe zabezpieczenie backendowe przed duplikatami (Race conditions / podwójne kliknięcia)
+    // Dodatkowe zabezpieczenie backendowe przed duplikatami (Race conditions / podwĂłjne klikniÄ™cia)
     let wsId = record.get("workspace");
     let checkUserId = record.get("user");
     let checkEmail = record.get("invited_email");
@@ -668,7 +668,7 @@ onRecordCreateRequest((e) => {
         } catch(err) {}
         
         if (hasDuplicate) {
-            throw new BadRequestError("Ten użytkownik został już zaproszony do tego workspace. / This user has already been invited to this workspace.");
+            throw new BadRequestError("Ten uĹĽytkownik zostaĹ‚ juĹĽ zaproszony do tego workspace. / This user has already been invited to this workspace.");
         }
     }
 
@@ -702,22 +702,22 @@ onRecordCreateRequest((e) => {
         let role = record.get("role") || "editor";
         let isNewUser = (status === "pending_registration");
 
-        let inviterName = "Użytkownik Gryf.ai";
+        let inviterName = "UĹĽytkownik Gryf.ai";
         let inviterEmail = "";
         if (e.auth) {
-            inviterName = e.auth.get("name") || e.auth.get("email") || "Użytkownik Gryf.ai";
+            inviterName = e.auth.get("name") || e.auth.get("email") || "UĹĽytkownik Gryf.ai";
             inviterEmail = e.auth.get("email") || "";
         }
 
-        let subject = "Zaproszenie / Invitation — Workspace \"" + wsName + "\"";
+        let subject = "Zaproszenie / Invitation â€” Workspace \"" + wsName + "\"";
 
         let ctaText = isNewUser
-            ? "Zarejestruj się / Sign up"
-            : "Zaloguj się / Log in";
+            ? "Zarejestruj siÄ™ / Sign up"
+            : "Zaloguj siÄ™ / Log in";
 
         let subtitleText = isNewUser
-            ? "Zostałeś zaproszony do współpracy. Utwórz konto na Gryf.ai, aby dołączyć do zespołu.<br/><span style='color:#9ca3af;font-size:13px;display:block;margin-top:6px;'>You have been invited to collaborate. Create an account on Gryf.ai to join the team.</span>"
-            : "Masz nowe zaproszenie do workspace. Zaloguj się, aby je zaakceptować.<br/><span style='color:#9ca3af;font-size:13px;display:block;margin-top:6px;'>You have a new workspace invitation. Log in to accept it.</span>";
+            ? "ZostaĹ‚eĹ› zaproszony do wspĂłĹ‚pracy. UtwĂłrz konto na Gryf.ai, aby doĹ‚Ä…czyÄ‡ do zespoĹ‚u.<br/><span style='color:#9ca3af;font-size:13px;display:block;margin-top:6px;'>You have been invited to collaborate. Create an account on Gryf.ai to join the team.</span>"
+            : "Masz nowe zaproszenie do workspace. Zaloguj siÄ™, aby je zaakceptowaÄ‡.<br/><span style='color:#9ca3af;font-size:13px;display:block;margin-top:6px;'>You have a new workspace invitation. Log in to accept it.</span>";
 
         let roleLabel = role === "admin" ? "Admin"
             : role === "editor" ? "Edytor / Editor"
@@ -767,8 +767,8 @@ onRecordCreateRequest((e) => {
                 + escapeHtml(ctaText) + '</a>'
                 + '</td></tr>'
                 + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
-                + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
-                + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. Nie musisz na niego odpowiadać.<br/>This email was sent automatically. You do not need to reply.</p>'
+                + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai â€” Projektowanie ProcesĂłw Biznesowych / Business Process Design</p>'
+                + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email zostaĹ‚ wysĹ‚any automatycznie. Nie musisz na niego odpowiadaÄ‡.<br/>This email was sent automatically. You do not need to reply.</p>'
                 + '</td></tr>'
                 + '</table>'
                 + '</td></tr></table>'
@@ -815,16 +815,16 @@ onRecordCreateRequest((e) => {
         const senderEmail = record.get("email") || "Brak emaila / No email";
         const messageBody = record.get("message") || "";
 
-        let subject = "Nowa wiadomość z formularza kontaktowego Gryf.ai";
+        let subject = "Nowa wiadomoĹ›Ä‡ z formularza kontaktowego Gryf.ai";
 
         let html = '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
         + '<body style="font-family:sans-serif; background:#f4f4f5; padding:40px;">'
         + '<div style="background:#fff; padding:20px; border-radius:10px; max-width:600px; margin:0 auto;">'
-        + '<h2 style="color:#1a1a1a;">Nowa wiadomość ze strony</h2>'
-        + '<p style="color:#666;">Otrzymałeś nową wiadomość z formularza na Gryf.ai:</p>'
+        + '<h2 style="color:#1a1a1a;">Nowa wiadomoĹ›Ä‡ ze strony</h2>'
+        + '<p style="color:#666;">OtrzymaĹ‚eĹ› nowÄ… wiadomoĹ›Ä‡ z formularza na Gryf.ai:</p>'
         + '<hr style="border:0; border-top:1px solid #eee; margin:20px 0;" />'
         + '<p><strong>Od:</strong> ' + escapeHtml(senderEmail) + '</p>'
-        + '<p><strong>Treść:</strong></p>'
+        + '<p><strong>TreĹ›Ä‡:</strong></p>'
         + '<div style="background:#f9f9f9; padding:15px; border-radius:5px; color:#333; white-space:pre-wrap;">' + escapeHtml(messageBody) + '</div>'
         + '</div></body></html>';
 
@@ -839,16 +839,16 @@ onRecordCreateRequest((e) => {
         });
 
         e.app.newMailClient().send(message);
-        console.log("Wiadomość do administracji wysłana pomyślnie na kontakt@gryf.ai");
+        console.log("WiadomoĹ›Ä‡ do administracji wysĹ‚ana pomyĹ›lnie na kontakt@gryf.ai");
 
         // Potwierdzenie do nadawcy
         if (senderEmail !== "Brak emaila / No email" && senderEmail.indexOf("@") !== -1) {
-            let userSubject = "Potwierdzenie otrzymania wiadomości / Message received - Gryf.ai";
+            let userSubject = "Potwierdzenie otrzymania wiadomoĹ›ci / Message received - Gryf.ai";
             let userHtml = "<div style=\"font-family:sans-serif; padding:20px;\">" +
-                "<h2>Dziękujemy za kontakt! / Thank you for contacting us!</h2>" +
-                "<p>Otrzymaliśmy Twoją wiadomość i odpowiemy tak szybko, jak to możliwe.<br/><span style=\"color:#666;font-size:14px;\">We have received your message and will reply as soon as possible.</span></p>" +
+                "<h2>DziÄ™kujemy za kontakt! / Thank you for contacting us!</h2>" +
+                "<p>OtrzymaliĹ›my TwojÄ… wiadomoĹ›Ä‡ i odpowiemy tak szybko, jak to moĹĽliwe.<br/><span style=\"color:#666;font-size:14px;\">We have received your message and will reply as soon as possible.</span></p>" +
                 "<hr style=\"border:0; border-top:1px solid #eee; margin:20px 0;\" />" +
-                "<p><strong>Twoja wiadomość / Your message:</strong></p>" +
+                "<p><strong>Twoja wiadomoĹ›Ä‡ / Your message:</strong></p>" +
                 "<div style=\"background:#f9f9f9; padding:15px; border-radius:5px; white-space:pre-wrap;\">" + escapeHtml(messageBody) + "</div>" +
                 "</div>";
 
@@ -862,7 +862,7 @@ onRecordCreateRequest((e) => {
                 html: userHtml,
             });
             e.app.newMailClient().send(userConfirmation);
-            console.log("Potwierdzenie do użytkownika wysłane pomyślnie na " + senderEmail);
+            console.log("Potwierdzenie do uĹĽytkownika wysĹ‚ane pomyĹ›lnie na " + senderEmail);
         }
 
     } catch (err) {
@@ -893,7 +893,7 @@ onRecordUpdateRequest(function(e) {
 }, "WORKFLOW_processes");
 
 // =====================================================
-// HOOK: Secure Workspace Members — Create
+// HOOK: Secure Workspace Members â€” Create
 // =====================================================
 onRecordCreateRequest(function(e) {
     const record = e.record;
@@ -917,7 +917,7 @@ onRecordCreateRequest(function(e) {
     }
 
     if (record.get("user") === ws.get("owner")) {
-        throw new Error("Właściciel jest już członkiem tego obszaru roboczego. / The owner is already a member of this workspace.");
+        throw new Error("WĹ‚aĹ›ciciel jest juĹĽ czĹ‚onkiem tego obszaru roboczego. / The owner is already a member of this workspace.");
     }
     try {
         const admins = e.app.findRecordsByFilter(
@@ -953,7 +953,7 @@ onRecordCreateRequest(function(e) {
             const currentMembers = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && status = 'active'", "", 5000, 0, { ws: wsId });
             const currentCount = currentMembers ? currentMembers.length : 0;
             if (currentCount >= maxMembers) {
-                throw new Error("Osiągnięto limit aktywnych członków (" + maxMembers + ") dla planu " + userTier + ". / Active member limit reached (" + maxMembers + ") for " + userTier + " plan.");
+                throw new Error("OsiÄ…gniÄ™to limit aktywnych czĹ‚onkĂłw (" + maxMembers + ") dla planu " + userTier + ". / Active member limit reached (" + maxMembers + ") for " + userTier + " plan.");
             }
         }
     } catch(err) {
@@ -964,7 +964,7 @@ onRecordCreateRequest(function(e) {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Workspace Members — Update
+// HOOK: Secure Workspace Members â€” Update
 // =====================================================
 onRecordUpdateRequest(function(e) {
     const record = e.record;
@@ -985,7 +985,7 @@ onRecordUpdateRequest(function(e) {
     // --- ENFORCE MEMBER TIER LIMITS ON ACTIVATION ---
     let originalStatus = record.get("status");
     try {
-        const orig = record.originalCopy();
+        const orig = e.app.findRecordById(record.collection().name, record.id);
         if (orig) originalStatus = orig.get("status");
     } catch(err) {}
     
@@ -1009,7 +1009,7 @@ onRecordUpdateRequest(function(e) {
                 const currentMembers = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && status = 'active'", "", 5000, 0, { ws: wsId });
                 const currentCount = currentMembers ? currentMembers.length : 0;
                 if (currentCount >= maxMembers) {
-                    throw new Error("Osiągnięto limit aktywnych członków (" + maxMembers + ") dla planu " + userTier + ". / Active member limit reached (" + maxMembers + ") for " + userTier + " plan.");
+                    throw new Error("OsiÄ…gniÄ™to limit aktywnych czĹ‚onkĂłw (" + maxMembers + ") dla planu " + userTier + ". / Active member limit reached (" + maxMembers + ") for " + userTier + " plan.");
                 }
             }
         } catch(err) {
@@ -1035,22 +1035,22 @@ onRecordUpdateRequest(function(e) {
         try {
             const original = e.app.findRecordById("WORKFLOW_workspace_members", record.id);
             if (original.get("user") !== authRecord.id) {
-                throw new Error("Nie możesz edytować cudzego zaproszenia. / You cannot edit someone else's invitation.");
+                throw new Error("Nie moĹĽesz edytowaÄ‡ cudzego zaproszenia. / You cannot edit someone else's invitation.");
             }
             if (original.get("user") !== record.get("user")) {
-                throw new Error("Nie możesz zmienić użytkownika zaproszenia. / You cannot change the user of the invitation.");
+                throw new Error("Nie moĹĽesz zmieniÄ‡ uĹĽytkownika zaproszenia. / You cannot change the user of the invitation.");
             }
-            if (original.get("role") !== record.get("role")) {
+            if (String(original.get("role")) !== String(record.get("role"))) {
                 throw new Error("You cannot change your role.");
             }
             if (original.get("workspace") !== record.get("workspace")) {
                 throw new Error("You cannot change the workspace ID.");
             }
             if (!original.get("invited_by")) {
-                throw new Error("Nie możesz samodzielnie zaakceptować prośby o dołączenie. Wymagana jest akceptacja admina. / You cannot accept a join request yourself. An admin must approve it.");
+                throw new Error("Nie moĹĽesz samodzielnie zaakceptowaÄ‡ proĹ›by o doĹ‚Ä…czenie. Wymagana jest akceptacja admina. / You cannot accept a join request yourself. An admin must approve it.");
             }
         } catch(err) {
-            throw new Error(err.message || "Błąd podczas weryfikacji uprawnień użytkownika / Error verifying user permissions");
+            throw new Error(err.message || "BĹ‚Ä…d podczas weryfikacji uprawnieĹ„ uĹĽytkownika / Error verifying user permissions");
         }
         return e.next();
     }
@@ -1059,7 +1059,7 @@ onRecordUpdateRequest(function(e) {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Workspace Members — Delete
+// HOOK: Secure Workspace Members â€” Delete
 // =====================================================
 onRecordDeleteRequest((e) => {
     const record = e.record;
@@ -1113,8 +1113,8 @@ onRecordDeleteRequest((e) => {
             wsName = ws.get("name") || wsName;
         } catch(err) {}
 
-        const title = "Usunięto z obszaru roboczego / Removed from workspace";
-        const message = `Zostałeś usunięty z obszaru roboczego "${wsName}". / You have been removed from the workspace "${wsName}".`;
+        const title = "UsuniÄ™to z obszaru roboczego / Removed from workspace";
+        const message = `ZostaĹ‚eĹ› usuniÄ™ty z obszaru roboczego "${wsName}". / You have been removed from the workspace "${wsName}".`;
 
         // 1. Create System Notification
         try {
@@ -1150,10 +1150,10 @@ onRecordDeleteRequest((e) => {
                 + '<body style="font-family:sans-serif; background:#f4f4f5; padding:40px;">'
                 + '<div style="background:#fff; padding:20px; border-radius:10px; max-width:600px; margin:0 auto;">'
                 + '<h2 style="color:#1a1a1a;">Powiadomienie z obszaru roboczego / Workspace Notification</h2>'
-                + '<p style="color:#666;">Zostałeś usunięty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
+                + '<p style="color:#666;">ZostaĹ‚eĹ› usuniÄ™ty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
                 + '<p style="color:#666; font-size:14px;">You have been removed from the workspace <strong>' + escapeHtml(wsName) + '</strong>.</p>'
                 + '<hr style="border:0; border-top:1px solid #eee; margin:20px 0;" />'
-                + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. Nie musisz na niego odpowiadać.<br/>This email was sent automatically. You do not need to reply.</p>'
+                + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email zostaĹ‚ wysĹ‚any automatycznie. Nie musisz na niego odpowiadaÄ‡.<br/>This email was sent automatically. You do not need to reply.</p>'
                 + '</div></body></html>';
 
                 let mailMsg = new MailerMessage({
@@ -1176,7 +1176,7 @@ onRecordDeleteRequest((e) => {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Notifications — Update
+// HOOK: Secure Notifications â€” Update
 // =====================================================
 onRecordUpdateRequest((e) => {
     const record = e.record;
@@ -1187,7 +1187,7 @@ onRecordUpdateRequest((e) => {
     try {
         const original = e.app.findRecordById("WORKFLOW_notifications", record.id);
         
-        // Zabezpieczenie przed edycją treści powiadomienia przez zwykłego użytkownika
+        // Zabezpieczenie przed edycjÄ… treĹ›ci powiadomienia przez zwykĹ‚ego uĹĽytkownika
         if (original.get("title") !== record.get("title") ||
             original.get("message") !== record.get("message") ||
             original.get("type") !== record.get("type") ||
@@ -1195,7 +1195,7 @@ onRecordUpdateRequest((e) => {
             throw new Error("You cannot modify the content of a notification. Only 'isRead' can be updated.");
         }
     } catch(err) {
-        throw new Error(err.message || "Błąd podczas weryfikacji powiadomienia");
+        throw new Error(err.message || "BĹ‚Ä…d podczas weryfikacji powiadomienia");
     }
     
     return e.next();
@@ -1239,17 +1239,17 @@ onRecordCreateRequest(function(e) {
 
     var record = e.record;
 
-    // Sprawdzenie ilości procesów w workspace (tylko CREATE)
+    // Sprawdzenie iloĹ›ci procesĂłw w workspace (tylko CREATE)
     var workspaceId = record.get("workspace");
     if (workspaceId) {
         var existing = e.app.findRecordsByFilter("WORKFLOW_processes", "workspace = {:workspace}", "", 5000, 0, { workspace: workspaceId });
         var existingCount = existing ? existing.length : 0;
         if (Number(existingCount) >= Number(limits.maxProcesses)) {
-            throw new BadRequestError("Limit procesów (" + limits.maxProcesses + ") został osiągnięty dla planu " + effectiveTier + ". / Process limit exceeded (" + limits.maxProcesses + ") for " + effectiveTier + " plan.");
+            throw new BadRequestError("Limit procesĂłw (" + limits.maxProcesses + ") zostaĹ‚ osiÄ…gniÄ™ty dla planu " + effectiveTier + ". / Process limit exceeded (" + limits.maxProcesses + ") for " + effectiveTier + " plan.");
         }
     }
 
-    // Walidacja wnętrza procesu
+    // Walidacja wnÄ™trza procesu
     function parsePbJson(raw) {
         if (!raw) return [];
         if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
@@ -1297,12 +1297,12 @@ onRecordCreateRequest(function(e) {
 
     console.log("CREATE HOOK DEBUG: nodesCount=" + nodesCount + ", nodesArray.length=" + nodesArray.length + ", typeof nodesRaw=" + typeof nodesRaw + ", maxN=" + maxN);
 
-    if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesów nie jest dostępna w Twoim planie. / Subworkflows not available in your plan.");
-    if (nodesCount > maxN) throw new BadRequestError("Limit węzłów (" + maxN + ") osiągnięty. / Nodes limit (" + maxN + ") reached.");
-    if (edgesArray.length > maxE) throw new BadRequestError("Limit połączeń (" + maxE + ") osiągnięty. / Edges limit (" + maxE + ") reached.");
-    if (notesCount > maxNo) throw new BadRequestError("Limit notatek (" + maxNo + ") osiągnięty. / Notes limit (" + maxNo + ") reached.");
-    if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiągnięty. / Variables limit (" + maxV + ") reached.");
-    if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiągnięty. / Checklist limit (" + maxC + ") reached.");
+    if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesĂłw nie jest dostÄ™pna w Twoim planie. / Subworkflows not available in your plan.");
+    if (nodesCount > maxN) throw new BadRequestError("Limit wÄ™zĹ‚Ăłw (" + maxN + ") osiÄ…gniÄ™ty. / Nodes limit (" + maxN + ") reached.");
+    if (edgesArray.length > maxE) throw new BadRequestError("Limit poĹ‚Ä…czeĹ„ (" + maxE + ") osiÄ…gniÄ™ty. / Edges limit (" + maxE + ") reached.");
+    if (notesCount > maxNo) throw new BadRequestError("Limit notatek (" + maxNo + ") osiÄ…gniÄ™ty. / Notes limit (" + maxNo + ") reached.");
+    if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiÄ…gniÄ™ty. / Variables limit (" + maxV + ") reached.");
+    if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiÄ…gniÄ™ty. / Checklist limit (" + maxC + ") reached.");
 
     return e.next();
 }, "WORKFLOW_processes");
@@ -1312,8 +1312,8 @@ onRecordUpdateRequest(function(e) {
     var authRecord = e.auth;
     if (!authRecord) return e.next();
 
-    // Sprawdź czy nodes/edges są w ogóle zmieniane w tym PATCH.
-    // Jeśli nie (np. zmiana folderu, nazwy), pomiń walidację limitów.
+    // SprawdĹş czy nodes/edges sÄ… w ogĂłle zmieniane w tym PATCH.
+    // JeĹ›li nie (np. zmiana folderu, nazwy), pomiĹ„ walidacjÄ™ limitĂłw.
     var body = e.requestInfo().body || {};
     if (body.nodes === undefined && body.edges === undefined) {
         return e.next();
@@ -1351,7 +1351,7 @@ onRecordUpdateRequest(function(e) {
 
     var record = e.record;
 
-    // Walidacja wnętrza procesu (bez sprawdzania maxProcesses bo to UPDATE)
+    // Walidacja wnÄ™trza procesu (bez sprawdzania maxProcesses bo to UPDATE)
     function parsePbJson(raw) {
         if (!raw) return [];
         if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
@@ -1397,18 +1397,18 @@ onRecordUpdateRequest(function(e) {
     var maxV = Number(limits.maxVariablesPerProcess) || 999999;
     var maxC = Number(limits.maxChecklistItemsPerNode) || 999999;
 
-    if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesów nie jest dostępna w Twoim planie. / Subworkflows not available in your plan.");
-    if (nodesCount > maxN) throw new BadRequestError("Limit węzłów (" + maxN + ") osiągnięty. / Nodes limit (" + maxN + ") reached.");
-    if (edgesArray.length > maxE) throw new BadRequestError("Limit połączeń (" + maxE + ") osiągnięty. / Edges limit (" + maxE + ") reached.");
-    if (notesCount > maxNo) throw new BadRequestError("Limit notatek (" + maxNo + ") osiągnięty. / Notes limit (" + maxNo + ") reached.");
-    if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiągnięty. / Variables limit (" + maxV + ") reached.");
-    if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiągnięty. / Checklist limit (" + maxC + ") reached.");
+    if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesĂłw nie jest dostÄ™pna w Twoim planie. / Subworkflows not available in your plan.");
+    if (nodesCount > maxN) throw new BadRequestError("Limit wÄ™zĹ‚Ăłw (" + maxN + ") osiÄ…gniÄ™ty. / Nodes limit (" + maxN + ") reached.");
+    if (edgesArray.length > maxE) throw new BadRequestError("Limit poĹ‚Ä…czeĹ„ (" + maxE + ") osiÄ…gniÄ™ty. / Edges limit (" + maxE + ") reached.");
+    if (notesCount > maxNo) throw new BadRequestError("Limit notatek (" + maxNo + ") osiÄ…gniÄ™ty. / Notes limit (" + maxNo + ") reached.");
+    if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiÄ…gniÄ™ty. / Variables limit (" + maxV + ") reached.");
+    if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiÄ…gniÄ™ty. / Checklist limit (" + maxC + ") reached.");
 
     return e.next();
 }, "WORKFLOW_processes");
 
 // =====================================================
-// ROUTE: POST /api/process/lock — Atomic Process Locking
+// ROUTE: POST /api/process/lock â€” Atomic Process Locking
 // =====================================================
 routerAdd("POST", "/api/process/lock", (e) => {
     if (!e.auth) {
@@ -1571,7 +1571,7 @@ routerAdd("POST", "/api/process/set-password", (e) => {
         }
         
         if (password) {
-            const hashedPassword = $security.sha256(password + "gryf-salt-" + process.id);
+            const hashedPassword = $security.sha256(password + "gryf-salt-" + record.id);
             record.set("publicPassword", hashedPassword);
         } else {
             record.set("publicPassword", "");
@@ -1699,7 +1699,7 @@ routerAdd("GET", "/api/folder-stats/{workspaceId}", (e) => {
 
         const db = e.app.db ? e.app.db() : $app.db();
         // Zliczamy procesy dla poszczegolnych folderow (group) w danym workspace
-        // Zabezpieczamy `group` znakami ucieczki, ponieważ jest to słowo kluczowe w SQL.
+        // Zabezpieczamy `group` znakami ucieczki, poniewaĹĽ jest to sĹ‚owo kluczowe w SQL.
         // Ignorujemy procesy, ktore nie maja przypisanej grupy (group = '').
         const query = db.newQuery('SELECT "group", COUNT(*) as cnt FROM WORKFLOW_processes WHERE workspace = {:workspace} AND "group" != \'\' GROUP BY "group"').bind({ workspace: workspaceId });
         
@@ -1840,7 +1840,7 @@ routerAdd("GET", "/api/locked-processes/{workspaceId}", (e) => {
             let sub = conf.get("can_use_subworkflows");
             limits.canUseSubworkflows = (sub === true || sub === "true" || sub === 1 || sub === "1");
             
-            // Tryb debug do bezpośredniego sprawdzenia co Goja widzi w bazie
+            // Tryb debug do bezpoĹ›redniego sprawdzenia co Goja widzi w bazie
             limits._debugRawMaxProcesses = conf.get("max_processes");
             limits._debugUserTier = userTier;
         }
@@ -1905,7 +1905,7 @@ routerAdd("GET", "/api/locked-processes/{workspaceId}", (e) => {
 
             let isLocked = false;
 
-            // Wymuszamy rzutowanie na JS Number dla pewności
+            // Wymuszamy rzutowanie na JS Number dla pewnoĹ›ci
             const maxNodes = Number(limits.maxNodesPerProcess) || 999999;
             const maxEdges = Number(limits.maxEdgesPerProcess) || 999999;
             const maxNotes = Number(limits.maxNotesPerProcess) || 999999;
@@ -1942,7 +1942,7 @@ routerAdd("GET", "/api/locked-processes/{workspaceId}", (e) => {
 // =====================================================
 routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
     if (!e.auth) {
-        return e.json(401, { message: "Nie jesteś zalogowany / Not authenticated" });
+        return e.json(401, { message: "Nie jesteĹ› zalogowany / Not authenticated" });
     }
 
     try {
@@ -1954,7 +1954,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
 
         const userId = e.auth.id;
 
-        // Znajdź workspace po kodzie
+        // ZnajdĹş workspace po kodzie
         const workspaces = e.app.findRecordsByFilter(
             "WORKFLOW_workspaces",
             "join_code = {:code}",
@@ -1969,7 +1969,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
         const ws = workspaces[0];
         const wsId = ws.id;
 
-        // Sprawdź, czy uzytkownik jest juz czlonkiem lub wyslal zaproszenie
+        // SprawdĹş, czy uzytkownik jest juz czlonkiem lub wyslal zaproszenie
         const existing = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
             "workspace = {:ws} && user = {:user}",
@@ -1978,12 +1978,12 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
         );
 
         if (existing && existing.length > 0) {
-            return e.json(400, { message: "Jesteś już członkiem tego workspace lub wysłałeś prośbę. / You are already a member or pending." });
+            return e.json(400, { message: "JesteĹ› juĹĽ czĹ‚onkiem tego workspace lub wysĹ‚aĹ‚eĹ› proĹ›bÄ™. / You are already a member or pending." });
         }
 
-        // Sprawdź, czy uzytkownik jest wlascicielem
+        // SprawdĹş, czy uzytkownik jest wlascicielem
         if (ws.get("owner") === userId) {
-            return e.json(400, { message: "Jesteś właścicielem tego workspace. / You are the owner of this workspace." });
+            return e.json(400, { message: "JesteĹ› wĹ‚aĹ›cicielem tego workspace. / You are the owner of this workspace." });
         }
 
         // --- ENFORCE MEMBER TIER LIMITS ---
@@ -2006,14 +2006,14 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                 const currentMembers = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && status = 'active'", "", 5000, 0, { ws: wsId });
                 const currentCount = currentMembers ? currentMembers.length : 0;
                 if (currentCount >= maxMembers) {
-                    return e.json(400, { message: "Workspace osiągnął limit aktywnych członków dla obecnego planu (" + maxMembers + "). / Workspace reached active member limit for current plan (" + maxMembers + ")." });
+                    return e.json(400, { message: "Workspace osiÄ…gnÄ…Ĺ‚ limit aktywnych czĹ‚onkĂłw dla obecnego planu (" + maxMembers + "). / Workspace reached active member limit for current plan (" + maxMembers + ")." });
                 }
             }
         } catch(err) {
             console.log("Error checking member limit in join-by-code: " + err);
         }
 
-        // Utworz prosbe o dolaczenie (jako pending — wymaga zatwierdzenia przez ownera/admina)
+        // Utworz prosbe o dolaczenie (jako pending â€” wymaga zatwierdzenia przez ownera/admina)
         const collection = e.app.findCollectionByNameOrId("WORKFLOW_workspace_members");
         const newRecord = new Record(collection);
         newRecord.set("workspace", wsId);
@@ -2022,7 +2022,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
         newRecord.set("status", "pending");
         e.app.save(newRecord);
 
-        // Powiadomienie mailowe dla wlasciciela — prośba o zatwierdzenie
+        // Powiadomienie mailowe dla wlasciciela â€” proĹ›ba o zatwierdzenie
         try {
             const ownerId = ws.get("owner");
             if (ownerId && ownerId !== userId) {
@@ -2041,9 +2041,9 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;">'
                         + '<tr><td style="padding:36px 36px 20px;text-align:center;border-bottom:1px solid #f0f0f0;">'
                         + '<img src="https://gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
-                        + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">Prośba o dołączenie</h1>'
+                        + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">ProĹ›ba o doĹ‚Ä…czenie</h1>'
                         + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Join Request</p>'
-                        + '<p style="margin:16px 0 0;font-size:14px;color:#6b7280;line-height:1.5;">Ktoś chce dołączyć do Twojego workspace używając kodu. Zaakceptuj go w panelu Członków.<br/><span style="color:#9ca3af;font-size:13px;display:block;margin-top:6px;">Someone wants to join your workspace using the join code. Approve them in the Members panel.</span></p>'
+                        + '<p style="margin:16px 0 0;font-size:14px;color:#6b7280;line-height:1.5;">KtoĹ› chce doĹ‚Ä…czyÄ‡ do Twojego workspace uĹĽywajÄ…c kodu. Zaakceptuj go w panelu CzĹ‚onkĂłw.<br/><span style="color:#9ca3af;font-size:13px;display:block;margin-top:6px;">Someone wants to join your workspace using the join code. Approve them in the Members panel.</span></p>'
                         + '</td></tr>'
                         + '<tr><td style="padding:28px 36px;">'
                         + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf9;border:1px solid #f0ede6;border-radius:12px;overflow:hidden;">'
@@ -2052,7 +2052,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(wsName) + '</span>'
                         + '</td></tr>'
                         + '<tr><td style="padding:18px 20px;">'
-                        + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">Użytkownik / User</span><br/>'
+                        + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">UĹĽytkownik / User</span><br/>'
                         + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(joinedName) + '</span>'
                         + '<br/><span style="font-size:13px;color:#6b7280;">' + escapeHtml(joinedEmail) + '</span>'
                         + '</td></tr>'
@@ -2062,7 +2062,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<a href="https://gryf.ai" style="display:inline-block;padding:14px 44px;background:#bc9b59;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.2px;">Zaakceptuj / Approve</a>'
                         + '</td></tr>'
                         + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
-                        + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. / This email was sent automatically.</p>'
+                        + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email zostaĹ‚ wysĹ‚any automatycznie. / This email was sent automatically.</p>'
                         + '</td></tr>'
                         + '</table>'
                         + '</td></tr></table>'
@@ -2074,7 +2074,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                             name: e.app.settings().meta.senderName || "Gryf.ai"
                         },
                         to: [{ address: ownerEmail }],
-                        subject: "Prośba o dołączenie / Join request — " + wsName,
+                        subject: "ProĹ›ba o doĹ‚Ä…czenie / Join request â€” " + wsName,
                         html: html,
                     });
 
@@ -2317,7 +2317,7 @@ cronAdd("cleanUnverifiedUsers", "0 0 * * *", () => {
         date.setDate(date.getDate() - 1);
         const dateString = date.toISOString().replace("T", " ");
         
-        // Znajdź użytkowników, którzy mają verified = false i zostali utworzeni ponad 24h temu
+        // ZnajdĹş uĹĽytkownikĂłw, ktĂłrzy majÄ… verified = false i zostali utworzeni ponad 24h temu
         const unverified = app.findRecordsByFilter(
             "WORKFLOW_users",
             "verified = false && created < {:date}",
@@ -2355,7 +2355,7 @@ onRecordCreateRequest((e) => {
         } catch(err) {}
 
         const title = "Nowe zaproszenie / New invitation";
-        const message = `Otrzymałeś zaproszenie do obszaru roboczego "${wsName}". / You received an invitation to workspace "${wsName}".`;
+        const message = `OtrzymaĹ‚eĹ› zaproszenie do obszaru roboczego "${wsName}". / You received an invitation to workspace "${wsName}".`;
 
         const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
         const notifRecord = new Record(notifCollection);
@@ -2380,7 +2380,7 @@ onRecordUpdateRequest((e) => {
 
         let original;
         try {
-            original = record.originalCopy();
+            original = e.app.findRecordById(record.collection().name, record.id);
         } catch(err) {
             console.log("Could not get originalCopy: " + err);
             return;
@@ -2399,7 +2399,7 @@ onRecordUpdateRequest((e) => {
         // Status changed to active (Accepted invitation)
         if (original.get("status") !== "active" && record.get("status") === "active") {
             const title = "Zaakceptowano zaproszenie / Invitation accepted";
-            const message = `Dołączyłeś do obszaru roboczego "${wsName}". / You joined workspace "${wsName}".`;
+            const message = `DoĹ‚Ä…czyĹ‚eĹ› do obszaru roboczego "${wsName}". / You joined workspace "${wsName}".`;
             const notifRecord = new Record(notifCollection);
             notifRecord.set("user", userId);
             notifRecord.set("title", title);
@@ -2410,11 +2410,11 @@ onRecordUpdateRequest((e) => {
         }
 
         // Role changed
-        if (original.get("status") === "active" && record.get("status") === "active" && original.get("role") !== record.get("role")) {
+        if (original.get("status") === "active" && record.get("status") === "active" && String(original.get("role")) !== String(record.get("role"))) {
             const oldRole = original.get("role");
             const newRole = record.get("role");
             const title = "Zmiana roli / Role change";
-            const message = `Twoja rola w "${wsName}" została zmieniona z ${oldRole} na ${newRole}. / Your role in "${wsName}" changed from ${oldRole} to ${newRole}.`;
+            const message = `Twoja rola w "${wsName}" zostaĹ‚a zmieniona z ${oldRole} na ${newRole}. / Your role in "${wsName}" changed from ${oldRole} to ${newRole}.`;
             const notifRecord = new Record(notifCollection);
             notifRecord.set("user", userId);
             notifRecord.set("title", title);
@@ -2432,7 +2432,7 @@ onRecordUpdateRequest((e) => {
 // =====================================================
 // HOOK: Notifications for Workspace Deletion
 // =====================================================
-onRecordBeforeDeleteRequest((e) => {
+onRecordDeleteRequest((e) => {
     const ws = e.record;
     const wsId = ws.id;
     const wsName = ws.get("name") || "Workspace";
@@ -2464,13 +2464,13 @@ onRecordBeforeDeleteRequest((e) => {
         for (let i = 0; i < userIdsToNotify.length; i++) {
             const userId = userIdsToNotify[i];
             
-            // Opcjonalnie: nie powiadamiać osoby usuwającej (autora żądania)
+            // Opcjonalnie: nie powiadamiaÄ‡ osoby usuwajÄ…cej (autora ĹĽÄ…dania)
             // if (authRecord && authRecord.id === userId) continue;
 
             const notifRecord = new Record(notifCollection);
             notifRecord.set("user", userId);
-            notifRecord.set("title", "Obszar roboczy usunięty / Workspace deleted");
-            notifRecord.set("message", `Obszar roboczy "${wsName}" został usunięty przez ${authorName}. / Workspace "${wsName}" was deleted by ${authorName}.`);
+            notifRecord.set("title", "Obszar roboczy usuniÄ™ty / Workspace deleted");
+            notifRecord.set("message", `Obszar roboczy "${wsName}" zostaĹ‚ usuniÄ™ty przez ${authorName}. / Workspace "${wsName}" was deleted by ${authorName}.`);
             notifRecord.set("type", "warning");
             notifRecord.set("isRead", false);
             e.app.save(notifRecord);
@@ -2483,7 +2483,7 @@ onRecordBeforeDeleteRequest((e) => {
 // =====================================================
 // HOOK: Notifications for Process Deletion
 // =====================================================
-onRecordBeforeDeleteRequest((e) => {
+onRecordDeleteRequest((e) => {
     const process = e.record;
     const processName = process.get("name") || "Proces";
     const wsId = process.get("workspace");
@@ -2530,8 +2530,8 @@ onRecordBeforeDeleteRequest((e) => {
 
             const notifRecord = new Record(notifCollection);
             notifRecord.set("user", userId);
-            notifRecord.set("title", "Proces usunięty / Process deleted");
-            notifRecord.set("message", `Proces "${processName}" w zespole "${wsName}" został usunięty przez ${authorName}. / Process "${processName}" in "${wsName}" was deleted by ${authorName}.`);
+            notifRecord.set("title", "Proces usuniÄ™ty / Process deleted");
+            notifRecord.set("message", `Proces "${processName}" w zespole "${wsName}" zostaĹ‚ usuniÄ™ty przez ${authorName}. / Process "${processName}" in "${wsName}" was deleted by ${authorName}.`);
             notifRecord.set("type", "warning");
             notifRecord.set("isRead", false);
             e.app.save(notifRecord);
@@ -2558,7 +2558,7 @@ onRecordUpdateRequest((e) => {
         );
         if (adminsOrEditors && adminsOrEditors.length > 0) return e.next();
     } catch(err) {}
-    throw new Error("Tylko admin lub edytor może edytować grupy.");
+    throw new Error("Tylko admin lub edytor moĹĽe edytowaÄ‡ grupy.");
 }, "WORKFLOW_groups");
 
 onRecordDeleteRequest((e) => {
@@ -2575,22 +2575,142 @@ onRecordDeleteRequest((e) => {
         );
         if (admins && admins.length > 0) return e.next();
     } catch(err) {}
-    throw new Error("Tylko admin może usuwać grupy.");
+    throw new Error("Tylko admin moĹĽe usuwaÄ‡ grupy.");
 }, "WORKFLOW_groups");
 
 // =====================================================
 // HOOK: Secure WORKFLOW_users (Prevent self-upgrade)
 // =====================================================
 onRecordUpdateRequest((e) => {
-    const original = e.record.originalCopy();
+    const original = e.app.findRecordById(e.record.collection().name, e.record.id);
     const record = e.record;
     
     if (original && record) {
-        if (original.get("tier") !== record.get("tier") || 
-            original.get("tier_expires_at") !== record.get("tier_expires_at") ||
-            original.get("role") !== record.get("role")) {
-            throw new Error("Nie możesz samodzielnie modyfikować swojego planu / ról.");
+        if (String(original.get("tier")) !== String(record.get("tier")) || 
+            String(original.get("tier_expires_at")) !== String(record.get("tier_expires_at")) ||
+            String(original.get("role")) !== String(record.get("role"))) {
+            throw new Error("Nie moĹĽesz samodzielnie modyfikowaÄ‡ swojego planu / rĂłl.");
         }
     }
     return e.next();
 }, "WORKFLOW_users");
+
+// =====================================================
+// HOOK: Enforce Workspace Tier Limits (Added to seal the loophole)
+// =====================================================
+onRecordCreateRequest(function(e) {
+    var authRecord = e.auth;
+    if (!authRecord) return e.next();
+    var ownerId = e.record.get('owner');
+    if (!ownerId) return e.next();
+    var userTier = (authRecord.get('tier') || 'FREE').toUpperCase();
+    var tierExpiry = authRecord.get('tier_expires_at');
+    if (userTier !== 'FREE' && tierExpiry && new Date(tierExpiry).getTime() <= Date.now()) {
+        userTier = 'FREE';
+    }
+    var maxWorkspaces = 1;
+    try {
+        var configs = e.app.findRecordsByFilter('WORKFLOW_tier_config', 'tier = {:tier}', '', 1, 0, { tier: userTier });
+        if (configs && configs.length > 0) {
+            maxWorkspaces = Number(configs[0].get('max_workspaces')) || 1;
+        }
+    } catch(err) {}
+    if (maxWorkspaces < 999999) {
+        try {
+            var db = e.app.db ? e.app.db() : $app.db();
+            var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
+            db.newQuery('SELECT COUNT(*) as cnt FROM WORKFLOW_workspaces WHERE owner = {:owner}').bind({ owner: ownerId }).all(wRows);
+            var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
+            if (currentCount >= maxWorkspaces) {
+                throw new BadRequestError('Limit obszarów roboczych (' + maxWorkspaces + ') został osiągnięty. / Workspace limit (' + maxWorkspaces + ') reached.');
+            }
+        } catch(err) { throw err; }
+    }
+    return e.next();
+}, 'WORKFLOW_workspaces');
+// =====================================================
+// HOOK: Enforce Folder Tier Limits
+// =====================================================
+onRecordCreateRequest(function(e) {
+    var wsId = e.record.get("workspace");
+    if (!wsId) return e.next();
+    try {
+        var ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+        var ownerId = ws.get("owner");
+        var ownerRec = e.app.findRecordById("WORKFLOW_users", ownerId);
+        var userTier = (ownerRec.get("tier") || "FREE").toUpperCase();
+        var tierExpiry = ownerRec.get("tier_expires_at");
+        if (userTier !== "FREE" && tierExpiry && new Date(tierExpiry).getTime() <= Date.now()) userTier = "FREE";
+        var maxGroups = 2;
+        var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
+        if (configs && configs.length > 0) maxGroups = Number(configs[0].get("max_groups_per_workspace")) || 2;
+        if (maxGroups < 999999) {
+            var db = e.app.db ? e.app.db() : $app.db();
+            var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
+            db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_process_groups WHERE workspace = {:ws}").bind({ ws: wsId }).all(wRows);
+            var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
+            if (currentCount >= maxGroups) throw new BadRequestError("Limit folderow (" + maxGroups + ") osiagniety. / Folders limit reached.");
+        }
+    } catch(err) { throw err; }
+    return e.next();
+}, "WORKFLOW_process_groups");
+
+// =====================================================
+// HOOK: Enforce Comments Tier Limits
+// =====================================================
+onRecordCreateRequest(function(e) {
+    var processId = e.record.get("process");
+    if (!processId) return e.next();
+    try {
+        var proc = e.app.findRecordById("WORKFLOW_processes", processId);
+        var wsId = proc.get("workspace");
+        var ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+        var ownerId = ws.get("owner");
+        var ownerRec = e.app.findRecordById("WORKFLOW_users", ownerId);
+        var userTier = (ownerRec.get("tier") || "FREE").toUpperCase();
+        var tierExpiry = ownerRec.get("tier_expires_at");
+        if (userTier !== "FREE" && tierExpiry && new Date(tierExpiry).getTime() <= Date.now()) userTier = "FREE";
+        var maxComments = 10;
+        var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
+        if (configs && configs.length > 0) maxComments = Number(configs[0].get("max_comments_per_process")) || 10;
+        if (maxComments < 999999) {
+            var db = e.app.db ? e.app.db() : $app.db();
+            var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
+            db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_comments WHERE process = {:proc}").bind({ proc: processId }).all(wRows);
+            var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
+            if (currentCount >= maxComments) throw new BadRequestError("Limit komentarzy (" + maxComments + ") osiagniety. / Comments limit reached.");
+        }
+    } catch(err) { throw err; }
+    return e.next();
+}, "WORKFLOW_comments");
+
+// =====================================================
+// HOOK: Enforce Versions Tier Limits
+// =====================================================
+onRecordCreateRequest(function(e) {
+    var processId = e.record.get("process");
+    if (!processId) return e.next();
+    try {
+        var proc = e.app.findRecordById("WORKFLOW_processes", processId);
+        var wsId = proc.get("workspace");
+        var ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+        var ownerId = ws.get("owner");
+        var ownerRec = e.app.findRecordById("WORKFLOW_users", ownerId);
+        var userTier = (ownerRec.get("tier") || "FREE").toUpperCase();
+        var tierExpiry = ownerRec.get("tier_expires_at");
+        if (userTier !== "FREE" && tierExpiry && new Date(tierExpiry).getTime() <= Date.now()) userTier = "FREE";
+        var maxVersions = 5;
+        var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
+        if (configs && configs.length > 0) maxVersions = Number(configs[0].get("max_versions_per_process")) || 5;
+        if (maxVersions < 999999) {
+            var db = e.app.db ? e.app.db() : $app.db();
+            var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
+            db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_versions WHERE process = {:proc}").bind({ proc: processId }).all(wRows);
+            var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
+            if (currentCount >= maxVersions) throw new BadRequestError("Limit wersji (" + maxVersions + ") osiagniety. / Versions limit reached.");
+        }
+    } catch(err) { throw err; }
+    return e.next();
+}, "WORKFLOW_versions");
+
+

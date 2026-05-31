@@ -142,22 +142,8 @@ export const en = {
     processMap: 'Process Map',
     notifications: 'Notifications',
   },
-  storeErrors: {
-    viewerCannotSave: 'You have a viewer role in this workspace — you cannot create processes.',
-    savePermissionLost: 'No permission to save. Your access might have been changed.',
-  },
-  tierLimits: {
-    reasonWorkspaceLimit: 'Workspace limit exceeded.',
-    reasonProcessLimit: 'Process limit exceeded. Upgrade your plan to continue.',
-    reasonNodesLimit: 'Node limit in this process exceeded.',
-    reasonEdgesLimit: 'Edge limit in this process exceeded.',
-    reasonNotesLimit: 'Notes limit in this process exceeded.',
-    reasonVariablesLimit: 'Process variables limit exceeded.',
-    reasonChecklistLimit: 'Checklist items limit exceeded.',
-    reasonSubworkflowsLimit: 'Subworkflow nodes are limited in your current plan.',
-    reasonViewerRole: 'You have a viewer role in this workspace — you cannot edit.',
-    readOnlyMode: 'Read-only mode',
-  },
+
+
   errorBoundary: {
     title: 'Something went wrong',
     desc: 'An unexpected error occurred. Try refreshing the page.',
@@ -418,20 +404,7 @@ export const en = {
     addStages: 'Add Stages',
     settings: 'Settings',
   },
-  aiExt: {
-    generationStopped: 'Response generation was stopped.',
-    invalidKeyMsg: 'Saved API key is invalid. Update it in profile settings.',
-    providerError: 'AI Provider error (check your API key and available credits on your provider account).',
-    jsonParseErrorTitle: '⚠️ Data reading error',
-    jsonParseErrorDesc: 'Assistant generated a structure with JSON formatting errors, which prevents the map update button from displaying. Ask to generate data again without truncation.',
-    quickPrompts: {
-      createProcess: 'I want to create a new business process. Ask me what kind of process, for what industry, and what goals — then generate a complete workflow-json with stages, descriptions, checklists, and SLA.',
-      smartNames: 'Improve the names and descriptions of all stages in my workflow. Give them professional, business names and write short but substantive descriptions. Use the workflow-update format to update existing nodes.',
-      analyzeProcess: 'Analyze my workflow from a business perspective — what is this process, what are its goals, potential risks, and suggestions for improvement?',
-      recommendTools: 'Based on my workflow, what tools from the catalog can I use? List specific tool names from the catalog and explain how they can be useful in this process.',
-      addStages: 'Suggest additional stages I can add to this process to improve it. Generate workflow-json with new nodes.'
-    }
-  },
+
   nav: {
     search: 'Search (Text & Users)',
     stats: 'Process statistics',
@@ -704,12 +677,13 @@ export const en = {
     noName: 'No name',
     aiAssistantTitle: 'AI Assistant',
     backupTitle: 'Global Backup & Restore',
-    backupDesc: 'Export all your workspaces (including processes, groups, members, and maps) to a ZIP file, or clone them back into your account. Note: Restoring acts as a safe clone and preserves all current data and invited members.',
+    backupDesc: 'Export all your workspaces (including processes, groups, members, and maps) to a ZIP file, or clone them back into your account. Note: Restoring acts as a safe clone and preserves all current data. Team members are NOT imported to keep the clone private.',
     exportZip: 'Export All to ZIP',
     importZip: 'Import Global ZIP',
     importConfirmTitle: 'Confirm Import (Safe Clone)',
-    importConfirmDesc: 'Are you sure you want to import this backup? Your projects will be SAFELY CLONED alongside your existing ones. All invited team members will also be preserved and retain access to the cloned projects.',
+    importConfirmDesc: 'Are you sure you want to import this backup? Your projects will be SAFELY CLONED alongside your existing ones. Team members will NOT be imported, ensuring the clone remains a private sandbox.',
     importSuccess: 'Global backup imported successfully!',
+
     exportSuccess: 'Global backup exported successfully!',
     importError: 'Error during import. Check file format.',
     aiMemory: 'Assistant memory (message count)',
@@ -1036,6 +1010,19 @@ export const en = {
   },
 
   aiExt: {
+    generationStopped: 'Response generation was stopped.',
+    invalidKeyMsg: 'Saved API key is invalid. Update it in profile settings.',
+    providerError: 'AI Provider error (check your API key and available credits on your provider account).',
+    jsonParseErrorTitle: '⚠️ Data reading error',
+    jsonParseErrorDesc: 'Assistant generated a structure with JSON formatting errors, which prevents the map update button from displaying. Ask to generate data again without truncation.',
+    quickPrompts: {
+      createProcess: 'I want to create a new business process. Ask me what kind of process, for what industry, and what goals — then generate a complete workflow-json with stages, descriptions, checklists, and SLA.',
+      smartNames: 'Improve the names and descriptions of all stages in my workflow. Give them professional, business names and write short but substantive descriptions. Use the workflow-update format to update existing nodes.',
+      analyzeProcess: 'Analyze my workflow from a business perspective — what is this process, what are its goals, potential risks, and suggestions for improvement?',
+      recommendTools: 'Based on my workflow, what tools from the catalog can I use? List specific tool names from the catalog and explain how they can be useful in this process.',
+      addStages: 'Suggest additional stages I can add to this process to improve it. Generate workflow-json with new nodes.'
+    },
+
     title: 'Gryf AI Assistant',
     greeting: 'Hello!',
     intro: "I'm <span class=\"text-brand-gold font-semibold\">Gryf</span> — your AI assistant.<br/>I'll help you find tools, analyze processes, and generate workflows.",
@@ -1201,6 +1188,9 @@ export const en = {
     restoredFrom: 'Restored from v{{number}}',
   },
   storeErrors: {
+    viewerCannotSave: 'You have a viewer role in this workspace — you cannot create processes.',
+    savePermissionLost: 'No permission to save. Your access might have been changed.',
+
     mustBeLoggedToSave: 'You must be logged in to save a process.',
     selectWorkspaceFirst: 'Select an active Workspace before creating a new process.',
     mustBeLoggedIn: 'You must be logged in.',
@@ -1258,6 +1248,17 @@ export const en = {
 
   // Tier Limits
   tierLimits: {
+    reasonWorkspaceLimit: 'Workspace limit exceeded.',
+    reasonProcessLimit: 'Process limit exceeded. Upgrade your plan to continue.',
+    reasonNodesLimit: 'Node limit in this process exceeded.',
+    reasonEdgesLimit: 'Edge limit in this process exceeded.',
+    reasonNotesLimit: 'Notes limit in this process exceeded.',
+    reasonVariablesLimit: 'Process variables limit exceeded.',
+    reasonChecklistLimit: 'Checklist items limit exceeded.',
+    reasonSubworkflowsLimit: 'Subworkflow nodes are limited in your current plan.',
+    reasonViewerRole: 'You have a viewer role in this workspace — you cannot edit.',
+    readOnlyMode: 'Read-only mode',
+
     nodeLimit: 'Node limit per process: {{limit}}',
     edgeLimit: 'Connection limit per process: {{limit}}',
     memberLimitReached: 'Member limit for this workspace ({{limit}}) has been reached. Upgrade your plan to add more.',

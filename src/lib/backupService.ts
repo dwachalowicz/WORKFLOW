@@ -90,7 +90,7 @@ export async function exportGlobalBackup(userId: string) {
         avatarPromises.push((async () => {
           try {
             const url = `${pb.baseUrl}/api/files/WORKFLOW_workspaces/${wsData.workspace.id}/${wsData.workspace.avatar}`;
-            const res = await fetch(url);
+            const res = await fetch(url, { headers: { Authorization: pb.authStore.token } });
             if (res.ok) {
               const blob = await res.blob();
               zip.file(`avatars/${wsData.workspace.id}_${wsData.workspace.avatar}`, blob);
@@ -107,7 +107,7 @@ export async function exportGlobalBackup(userId: string) {
           avatarPromises.push((async () => {
             try {
               const url = `${pb.baseUrl}/api/files/WORKFLOW_groups/${group.id}/${group.avatar}`;
-              const res = await fetch(url);
+              const res = await fetch(url, { headers: { Authorization: pb.authStore.token } });
               if (res.ok) {
                 const blob = await res.blob();
                 zip.file(`avatars/${group.id}_${group.avatar}`, blob);
@@ -148,6 +148,8 @@ export async function exportGlobalBackup(userId: string) {
  * and adds them to the current user's account safely without deleting existing workspaces.
  */
 export async function importGlobalBackup(file: File, userId: string) {
+  let importedCount = 0;
+  
   try {
     // 1. Unzip and parse
     const zip = await JSZip.loadAsync(file);
@@ -196,7 +198,7 @@ export async function importGlobalBackup(file: File, userId: string) {
           // Add a small delay to prevent network saturation / rate limits during heavy imports
           await new Promise(resolve => setTimeout(resolve, 20));
         } catch (e) {
-          console.error(`Failed to restore record in ${collectionName}:`, e);
+          throw e;
         }
       }
     };
@@ -235,9 +237,11 @@ export async function importGlobalBackup(file: File, userId: string) {
         const createdWs = await pb.collection('WORKFLOW_workspaces').create(wsDataToUpload);
         newWsId = createdWs.id;
         idMap.set(oldWsId, newWsId);
+        importedCount++;
       } catch (e) {
         console.error(`Failed to restore workspace ${oldWsId}:`, e);
-        continue; // Skip restoring children if workspace creation failed
+        
+        throw e;
       }
 
       // 3.2 Create Groups (Folders)
@@ -282,13 +286,13 @@ export async function importGlobalBackup(file: File, userId: string) {
         }
       }
 
-      // 3.4 Create Members (Preserve all members, but map the owner to the new userId)
-      await insertRecords('WORKFLOW_workspace_members', wsData.members || [], (r) => {
-        const isOriginalOwner = r.user === oldUserId;
+      // 3.4 Create Members (Only preserve the importing user to create a safe, isolated clone)
+      const ownerMembers = (wsData.members || []).filter((r: Record<string, unknown>) => r.user === oldUserId);
+      await insertRecords('WORKFLOW_workspace_members', ownerMembers, (r) => {
         return {
           ...r,
           workspace: newWsId,
-          user: isOriginalOwner ? userId : r.user // Transfer old owner's membership to new owner, keep other users intact
+          user: userId // Assign membership to the importing user
         };
       });
 
@@ -321,13 +325,16 @@ export async function importGlobalBackup(file: File, userId: string) {
       });
 
       // 3.6 Create Comments
-      await insertRecords('WORKFLOW_comments', wsData.comments || [], (r) => {
-        const mappedProcess = r.process ? idMap.get(String(r.process)) : null;
+      // Filter out comments whose processes failed to restore to avoid attaching them to old processes
+      const validComments = (wsData.comments || []).filter((r: Record<string, unknown>) => idMap.has(String(r.process)));
+      await insertRecords('WORKFLOW_comments', validComments, (r) => {
+        const mappedProcess = idMap.get(String(r.process));
         const isOriginalOwner = r.author === oldUserId;
         return {
           ...r,
-          process: mappedProcess || r.process,
-          author: isOriginalOwner ? userId : r.author
+          process: mappedProcess, // Use exclusively the new cloned process ID
+          author: userId, // Safe impersonation prevention: importing user owns all restored comments
+          content: !isOriginalOwner ? `<p><em>[Kopia - z innego konta]</em></p> ${r.content || ''}` : r.content
         };
       });
 
@@ -385,19 +392,14 @@ export async function importGlobalBackup(file: File, userId: string) {
       }
     }
 
-    // 5. Update user settings (excluding AI)
-    const userUpdate = { ...backup.user };
-    delete userUpdate.id;
-    delete userUpdate.email; // Do not overwrite email
-    delete userUpdate.avatar; // Do not overwrite avatar
-    delete userUpdate.created;
-    delete userUpdate.updated;
-    await pb.collection('WORKFLOW_users').update(userId, userUpdate).catch(console.error);
+    // 5. Update user settings
+    // Removed to prevent Privilege Escalation vulnerabilities via JSON modification.
+    // A global backup import    // We are deliberately NOT updating the user profile from the backup.
+    
+    return { imported: importedCount,  };
 
-    return true;
   } catch (err) {
     console.error('Import failed:', err);
     throw err;
   }
 }
-

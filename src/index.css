@@ -39,7 +39,7 @@
   --color-border-strong: hsl(var(--border-strong));
   --color-border-hover: hsl(var(--border-hover));
 
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', sans-serif;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);

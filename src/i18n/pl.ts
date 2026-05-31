@@ -150,22 +150,8 @@ export const pl = {
     processMap: 'Mapa procesów',
     notifications: 'Powiadomienia',
   },
-  storeErrors: {
-    viewerCannotSave: 'Masz rolę obserwatora w tym workspace — nie możesz tworzyć procesów.',
-    savePermissionLost: 'Brak uprawnień do zapisu. Prawdopodobnie Twój dostęp został zmieniony.',
-  },
-  tierLimits: {
-    reasonWorkspaceLimit: 'Przekroczono limit obszarów roboczych.',
-    reasonProcessLimit: 'Przekroczono limit procesów. Zmień plan aby kontynuować.',
-    reasonNodesLimit: 'Przekroczono limit węzłów w tym procesie.',
-    reasonEdgesLimit: 'Przekroczono limit połączeń w tym procesie.',
-    reasonNotesLimit: 'Przekroczono limit notatek w tym procesie.',
-    reasonVariablesLimit: 'Przekroczono limit zmiennych procesowych.',
-    reasonChecklistLimit: 'Przekroczono limit elementów checklisty.',
-    reasonSubworkflowsLimit: 'Węzły typu Subworkflow są ograniczone w obecnym planie.',
-    reasonViewerRole: 'Masz rolę obserwatora w tym workspace — nie możesz edytować.',
-    readOnlyMode: 'Tryb tylko do odczytu',
-  },
+
+
   errorBoundary: {
     title: 'Coś poszło nie tak',
     desc: 'Wystąpił nieoczekiwany błąd. Spróbuj odświeżyć stronę.',
@@ -435,20 +421,7 @@ export const pl = {
     settings: 'Ustawienia',
   },
 
-  aiExt: {
-    generationStopped: 'Generowanie odpowiedzi zostało zatrzymane.',
-    invalidKeyMsg: 'Zapisany klucz API jest nieprawidłowy. Zaktualizuj go w ustawieniach profilu.',
-    providerError: 'Błąd dostawcy AI (sprawdź swój klucz API i dostępne środki na koncie dostawcy).',
-    jsonParseErrorTitle: '⚠️ Błąd odczytu danych',
-    jsonParseErrorDesc: 'Asystent wygenerował strukturę z błędami w formacie JSON, przez co nie można wyświetlić przycisku do aktualizacji mapy. Poproś go o wygenerowanie danych ponownie i bez obcinania.',
-    quickPrompts: {
-      createProcess: 'Chcę stworzyć nowy proces biznesowy. Zapytaj mnie jaki to proces, dla jakiej branży i jakie są cele — następnie wygeneruj kompletny workflow-json z etapami, opisami, checklistami i SLA.',
-      smartNames: 'Popraw nazwy i opisy wszystkich etapów w moim workflow. Nadaj im profesjonalne, biznesowe nazwy i napisz krótkie, ale treściwe opisy. Użyj formatu workflow-update, aby zaktualizować istniejące węzły.',
-      analyzeProcess: 'Przeanalizuj mój workflow z perspektywy biznesowej — czym jest ten proces, jakie są jego cele, potencjalne ryzyka i sugestie usprawnień?',
-      recommendTools: 'Na podstawie mojego workflow, jakie narzędzia z katalogu mogę wykorzystać? Wymień konkretne nazwy narzędzi z katalogu i wyjaśnij, jak mogą być przydatne w tym procesie.',
-      addStages: 'Zaproponuj dodatkowe etapy, które mogę dodać do tego procesu, aby go ulepszyć. Wygeneruj workflow-json z nowymi węzłami.'
-    }
-  },
+
 
   // Navbar
   nav: {
@@ -617,21 +590,7 @@ export const pl = {
   },
 
   // Tutorial
-  tutorial: {
-    welcome: 'Witaj w GRYF.AI Workflow!',
-    welcomeContent: 'Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
-    navBar: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
-    saveBar: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
-    canvas: 'To Twoje Płótno (Canvas). Kliknij PRAWYM przyciskiem myszy w dowolnym miejscu, aby otworzyć Menu Kołowe (Radial Menu).',
-    radialMenu: 'Oto Menu Kołowe! Z niego wstawisz: Etapy procesu, Bazy danych, Podprocesy (Inne Workflow), punkt Końcowy (Koniec), a także zduplikujesz lub usuniesz istniejące elementy.',
-    propertiesPanel: 'Gdy zaznaczysz węzeł, tu pojawią się jego szczegóły. Ustawisz tu czas na wykonanie (SLA), przypiszesz Edytorów, Czytelników i Decydentów oraz dodasz zmienne i instrukcje stanowiskowe.',
-    linter: 'To nasz inteligentny Walidator. Dba o to, by proces nie miał "ślepych uliczek" i sprawdza m.in. czy baza danych ma przypisane relacje.',
-    bottomControls: 'W tym dolnym, prawym menu znajdziesz kontrolki przybliżania/oddalania, centrowania widoku oraz przyciski Cofnij i Ponów.',
-    finish: 'Zakończ',
-    next: 'Dalej',
-    prev: 'Wstecz',
-    skip: 'Pomiń',
-  },
+
 
   // Share Modal
   share: {
@@ -766,12 +725,13 @@ export const pl = {
     
     // Backup
     backupTitle: 'Globalna kopia zapasowa',
-    backupDesc: 'Wyeksportuj wszystkie swoje obszary robocze (w tym procesy, grupy, członków i mapy) do pliku ZIP lub przywróć je jako bezpieczny klon. Wgrywanie kopii nie usuwa ani nie nadpisuje obecnych danych.',
+    backupDesc: 'Wyeksportuj wszystkie swoje obszary robocze (w tym procesy, grupy, członków i mapy) do pliku ZIP lub przywróć je jako bezpieczny klon. Wgrywanie kopii nie usuwa obecnych danych. Zespół NIE JEST kopiowany, aby zapewnić prywatność klonu.',
     exportZip: 'Eksportuj wszystko (ZIP)',
     importZip: 'Wgraj globalną kopię',
     importConfirmTitle: 'Potwierdź wgranie (Bezpieczne Klonowanie)',
-    importConfirmDesc: 'Czy na pewno chcesz wgrać tę kopię? Projekty zostaną BEZPIECZNIE SKLONOWANE i dodane obok Twoich obecnych. Wszyscy członkowie zespołu również zostaną przeniesieni i zachowają dostęp do sklonowanych projektów.',
+    importConfirmDesc: 'Czy na pewno chcesz wgrać tę kopię? Projekty zostaną BEZPIECZNIE SKLONOWANE obok Twoich obecnych. Członkowie zespołu NIE ZOSTANĄ wgrani, dzięki czemu nowy obszar roboczy będzie w pełni prywatny.',
     importSuccess: 'Globalna kopia zapasowa została wgrana!',
+
     exportSuccess: 'Globalna kopia zapasowa została wyeksportowana!',
     importError: 'Błąd podczas wgrywania. Sprawdź format pliku.',
     aiMemory: 'Pamięć asystenta (ilość wiadomości)',
@@ -1110,6 +1070,19 @@ export const pl = {
 
   // AI Assistant - extended
   aiExt: {
+    generationStopped: 'Generowanie odpowiedzi zostało zatrzymane.',
+    invalidKeyMsg: 'Zapisany klucz API jest nieprawidłowy. Zaktualizuj go w ustawieniach profilu.',
+    providerError: 'Błąd dostawcy AI (sprawdź swój klucz API i dostępne środki na koncie dostawcy).',
+    jsonParseErrorTitle: '⚠️ Błąd odczytu danych',
+    jsonParseErrorDesc: 'Asystent wygenerował strukturę z błędami w formacie JSON, przez co nie można wyświetlić przycisku do aktualizacji mapy. Poproś go o wygenerowanie danych ponownie i bez obcinania.',
+    quickPrompts: {
+      createProcess: 'Chcę stworzyć nowy proces biznesowy. Zapytaj mnie jaki to proces, dla jakiej branży i jakie są cele — następnie wygeneruj kompletny workflow-json z etapami, opisami, checklistami i SLA.',
+      smartNames: 'Popraw nazwy i opisy wszystkich etapów w moim workflow. Nadaj im profesjonalne, biznesowe nazwy i napisz krótkie, ale treściwe opisy. Użyj formatu workflow-update, aby zaktualizować istniejące węzły.',
+      analyzeProcess: 'Przeanalizuj mój workflow z perspektywy biznesowej — czym jest ten proces, jakie są jego cele, potencjalne ryzyka i sugestie usprawnień?',
+      recommendTools: 'Na podstawie mojego workflow, jakie narzędzia z katalogu mogę wykorzystać? Wymień konkretne nazwy narzędzi z katalogu i wyjaśnij, jak mogą być przydatne w tym procesie.',
+      addStages: 'Zaproponuj dodatkowe etapy, które mogę dodać do tego procesu, aby go ulepszyć. Wygeneruj workflow-json z nowymi węzłami.'
+    },
+
     title: 'Asystent GRYF.AI',
     greeting: 'Cześć!',
     intro: 'Jestem <span class="text-brand-gold font-semibold">Gryf</span> — asystent AI.<br/>Pomogę Ci znaleźć narzędzia, przeanalizować procesy i wygenerować workflow.',
@@ -1280,6 +1253,9 @@ export const pl = {
     restoredFrom: 'Przywrócono z v{{number}}',
   },
   storeErrors: {
+    viewerCannotSave: 'Masz rolę obserwatora w tym workspace — nie możesz tworzyć procesów.',
+    savePermissionLost: 'Brak uprawnień do zapisu. Prawdopodobnie Twój dostęp został zmieniony.',
+
     mustBeLoggedToSave: 'Musisz być zalogowany, aby zapisać proces.',
     selectWorkspaceFirst: 'Wybierz aktywny Workspace przed utworzeniem nowego procesu.',
     mustBeLoggedIn: 'Musisz być zalogowany.',
@@ -1311,6 +1287,20 @@ export const pl = {
 
   // Tutorial
   tutorial: {
+    welcome: 'Witaj w GRYF.AI Workflow!',
+    welcomeContent: 'Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
+    navBar: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
+    saveBar: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
+    canvas: 'To Twoje Płótno (Canvas). Kliknij PRAWYM przyciskiem myszy w dowolnym miejscu, aby otworzyć Menu Kołowe (Radial Menu).',
+    radialMenu: 'Oto Menu Kołowe! Z niego wstawisz: Etapy procesu, Bazy danych, Podprocesy (Inne Workflow), punkt Końcowy (Koniec), a także zduplikujesz lub usuniesz istniejące elementy.',
+    propertiesPanel: 'Gdy zaznaczysz węzeł, tu pojawią się jego szczegóły. Ustawisz tu czas na wykonanie (SLA), przypiszesz Edytorów, Czytelników i Decydentów oraz dodasz zmienne i instrukcje stanowiskowe.',
+    linter: 'To nasz inteligentny Walidator. Dba o to, by proces nie miał "ślepych uliczek" i sprawdza m.in. czy baza danych ma przypisane relacje.',
+    bottomControls: 'W tym dolnym, prawym menu znajdziesz kontrolki przybliżania/oddalania, centrowania widoku oraz przyciski Cofnij i Ponów.',
+    finish: 'Zakończ',
+    next: 'Dalej',
+    prev: 'Wstecz',
+    skip: 'Pomiń',
+
     step1: 'Witaj w GRYF.AI Workflow! Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
     step2: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
     step3: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
@@ -1341,6 +1331,17 @@ export const pl = {
 
   // Tier Limits
   tierLimits: {
+    reasonWorkspaceLimit: 'Przekroczono limit obszarów roboczych.',
+    reasonProcessLimit: 'Przekroczono limit procesów. Zmień plan aby kontynuować.',
+    reasonNodesLimit: 'Przekroczono limit węzłów w tym procesie.',
+    reasonEdgesLimit: 'Przekroczono limit połączeń w tym procesie.',
+    reasonNotesLimit: 'Przekroczono limit notatek w tym procesie.',
+    reasonVariablesLimit: 'Przekroczono limit zmiennych procesowych.',
+    reasonChecklistLimit: 'Przekroczono limit elementów checklisty.',
+    reasonSubworkflowsLimit: 'Węzły typu Subworkflow są ograniczone w obecnym planie.',
+    reasonViewerRole: 'Masz rolę obserwatora w tym workspace — nie możesz edytować.',
+    readOnlyMode: 'Tryb tylko do odczytu',
+
     nodeLimit: 'Limit węzłów na proces: {{limit}}',
     edgeLimit: 'Limit połączeń na proces: {{limit}}',
     memberLimitReached: 'Limit członków w workspace ({{limit}}) został osiągnięty. Ulepsz plan, aby dodać więcej.',
