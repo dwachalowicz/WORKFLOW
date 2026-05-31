@@ -138,7 +138,6 @@ export const ProfileModal = () => {
 
       await pb.collection('WORKFLOW_users').update(user.id, formData);
 
-      await checkAuth(); // Refresh user state
       useToastStore.getState().showToast(t('profile.saved'), 'success');
       setPendingDeleteAvatar(false);
       setProfileModalOpen(false);

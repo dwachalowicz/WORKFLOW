@@ -36,6 +36,7 @@ export const PropertiesPanel = () => {
 
   useEffect(() => {
     if (highlightTrigger > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsHighlighted(true);
       const timer = setTimeout(() => setIsHighlighted(false), 500);
       return () => clearTimeout(timer);
@@ -318,8 +319,8 @@ export const PropertiesPanel = () => {
         {activeNode?.type === 'startstop' && activeNode?.data?.type === 'start' && (
           <CollapsibleSection title={t('props.trigger')} isCollapsed={!!collapsedSections['trigger']} onToggle={() => toggleSection('trigger')}>
 
-            <div className="space-y-3">
-              <label className="text-xs text-muted-foreground font-medium">{t('props.triggerQuestion')}</label>
+            <div className="space-y-4">
+              <label className="text-xs text-muted-foreground font-medium block">{t('props.triggerQuestion')}</label>
               <div className="flex gap-2 flex-wrap">
                 {[
                   { id: 'manual', icon: MousePointerClick, label: t('props.triggerManual') },

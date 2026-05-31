@@ -132,6 +132,7 @@ export const AiAssistantPanel = () => {
   // Clear AI chat history when switching workspaces to prevent stale context
   const wsId = activeWorkspace?.id;
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages([]);
   }, [wsId]);
 
@@ -161,6 +162,10 @@ export const AiAssistantPanel = () => {
       toolsLoadedAt.current = Date.now();
       fetchAllTools().then(tools => {
         setAllTools(tools);
+      }).catch(err => {
+        console.warn('[AI Assistant] Failed to load tools:', err);
+        useToastStore.getState().showToast(t('aiExt.toolsFetchError', 'Nie udało się pobrać katalogu narzędzi. Sprawdź połączenie lub AdBlocka.'), 'error');
+        setAllTools([]); // Set empty to avoid retry loop
       });
     }
     if (isOpen && quickPrompts.length === 0 && hasKey && (now - qpLoadedAt.current) > TOOLS_TTL) {
@@ -169,7 +174,7 @@ export const AiAssistantPanel = () => {
         if (qps.length > 0) setQuickPrompts(qps);
       });
     }
-  }, [isOpen, allTools.length, quickPrompts.length, hasKey]);
+  }, [isOpen, allTools.length, quickPrompts.length, hasKey, t]);
 
   const checkKey = useCallback(async () => {
     if (!user?.id) { 
@@ -302,6 +307,7 @@ export const AiAssistantPanel = () => {
       });
       // Keep edges exactly as they are
       importProcess(updatedNodes, edges);
+      useToastStore.getState().showToast(t('aiExt.changesApplied', 'Zmiany zostały pomyślnie zastosowane na płótnie.'), 'success');
     } catch (err) {
       console.error('Error applying update:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -458,10 +464,20 @@ export const AiAssistantPanel = () => {
       // ── Security: validate, limit & sanitize AI-generated nodes ──
       const safeNodes = json.nodes
         .slice(0, MAX_AI_NODES)                                              // DoS guard
-        .filter(n => ALLOWED_NODE_TYPES.has((n.type as string) || 'simple'))  // type whitelist
         .map(n => {
-          const rawData = (n.data as Record<string, unknown>) || {};
-          const mappedData: Record<string, unknown> = { ...rawData };
+          let t = (n.type as string) || 'simple';
+          const d = { ...((n.data as Record<string, unknown>) || {}) };
+          if (t === 'stop' || t === 'start') {
+            d.type = t;
+            t = 'startstop';
+          } else if (t === 'gateway') {
+            t = 'simple';
+          }
+          return { ...n, type: t, data: d };
+        })
+        .filter(n => ALLOWED_NODE_TYPES.has(n.type))  // type whitelist
+        .map(n => {
+          const mappedData: Record<string, unknown> = { ...(n.data as Record<string, unknown>) };
           
           // Map AI generated SLA/cost fields to internal format
           if (mappedData.sla !== undefined) {
@@ -572,8 +588,9 @@ export const AiAssistantPanel = () => {
       });
       if (stopNodes.length > 0 && ordered.length > 0) {
         const lastNode = ordered[ordered.length - 1];
+        const canConnect = lastNode.type === 'simple' || lastNode.type === 'subworkflow' || (lastNode.type === 'startstop' && (lastNode.data as Record<string, unknown>)?.type === 'start');
         const key = `${lastNode.id}->${stopNodes[0].id}`;
-        if (!existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === lastNode.id && e.target === stopNodes[0].id))
+        if (canConnect && !existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === lastNode.id && e.target === stopNodes[0].id))
           // eslint-disable-next-line react-hooks/purity
           finalNewEdges.push({ id: `ai-edge-stop-${Date.now()}`, type: 'custom', source: lastNode.id, target: stopNodes[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
@@ -589,6 +606,7 @@ export const AiAssistantPanel = () => {
       setTimeout(() => {
         useCanvasStore.getState().autoLayout();
       }, 100);
+      useToastStore.getState().showToast(t('aiExt.changesApplied', 'Zmiany zostały pomyślnie zastosowane na płótnie.'), 'success');
     } catch (err) { 
       console.error('Error applying JSON:', err); 
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -688,7 +706,7 @@ export const AiAssistantPanel = () => {
           {ytId && (
             <div className="mt-4">
               <div className="aspect-video rounded-xl overflow-hidden border border-border">
-                <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${ytId}`} title={selectedTool.name} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                <iframe width="100%" height="100%" src={`https://www.youtube-nocookie.com/embed/${ytId}`} title={selectedTool.name} frameBorder="0" allowFullScreen />
               </div>
             </div>
           )}

@@ -74,7 +74,7 @@ export async function checkLock(processId: string, currentUserId: string): Promi
  * Acquire a lock on a process for the given user.
  * Returns true if lock was acquired, false if locked by someone else.
  */
-export async function acquireLock(processId: string, _userId?: string): Promise<boolean> {
+export async function acquireLock(processId: string): Promise<boolean> {
   try {
     // Attempt to set lock using the atomic backend endpoint
     const data = await pb.send('/api/process/lock', {

@@ -194,7 +194,7 @@ export const ProcessesTab = () => {
             });
             setFolderCounts(counts);
           } catch (err) {
-            if ((err as any)?.isAbort) return;
+            if ((err as { isAbort?: boolean })?.isAbort) return;
             console.error('Error fetching folder stats:', err);
             useToastStore.getState().showToast(t('common.error'), 'error');
           }

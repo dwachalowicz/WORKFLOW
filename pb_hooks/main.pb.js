@@ -1175,6 +1175,31 @@ onRecordDeleteRequest((e) => {
     }
 }, "WORKFLOW_workspace_members");
 
+// =====================================================
+// HOOK: Secure Notifications — Update
+// =====================================================
+onRecordUpdateRequest((e) => {
+    const record = e.record;
+    const authRecord = e.auth;
+
+    if (!authRecord) return e.next();
+
+    try {
+        const original = e.app.findRecordById("WORKFLOW_notifications", record.id);
+        
+        // Zabezpieczenie przed edycją treści powiadomienia przez zwykłego użytkownika
+        if (original.get("title") !== record.get("title") ||
+            original.get("message") !== record.get("message") ||
+            original.get("type") !== record.get("type") ||
+            original.get("user") !== record.get("user")) {
+            throw new Error("You cannot modify the content of a notification. Only 'isRead' can be updated.");
+        }
+    } catch(err) {
+        throw new Error(err.message || "Błąd podczas weryfikacji powiadomienia");
+    }
+    
+    return e.next();
+}, "WORKFLOW_notifications");
 
 // --- CREATE: Enforce tier limits ---
 onRecordCreateRequest(function(e) {
@@ -2355,3 +2380,57 @@ onRecordBeforeDeleteRequest((e) => {
         console.log("Error creating process deletion notifs: " + err);
     }
 }, "WORKFLOW_processes");
+
+// =====================================================
+// HOOK: Secure WORKFLOW_groups (Update & Delete)
+// =====================================================
+onRecordUpdateRequest((e) => {
+    const wsId = e.record.get("workspace");
+    if (!wsId || !e.auth) throw new Error("Unauthorized");
+    try {
+        const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+        if (ws.get("owner") === e.auth.id) return e.next();
+        
+        const adminsOrEditors = e.app.findRecordsByFilter(
+            "WORKFLOW_workspace_members",
+            "workspace = {:wsId} && user = {:userId} && status = 'active' && (role = 'admin' || role = 'editor')",
+            "", 1, 0, { wsId: wsId, userId: e.auth.id }
+        );
+        if (adminsOrEditors && adminsOrEditors.length > 0) return e.next();
+    } catch(err) {}
+    throw new Error("Tylko admin lub edytor może edytować grupy.");
+}, "WORKFLOW_groups");
+
+onRecordDeleteRequest((e) => {
+    const wsId = e.record.get("workspace");
+    if (!wsId || !e.auth) throw new Error("Unauthorized");
+    try {
+        const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+        if (ws.get("owner") === e.auth.id) return e.next();
+        
+        const admins = e.app.findRecordsByFilter(
+            "WORKFLOW_workspace_members",
+            "workspace = {:wsId} && user = {:userId} && status = 'active' && role = 'admin'",
+            "", 1, 0, { wsId: wsId, userId: e.auth.id }
+        );
+        if (admins && admins.length > 0) return e.next();
+    } catch(err) {}
+    throw new Error("Tylko admin może usuwać grupy.");
+}, "WORKFLOW_groups");
+
+// =====================================================
+// HOOK: Secure WORKFLOW_users (Prevent self-upgrade)
+// =====================================================
+onRecordUpdateRequest((e) => {
+    const original = e.record.originalCopy();
+    const record = e.record;
+    
+    if (original && record) {
+        if (original.get("tier") !== record.get("tier") || 
+            original.get("tier_expires_at") !== record.get("tier_expires_at") ||
+            original.get("role") !== record.get("role")) {
+            throw new Error("Nie możesz samodzielnie modyfikować swojego planu / ról.");
+        }
+    }
+    return e.next();
+}, "WORKFLOW_users");

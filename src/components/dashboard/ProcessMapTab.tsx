@@ -502,7 +502,13 @@ const ProcessMapInner = () => {
       }));
       try {
         const result = getLayoutedElements(connectedNodes, tempEdges, 'LR');
-        layoutedConnected = result.nodes;
+        layoutedConnected = result.nodes.map(n => ({
+          ...n,
+          data: {
+            ...n.data,
+            rotation: nodeRotations[n.id] !== undefined ? nodeRotations[n.id] : n.data.rotation
+          }
+        }));
       } catch { /* fallback positions */ }
     }
 

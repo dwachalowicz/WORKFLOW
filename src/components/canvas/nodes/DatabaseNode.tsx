@@ -37,9 +37,9 @@ export const DatabaseNode = memo(({
       <Handle 
         type="target" 
         position={getRotatedHandlePosition(Position.Top, rotation)} 
-        id="db-target" 
+        id="db" 
         isConnectableStart={false}
-        className={getDbHandleClass(getRotatedHandlePosition(Position.Top, rotation), isHandleActive('db-target', 'target'), true)} 
+        className={getDbHandleClass(getRotatedHandlePosition(Position.Top, rotation), isHandleActive('db', 'target'), true)} 
       />
       
       <div className="flex flex-col items-center justify-center gap-1">

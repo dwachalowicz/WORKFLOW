@@ -169,7 +169,7 @@ export const GryfCanvas = () => {
     window.dispatchEvent(new CustomEvent('collapseAllNodes'));
   }, []);
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: import('@xyflow/react').Node) => {
+  const onNodeClick = useCallback(() => {
     if (useCanvasStore.getState().isVersionModalOpen) {
       useCanvasStore.getState().setVersionModalOpen(false);
     }

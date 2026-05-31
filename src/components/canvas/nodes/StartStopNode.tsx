@@ -144,15 +144,16 @@ export const StartStopNode = memo(({ data, selected, id }: NodeProps) => {
         </div>
       </div>
       
-      {isStart && (
-        <Handle 
-          type="source" 
-          position={getRotatedHandlePosition(Position.Right, rotation)} 
-          id="right" 
-          isConnectable={true}
-          className={getHandleClass(getRotatedHandlePosition(Position.Right, rotation), isHandleActive('right', 'source'))} 
-        />
-      )}
+      <Handle 
+        type="source" 
+        position={getRotatedHandlePosition(Position.Right, rotation)} 
+        id="right" 
+        isConnectable={true}
+        className={cn(
+          getHandleClass(getRotatedHandlePosition(Position.Right, rotation), isHandleActive('right', 'source')),
+          !isStart && "opacity-0 pointer-events-none"
+        )} 
+      />
     </div>
   );
 });

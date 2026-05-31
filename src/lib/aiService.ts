@@ -43,10 +43,10 @@ export async function getAiUserConfig(userId: string): Promise<AiUserConfig | nu
     // Check key existence via server-side endpoint
     let hasKey = false;
     try {
-      const keyCheck = await pb.send('/api/ai/check-key', { method: 'POST' });
+      const keyCheck = await pb.send('/api/ai/check-key', { method: 'POST', requestKey: null });
       hasKey = !!keyCheck?.hasKey;
     } catch (err) {
-      console.error('AI Key verification error:', err);
+      console.warn('[AI Service] AI Key verification error:', err);
       // If endpoint fails, assume no key
     }
 
@@ -189,7 +189,8 @@ export async function fetchAllTools(): Promise<ToolFromCatalog[]> {
     if (err instanceof Error && !(err as Error & { isAbort?: boolean }).isAbort) {
       const is404 = (err as { status?: number }).status === 404;
       if (!is404) {
-        console.error('Error fetching tools:', err);
+        console.warn('[AI Service] Error fetching tools from KATALOG_NARZEDZI:', err);
+        throw err;
       }
     }
     return [];

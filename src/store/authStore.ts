@@ -121,7 +121,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           // Refresh the auth state from DB to get latest tier, name, avatar etc.
           const authData = await pb.collection('WORKFLOW_users').authRefresh();
           model = authData.record as WorkflowUser;
-        } catch (err) {
+        } catch (err: any) {
+          if (err?.isAbort) {
+            console.warn("authRefresh was auto-cancelled, skipping.");
+            return;
+          }
           console.error("Failed to refresh auth, token likely expired:", err);
           pb.authStore.clear();
           set({ user: null, token: null, isAuthenticated: false, workspaces: [], activeWorkspace: null });
