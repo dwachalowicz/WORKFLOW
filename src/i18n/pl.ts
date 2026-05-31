@@ -1467,7 +1467,8 @@ export const pl = {
       text8: "Dziękujemy za kontakt. Wkrótce odpowiemy.",
       text9: "Wpisz swój email",
       text10: "Twoja wiadomość...",
-      text11: "Wyślij wiadomość"
+      text11: "Wyślij wiadomość",
+      blog: "Blog"
     },
     organizationsection: {
       html_1: "Połącz",

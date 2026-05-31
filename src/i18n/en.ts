@@ -1384,7 +1384,8 @@ export const en = {
       "text8": "Thank you for reaching out. We'll respond shortly.",
       "text9": "Enter your email",
       "text10": "Your message...",
-      "text11": "Send message"
+      "text11": "Send message",
+      "blog": "Blog"
     },
     "organizationsection": {
       html_1: "Connect",
