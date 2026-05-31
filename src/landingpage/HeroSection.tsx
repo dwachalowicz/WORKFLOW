@@ -48,7 +48,7 @@ export const HeroSection: React.FC = () => {
       {/* Background Image Overlay */}
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat opacity-[0.15] pointer-events-none z-0"
-        style={{ backgroundImage: 'url("/landingpage/bg-offer.png")' }}
+        style={{ backgroundImage: 'url("/landingpage/bg-offer.webp")' }}
       />
       
       {/* Main Container matching Navbar margins (max-w-[1600px] px-[5%] md:px-16) */}
@@ -91,10 +91,10 @@ export const HeroSection: React.FC = () => {
               <div
                 className="flex flex-col items-start w-full origin-center"
               >
-                 <h2 className="w-full text-[13px] lg:text-[16px] xl:text-[26px] font-bold text-[#666] uppercase tracking-[0.2em] mb-2 lg:mb-3 xl:mb-4 text-left leading-relaxed">
+                 <h1 className="w-full text-[13px] lg:text-[16px] xl:text-[26px] font-bold text-[#666] uppercase tracking-[0.2em] mb-2 lg:mb-3 xl:mb-4 text-left leading-relaxed">
                    {t('landing.hero.map')}
                    {t('landing.hero.with') ? <><br/>{t('landing.hero.with')}</> : null}
-                 </h2>
+                 </h1>
                  
                  <div className="flex flex-col items-start justify-center w-full">
                    <div className="flex flex-row items-center justify-start lg:justify-between gap-3 lg:gap-0 w-full">
@@ -222,7 +222,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container pointing DOWN */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img src="/landingpage/avatar-hero1.png" alt="User 1" className="w-full h-full object-cover" />
+               <img loading="lazy" src="/landingpage/avatar-hero1.webp" alt="User 1" className="w-full h-full object-cover" />
              </div>
            </div>
         </motion.div>
@@ -244,7 +244,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container pointing DOWN */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img src="/landingpage/avatar-gryf.png" alt="OK Avatar" className="w-full h-full object-cover" />
+               <img loading="lazy" src="/landingpage/avatar-gryf.webp" alt="OK Avatar" className="w-full h-full object-cover" />
              </div>
            </div>
         </motion.div>
@@ -260,7 +260,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container rotated to point down */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img src="/landingpage/avatar-hero3.png" className="w-full h-full object-cover" alt="Poprawiam" />
+               <img loading="lazy" src="/landingpage/avatar-hero3.webp" className="w-full h-full object-cover" alt="Poprawiam" />
              </div>
            </div>
            
@@ -281,7 +281,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container rotated to point right */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: 'calc(-56.6px - 40px)', top: '-40px', transform: 'rotate(-45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(45deg)' }}>
-               <img src="/landingpage/avatar-hero2.png" className="w-full h-full object-cover" alt="Akceptuj" />
+               <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-full h-full object-cover" alt="Akceptuj" />
              </div>
            </div>
            
@@ -344,7 +344,7 @@ export const HeroSection: React.FC = () => {
                 }}
               >
                 <img 
-                  src="/landingpage/menu-without-bg.png" 
+                  src="/landingpage/menu-without-bg.webp" 
                   alt="Menu" 
                   className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
                 />

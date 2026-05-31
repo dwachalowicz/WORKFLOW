@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense, useMemo } from 'react';
+import { useEffect, useState, lazy, Suspense, useMemo, useCallback } from 'react';
 import { GryfCanvas } from '@/components/canvas/GryfCanvas';
 import { FloatingNavBar } from '@/components/layout/FloatingNavBar';
 import { SimulationControl } from '@/components/panels/SimulationControl';
@@ -93,12 +93,14 @@ export const AppPage = () => {
   const refreshCommentCounts = useCanvasStore((s) => s.refreshCommentCounts);
   const commentOptions = useMemo(() => ({ filter: urlProcessId ? `process = "${urlProcessId}"` : '' }), [urlProcessId]);
   
-  usePBSubscription('WORKFLOW_comments', '*', (e) => {
+  const handleCommentRealtime = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
     // Only refresh if the comment belongs to the currently opened process
     if (e.record && e.record.process === urlProcessId) {
       refreshCommentCounts();
     }
-  }, !!urlProcessId, commentOptions);
+  }, [urlProcessId, refreshCommentCounts]);
+
+  usePBSubscription('WORKFLOW_comments', '*', handleCommentRealtime, !!urlProcessId, commentOptions);
 
   useEffect(() => {
     const initProcess = async () => {
@@ -153,7 +155,7 @@ export const AppPage = () => {
           </button>
         </SimpleTooltip>
 
-        <SimpleTooltip content={t('canvas.exportMd', 'Eksportuj Markdown')}>
+        <SimpleTooltip content={t('canvas.exportMd')}>
           <button 
             onClick={handleMarkdownExport}
             disabled={isViewMode}
@@ -228,7 +230,7 @@ export const AppPage = () => {
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 bg-red-500/20 border border-red-500/40 px-5 py-3 rounded-2xl shadow-xl backdrop-blur-sm animate-in slide-in-from-top-3">
           <Lock size={18} className="text-red-600 dark:text-red-400 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-foreground">{t('tierLimits.readOnlyMode', 'Tryb tylko do odczytu')}</p>
+            <p className="text-sm font-semibold text-foreground">{t('tierLimits.readOnlyMode')}</p>
             <p className="text-xs text-red-600 dark:text-red-200">{getLockedReasonText()}</p>
           </div>
         </div>

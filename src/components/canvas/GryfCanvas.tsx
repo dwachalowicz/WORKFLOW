@@ -356,6 +356,7 @@ export const GryfCanvas = () => {
               <SimpleTooltip content={t('canvas.zoomIn')}>
                 <button 
                   onClick={() => zoomIn()}
+                  aria-label={t('canvas.zoomIn')}
                   className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors"
                 >
                   +
@@ -364,6 +365,7 @@ export const GryfCanvas = () => {
               <SimpleTooltip content={t('canvas.zoomOut')}>
                 <button 
                   onClick={() => zoomOut()}
+                  aria-label={t('canvas.zoomOut')}
                   className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors"
                 >
                   -
@@ -372,6 +374,7 @@ export const GryfCanvas = () => {
               <SimpleTooltip content={t('canvas.fitView')}>
                 <button 
                   onClick={() => rfFitView({ duration: 800 })}
+                  aria-label={t('canvas.fitView')}
                   className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14v6h6M20 10V4h-6M10 20H4v-6M14 4h6v6"/></svg>

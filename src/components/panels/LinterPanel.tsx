@@ -45,13 +45,7 @@ export const LinterPanel = () => {
         newIssues.push({ type: 'warning', message: t('lint.isolated', { name: node.data?.label || t('nodes.unnamed') }), nodeId: node.id });
       } else {
         if (node.type === 'database') {
-          // Check if database has any incoming DB handle connections
-          const dbIncoming = edges.filter(e => e.target === node.id && e.data?.dbOperation !== undefined);
-          if (dbIncoming.length === 0 && incomingEdges.length === 0 && outgoingEdges.length === 0) {
-            // Already handled by isolated check above
-          } else if (dbIncoming.length === 0 && incomingEdges.length > 0) {
-            // Connected via old handles but not new DB handles — still ok for backward compat
-          }
+          // Database nodes connected via any handle type are valid — no additional warnings needed
         } else if (node.type === 'startstop') {
           if (node.data?.type === 'start' && outgoingEdges.length === 0) {
             newIssues.push({ type: 'warning', message: t('lint.startNoOutput'), nodeId: node.id });

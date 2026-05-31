@@ -204,8 +204,8 @@ export const ProcessCanvasWindow: React.FC = () => {
              style={{ left: '75%', top: '60%', x: "-50%" }}
              {...nodeAnim(0.14)}>
           <div className="flex -space-x-2">
-            <motion.img src="/landingpage/avatar-hero1.png" className="w-6 h-6 lg:w-7 lg:h-7 rounded-full border border-[#1c1c1e]" alt="User" {...avatarAnim(0.14, 0.00)} />
-            <motion.img src="/landingpage/avatar-hero2.png" className="w-6 h-6 lg:w-7 lg:h-7 rounded-full border border-[#1c1c1e] z-10" alt="User" {...avatarAnim(0.14, 0.01)} />
+            <motion.img src="/landingpage/avatar-hero1.webp" className="w-6 h-6 lg:w-7 lg:h-7 rounded-full border border-[#1c1c1e]" alt="User" {...avatarAnim(0.14, 0.00)} />
+            <motion.img src="/landingpage/avatar-hero2.webp" className="w-6 h-6 lg:w-7 lg:h-7 rounded-full border border-[#1c1c1e] z-10" alt="User" {...avatarAnim(0.14, 0.01)} />
           </div>
         </motion.div>
 

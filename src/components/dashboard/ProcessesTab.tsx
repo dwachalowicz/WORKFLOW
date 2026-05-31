@@ -54,6 +54,9 @@ const TemplatesModal = lazy(() => import('@/components/modals/TemplatesModal').t
 type Process = WorkflowProcess;
 type Group = ProcessGroup;
 
+// Shared PocketBase field projection for process list queries — avoids fetching heavy nodes/edges data
+const PROCESS_LIST_FIELDS = 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar';
+
 
 export const ProcessesTab = () => {
   const navigate = useNavigate();
@@ -139,7 +142,7 @@ export const ProcessesTab = () => {
         filter: filterStr,
         sort: '-created',
         expand: 'lastEditedBy,locked_by',
-        fields: 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar',
+        fields: PROCESS_LIST_FIELDS,
         requestKey: null,
       });
       setAllWorkspaceProcesses(allRecords.items as Process[]);
@@ -173,7 +176,7 @@ export const ProcessesTab = () => {
             filter: `workspace = '${sanitizeForFilter(activeWorkspace.id)}' && group = ''`,
             sort: '-created',
             expand: 'lastEditedBy,locked_by',
-            fields: 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar',
+            fields: PROCESS_LIST_FIELDS,
             requestKey: null,
           })
         ]);
@@ -207,7 +210,7 @@ export const ProcessesTab = () => {
           filter: `group = '${sanitizeForFilter(currentFolderId)}'`,
           sort: '-created',
           expand: 'lastEditedBy,locked_by',
-          fields: 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar',
+          fields: PROCESS_LIST_FIELDS,
           requestKey: null,
         });
         setProcesses(processRecords.items as Process[]);
@@ -356,7 +359,7 @@ export const ProcessesTab = () => {
           filter: `workspace = '${sanitizeForFilter(activeWorkspace.id)}' && name ~ '${sanitizeForFilter(searchQuery.trim())}'`,
           sort: '-created',
           expand: 'lastEditedBy,locked_by',
-          fields: 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar',
+          fields: PROCESS_LIST_FIELDS,
           requestKey: null,
         });
         setAllWorkspaceProcesses(prev => [...prev, ...moreRecords.items as Process[]]);
@@ -372,7 +375,7 @@ export const ProcessesTab = () => {
           filter: filterStr,
           sort: '-created',
           expand: 'lastEditedBy,locked_by',
-          fields: 'id,name,created,updated,avatar,icon,isPublic,locked_by,locked_at,group,expand.lastEditedBy.id,expand.lastEditedBy.name,expand.lastEditedBy.email,expand.lastEditedBy.avatar,expand.locked_by.id,expand.locked_by.name,expand.locked_by.email,expand.locked_by.avatar',
+          fields: PROCESS_LIST_FIELDS,
           requestKey: null,
         });
         setProcesses(prev => [...prev, ...moreRecords.items as Process[]]);
@@ -679,10 +682,7 @@ export const ProcessesTab = () => {
     return getRecordFileUrl('WORKFLOW_processes', proc, proc.avatar, 200);
   };
 
-  // const getFolderAvatarUrl = (group: Group) => {
-  //   if (!group.avatar) return '';
-  //   return getRecordFileUrl('WORKFLOW_process_groups', group, group.avatar, 200);
-  // };
+
 
   const isSearchActive = searchQuery.trim().length > 0;
   // When searching, use allWorkspaceProcesses (which is already filtered by backend); otherwise filter current view

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import { useLandingTranslation } from './LandingTranslationContext';
 import { Menu } from 'lucide-react';
 import { FullScreenMobileMenu } from './FullScreenMobileMenu';
 import { LanguageSelector } from './components/LanguageSelector';

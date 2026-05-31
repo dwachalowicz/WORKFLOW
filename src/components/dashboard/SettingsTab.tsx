@@ -22,6 +22,8 @@ export const SettingsTab = () => {
   const [prevWorkspaceId, setPrevWorkspaceId] = useState(activeWorkspace?.id);
   const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
 
+  const isAdminOrOwner = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';
+
   if (activeWorkspace?.id !== prevWorkspaceId) {
     setPrevWorkspaceId(activeWorkspace?.id);
     setEditingWorkspaceName(activeWorkspace?.name || '');
@@ -80,53 +82,61 @@ export const SettingsTab = () => {
         }
       />
       
-      {/* General Info */}
-      <Card className="p-4 sm:p-8 mb-8">
-        <h2 className="text-xl font-bold mb-4">{t('settingsTab.generalInfo')}</h2>
-        <div className="space-y-4 max-w-md">
-          <div>
-            <FormLabel variant="muted" className="mb-2">{t('settingsTab.workspaceName')}</FormLabel>
-            <div className="flex items-center gap-3">
-              <Input 
-                type="text"
-                value={editingWorkspaceName}
-                onChange={(e) => setEditingWorkspaceName(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleUpdateWorkspaceName}
-                disabled={isSavingWorkspace || editingWorkspaceName === activeWorkspace?.name || !editingWorkspaceName.trim()}
-                size="sm"
-              >
-                {isSavingWorkspace ? t('common.saving') : t('common.save')}
-              </Button>
+      {isAdminOrOwner ? (
+        <>
+          {/* General Info */}
+          <Card className="p-4 sm:p-8 mb-8">
+            <h2 className="text-xl font-bold mb-4">{t('settingsTab.generalInfo')}</h2>
+            <div className="space-y-4 max-w-md">
+              <div>
+                <FormLabel variant="muted" className="mb-2">{t('settingsTab.workspaceName')}</FormLabel>
+                <div className="flex items-center gap-3">
+                  <Input 
+                    type="text"
+                    value={editingWorkspaceName}
+                    onChange={(e) => setEditingWorkspaceName(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleUpdateWorkspaceName}
+                    disabled={isSavingWorkspace || editingWorkspaceName === activeWorkspace?.name || !editingWorkspaceName.trim()}
+                    size="sm"
+                  >
+                    {isSavingWorkspace ? t('common.saving') : t('common.save')}
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </Card>
+          </Card>
 
-      {/* Danger Zone */}
-      <Card className="bg-destructive/5 border-destructive/20 p-8">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
-            <AlertTriangle size={24} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-destructive mb-2">{t('settingsTab.dangerZoneTitle')}</h2>
-            <p className="text-sm text-foreground/80 mb-6 max-w-2xl">
-              {t('settingsTab.dangerZoneDesc')}
-            </p>
-            <Button 
-              variant="destructive"
-              onClick={handleDeleteWorkspace}
-              className="flex items-center gap-2"
-            >
-              <Trash2 size={18} />
-              {t('settingsTab.deleteWorkspace')}
-            </Button>
-          </div>
-        </div>
-      </Card>
+          {/* Danger Zone */}
+          <Card className="bg-destructive/5 border-destructive/20 p-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-destructive mb-2">{t('settingsTab.dangerZoneTitle')}</h2>
+                <p className="text-sm text-foreground/80 mb-6 max-w-2xl">
+                  {t('settingsTab.dangerZoneDesc')}
+                </p>
+                <Button 
+                  variant="destructive"
+                  onClick={handleDeleteWorkspace}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 size={18} />
+                  {t('settingsTab.deleteWorkspace')}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </>
+      ) : (
+        <Card className="p-4 sm:p-8">
+          <p className="text-sm text-muted-foreground">{t('settingsTab.viewerReadOnly')}</p>
+        </Card>
+      )}
     </DashboardPageLayout>
   );
 };

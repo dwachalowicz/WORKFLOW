@@ -31,7 +31,7 @@ const TabLoader = () => {
   if (isFirstDashboardMount) {
     return (
       <div className="fixed inset-0 z-loader bg-background flex items-center justify-center flex-col">
-        <GryfSpinner size={48} label="Uruchamianie aplikacji..." />
+        <GryfSpinner size={48} label="Loading..." />
       </div>
     );
   }

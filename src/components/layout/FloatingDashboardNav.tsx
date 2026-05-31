@@ -11,39 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { navBtnClass, NavDivider } from './navHelpers';
 import { UserMenuPopover } from '@/components/ui/UserMenuPopover';
-
-/** User avatar with optional tier badge — shared between both navs */
-const UserAvatarButton = ({
-  user,
-  onClick,
-}: {
-  user: Record<string, unknown> | null;
-  onClick: () => void;
-}) => (
-  <div 
-    className="flex items-center justify-center cursor-pointer group relative"
-    onClick={onClick}
-  >
-    <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden ring-2 ring-transparent group-hover:ring-brand-gold transition-all">
-      {(user as Record<string, string>)?.avatar ? (
-        <img 
-          src={getAvatarUrl(user, 100)} 
-          alt={(user as Record<string, string>)?.name || (user as Record<string, string>)?.email} 
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full bg-surface-elevated flex items-center justify-center text-brand-gold font-bold text-sm">
-          {((user as Record<string, string>)?.name || (user as Record<string, string>)?.email || 'U')[0].toUpperCase()}
-        </div>
-      )}
-    </div>
-    {(user as Record<string, string>)?.tier && (
-      <div className="absolute -bottom-1 -right-1 bg-brand-gold text-background text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-surface-nav">
-        {(user as Record<string, string>).tier}
-      </div>
-    )}
-  </div>
-);
+import { UserAvatarButton } from '@/components/ui/UserAvatarButton';
 
 interface FloatingDashboardNavProps {
   activeTab: string;

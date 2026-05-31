@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useLandingTranslation } from './LandingTranslationContext';
 import { Check } from 'lucide-react';
 import { useInView } from 'framer-motion';
+import DOMPurify from 'dompurify';
 
 export const RadialMenuSection: React.FC = () => {
   const { t } = useLandingTranslation();
@@ -30,7 +31,7 @@ export const RadialMenuSection: React.FC = () => {
           </h2>
           <p 
             className="text-[#666] mb-10 text-[15px] leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: t('landing.radialmenusection.text4') }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('landing.radialmenusection.text4')) }}
           />
 
           <ul className="space-y-4">
@@ -67,6 +68,7 @@ export const RadialMenuSection: React.FC = () => {
             <video 
               ref={videoRef}
               src="/landingpage/film2.mp4" 
+              preload="none"
               loop
               muted 
               playsInline 

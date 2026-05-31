@@ -28,14 +28,14 @@ export const CustomEdge = memo(({
 }: EdgeProps) => {
   const { setEdges } = useReactFlow();
   const { t } = useTranslation();
-  const sourceNode = useCanvasStore(state => state.nodes.find(n => n.id === source));
-  const targetNode = useCanvasStore(state => state.nodes.find(n => n.id === target));
+  const sourceNodeType = useCanvasStore(state => state.nodes.find(n => n.id === source)?.type);
+  const targetNodeType = useCanvasStore(state => state.nodes.find(n => n.id === target)?.type);
   const searchQuery = useUiStore(state => state.searchQuery);
   const searchSelectedUsers = useUiStore(state => state.searchSelectedUsers);
-  const isDataEdge = sourceNode?.type === 'database' || targetNode?.type === 'database';
+  const isDataEdge = sourceNodeType === 'database' || targetNodeType === 'database';
   const isDbHandleEdge = data?.dbOperation !== undefined; // New DB handle system
   const dbOperation: string = (data?.dbOperation as string) || 'read';
-  const isSubworkflowEdge = targetNode?.type === 'subworkflow';
+  const isSubworkflowEdge = targetNodeType === 'subworkflow';
   const [edgePath, baseLabelX, baseLabelY] = getBezierPath({
     sourceX,
     sourceY,

@@ -19,7 +19,7 @@ export const StepsSection: React.FC = () => {
       {/* Background image */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-bottom bg-no-repeat opacity-40"
-        style={{ backgroundImage: 'url(/landingpage/bg-offer.png)' }}
+        style={{ backgroundImage: 'url(/landingpage/bg-offer.webp)' }}
       />
       
       <motion.div 

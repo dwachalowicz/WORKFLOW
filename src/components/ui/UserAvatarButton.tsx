@@ -20,10 +20,10 @@ export const UserAvatarButton = forwardRef<HTMLDivElement, UserAvatarButtonProps
       role="button"
       tabIndex={0}
       aria-label={t('auth.userAccountOptions')}
-      className={`flex items-center justify-center cursor-pointer group relative ${className}`}
+      className={`flex items-center justify-center cursor-pointer group relative shrink-0 ${className}`}
       {...props}
     >
-      <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden ring-2 ring-transparent group-hover:ring-primary transition-all">
+      <div className="w-10 h-10 shrink-0 rounded-full bg-secondary overflow-hidden ring-2 ring-transparent group-hover:ring-primary transition-all">
         {(user as Record<string, string>)?.avatar && !imgError ? (
           <img loading="lazy" 
             src={getAvatarUrl(user, 100)} 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ArrowRight } from 'lucide-react';
 import { useLandingTranslation } from './LandingTranslationContext';
@@ -16,6 +16,14 @@ export const FullScreenMobileMenu: React.FC<FullScreenMobileMenuProps> = ({ isOp
   const { isAuthenticated, logout } = useAuthStore();
   const { brandColor, changeBrandColor } = useThemeToggle();
   const navigate = useNavigate();
+
+  // Close on ESC key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -84,7 +92,7 @@ export const FullScreenMobileMenu: React.FC<FullScreenMobileMenuProps> = ({ isOp
         {/* Bottom Actions */}
         <div className="flex items-center justify-between pt-6 border-t border-white/10">
           <button 
-            onClick={() => setLanguage(t('landing.fullscreenmobilemenu.text6'))}
+            onClick={() => setLanguage(language === 'pl' ? 'en' : 'pl')}
             className="text-sm font-semibold tracking-widest text-brand-gold border border-brand-gold/30 rounded-full px-6 py-2 uppercase transition-all duration-300 hover:bg-brand-gold hover:text-white hover:scale-105 hover:shadow-none hover:border-transparent"
           >
             {language}

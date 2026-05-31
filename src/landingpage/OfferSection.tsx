@@ -4,6 +4,7 @@ import { Cpu, Box, Layers, Network, Hexagon, Component, X } from 'lucide-react';
 import { pb } from '../lib/pocketbase';
 import { useLandingTranslation } from './LandingTranslationContext';
 import { formatWidows } from '../lib/utils';
+import { useToastStore } from '@/store/toastStore';
 
 interface AIService {
   id: string;
@@ -73,7 +74,7 @@ export const OfferSection: React.FC = () => {
     } catch (error) {
       console.error("Error sending message:", error);
       setIsSubmitting(false);
-      alert(t('landing.offer.sendError'));
+      useToastStore.getState().showToast(t('landing.offer.sendError'), 'error');
     }
   };
 
@@ -88,7 +89,7 @@ export const OfferSection: React.FC = () => {
     >
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/landingpage/bg-offer.png)' }}
+        style={{ backgroundImage: 'url(/landingpage/bg-offer.webp)' }}
       />
 
       <div className="relative z-10 w-full px-[5%] md:px-12 flex flex-col items-center">
@@ -160,7 +161,7 @@ export const OfferSection: React.FC = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center whitespace-nowrap gap-2 bg-landing-section border border-white/10 text-white font-semibold text-[14px] px-8 py-3.5 rounded-full transition-all duration-300 hover:bg-brand-gold hover:text-white hover:scale-105 hover:shadow-none hover:border-transparent"
               >
-                Blog
+                {t('landing.offersection.blog') || 'Blog'}
               </a>
               <button 
                 onClick={(e) => { e.preventDefault(); setIsFormOpen(true); }}
@@ -181,7 +182,7 @@ export const OfferSection: React.FC = () => {
               <button
                 onClick={(e) => { e.preventDefault(); setIsFormOpen(false); }}
                 className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-transparent border-none"
-                aria-label="Zamknij formularz"
+                aria-label="Close form"
               >
                 <X className="w-5 h-5" />
               </button>

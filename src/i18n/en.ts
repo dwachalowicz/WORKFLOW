@@ -156,6 +156,7 @@ export const en = {
     reasonChecklistLimit: 'Checklist items limit exceeded.',
     reasonSubworkflowsLimit: 'Subworkflow nodes are limited in your current plan.',
     reasonViewerRole: 'You have a viewer role in this workspace — you cannot edit.',
+    readOnlyMode: 'Read-only mode',
   },
   errorBoundary: {
     title: 'Something went wrong',
@@ -297,6 +298,7 @@ export const en = {
     pendingRegistration: 'Awaiting registration',
     inviteSuccessExisting: 'Invitation sent!',
     inviteSuccessNew: 'The user doesn\'t have an account yet. The invitation has been saved — they will see it as soon as they register on GRYF.AI.',
+    status: 'Status',
   },
   groups: {
     title: 'Manage Groups',
@@ -600,6 +602,8 @@ export const en = {
     passwordLabel: 'Access password (optional)',
     passwordHint: 'If you set a password, the user will need to enter it before viewing the process.',
     passwordSet: '✓ Password is set. Enter a new one to change it.',
+    passwordWillBeCleared: '⚠ Password will be removed after saving.',
+    clearPassword: 'Remove password',
   },
   avatar: {
     title: 'Appearance (Avatar / Icon)',
@@ -712,6 +716,7 @@ export const en = {
     memoryLong: 'Long',
     memoryDowngraded: 'Note: Your previous limit was {{previous}}, but your current plan allows a maximum of {{max}}. Moving the slider will update the value.',
     memoryWarning: 'Hint: A longer memory gives broader context but consumes more API tokens each time.',
+    viewerReadOnly: 'You have view-only access to this workspace. Contact the workspace owner for elevated permissions.',
   },
   nodes: {
     start: 'Start',

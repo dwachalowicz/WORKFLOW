@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
                 <span className="text-white font-extrabold text-xl tracking-tight">gryf.ai</span>
               </div>
               <Handshake className="w-8 h-8 text-white shrink-0" strokeWidth={1.5} />
-              <img src="/landingpage/qalcwise_logo_dark.png" alt="Qalcwise" className="h-8 md:h-9 object-contain" />
+              <img src="/landingpage/qalcwise_logo_dark.webp" alt="Qalcwise" className="h-8 md:h-9 object-contain" />
             </div>
           </motion.div>
         )}

@@ -92,6 +92,7 @@ export const createProcessSlice: StateCreator<CanvasState, [], [], ProcessSlice>
   },
 
   saveProcess: async () => {
+    if (get().isSaving) return; // Prevent concurrent saves
     const { currentProcessId, processName, nodes, edges, currentGroupId } = get();
     const user = useAuthStore.getState().user;
     const activeWorkspace = useAuthStore.getState().activeWorkspace;

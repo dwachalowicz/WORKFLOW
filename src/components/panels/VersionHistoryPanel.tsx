@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '@/lib/dateUtils';
 import { useEffect, useState } from 'react';
 import { X, History, Loader2, Trash2, RotateCcw, Tag, Plus, AlertTriangle, GitCompare, PlusCircle, MinusCircle, RefreshCw } from 'lucide-react';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
@@ -179,40 +180,8 @@ export const VersionHistoryPanel = () => {
   };
 
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return t('versionsExt.noDate');
-    try {
-      let dateObj: Date;
-      if (dateStr.includes('T')) {
-        dateObj = new Date(dateStr);
-      } else {
-        dateObj = new Date(dateStr.replace(' ', 'T'));
-      }
-      
-      if (isNaN(dateObj.getTime())) {
-        // Fallback to manual formatting if Date parsing fails
-        const parts = dateStr.split(/[ T]/);
-        if (parts.length >= 2) {
-          const [y, m, d] = parts[0].split('-');
-          const [time] = parts[1].split('.');
-          const [h, min] = time.split(':');
-          return `${d}.${m}.${y}, ${h}:${min}`;
-        }
-        return dateStr;
-      }
-      
-      return dateObj.toLocaleDateString(undefined, {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }) + ', ' + dateObj.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+  const formatVersionDate = (dateStr?: string) =>
+    formatDate(dateStr, { noDateKey: 'versionsExt.noDate', t });
 
   return (
     <AnimatePresence>
@@ -347,7 +316,7 @@ export const VersionHistoryPanel = () => {
                                 )}
                               </div>
                               <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">
-                                {formatDate((v.created as string) || (v.updated as string) || ((v as Record<string, unknown>).created_at as string))}
+                                {formatVersionDate((v.created as string) || (v.updated as string) || ((v as Record<string, unknown>).created_at as string))}
                               </span>
                             </div>
                             

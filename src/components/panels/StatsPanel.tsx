@@ -56,25 +56,25 @@ export const StatsPanel = () => {
   const [bnIdx, setBnIdx] = useState(0);
 
   const base = useMemo(() => {
-    const adj = new Map<string, string[]>(), nType = new Map<string, string>(), nLabel = new Map<string, string>();
-    const inD = new Map<string, number>(), outD = new Map<string, number>();
+    const adjacencyList = new Map<string, string[]>(), nodeType = new Map<string, string>(), nodeLabel = new Map<string, string>();
+    const inDegree = new Map<string, number>(), outDegree = new Map<string, number>();
     for (const n of nodes) {
-      adj.set(n.id, []); inD.set(n.id, 0); outD.set(n.id, 0);
-      nType.set(n.id, n.type || 'simple');
-      nLabel.set(n.id, n.data?.label || n.data?.text?.slice(0, 20) || n.id);
+      adjacencyList.set(n.id, []); inDegree.set(n.id, 0); outDegree.set(n.id, 0);
+      nodeType.set(n.id, n.type || 'simple');
+      nodeLabel.set(n.id, n.data?.label || n.data?.text?.slice(0, 20) || n.id);
     }
-    const flowEdges = edges.filter(e => nType.get(e.source) !== 'database' && nType.get(e.target) !== 'database');
-    for (const e of edges) adj.get(e.source)?.push(e.target);
-    for (const e of flowEdges) { outD.set(e.source, (outD.get(e.source) || 0) + 1); inD.set(e.target, (inD.get(e.target) || 0) + 1); }
+    const flowEdges = edges.filter(e => nodeType.get(e.source) !== 'database' && nodeType.get(e.target) !== 'database');
+    for (const e of edges) adjacencyList.get(e.source)?.push(e.target);
+    for (const e of flowEdges) { outDegree.set(e.source, (outDegree.get(e.source) || 0) + 1); inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1); }
 
-    const tc: Record<string, number> = {};
-    for (const n of nodes) { const t = n.type || 'simple'; tc[t] = (tc[t] || 0) + 1; }
-    const stages = (tc['simple'] || 0) + (tc['subworkflow'] || 0), startStop = tc['startstop'] || 0, dbs = tc['database'] || 0;
+    const typeCount: Record<string, number> = {};
+    for (const n of nodes) { const tp = n.type || 'simple'; typeCount[tp] = (typeCount[tp] || 0) + 1; }
+    const stages = (typeCount['simple'] || 0) + (typeCount['subworkflow'] || 0), startStop = typeCount['startstop'] || 0, dbs = typeCount['database'] || 0;
 
     let branching = 0;
     for (const n of nodes) {
       if (['startstop', 'note', 'database'].includes(n.type || '')) continue;
-      if ((adj.get(n.id) || []).filter(t => nType.get(t) !== 'database').length > 1) branching++;
+      if ((adjacencyList.get(n.id) || []).filter(t => nodeType.get(t) !== 'database').length > 1) branching++;
     }
 
     const starts = nodes.filter(n => n.type === 'startstop' && n.data?.type === 'start').map(n => n.id);
@@ -82,7 +82,7 @@ export const StatsPanel = () => {
     const allPaths: string[][] = [];
     function dfs(c: string, v: string[]) {
       if (ends.has(c)) { allPaths.push([...v]); return; }
-      const neighbors = (adj.get(c) || []).filter(nb => nType.get(nb) !== 'database');
+      const neighbors = (adjacencyList.get(c) || []).filter(nb => nodeType.get(nb) !== 'database');
       if (neighbors.length === 0) { allPaths.push([...v]); return; }
       for (const nb of neighbors) { if (!v.includes(nb)) { v.push(nb); dfs(nb, v); v.pop(); } }
     }
@@ -122,7 +122,7 @@ export const StatsPanel = () => {
       };
     });
 
-    return { flowEdges: flowEdges.length, stages, branching, allPaths, donut, inD, outD, nType, nLabel, avgCompleteness, hasSla, hasCost, hasTeam, wTotal, completenessItems };
+    return { flowEdges: flowEdges.length, stages, branching, allPaths, donut, inDegree, outDegree, nodeType, nodeLabel, avgCompleteness, hasSla, hasCost, hasTeam, wTotal, completenessItems };
   }, [nodes, edges, t]);
 
   const pathStats = useMemo(() => {
@@ -162,11 +162,11 @@ export const StatsPanel = () => {
     const team = [...tm.values()].sort((a, b) => (b.editorTasks + b.decisionTasks) - (a.editorTasks + a.decisionTasks)).slice(0, 8);
 
     const bottlenecks = pathNodes.filter(n => n.type !== 'note' && n.type !== 'database' && n.type !== 'startstop')
-      .map(n => ({ id: n.id, label: n.data?.label || n.id, deg: (base.inD.get(n.id) || 0) + (base.outD.get(n.id) || 0) }))
+      .map(n => ({ id: n.id, label: n.data?.label || n.id, deg: (base.inDegree.get(n.id) || 0) + (base.outDegree.get(n.id) || 0) }))
       .sort((a, b) => b.deg - a.deg).slice(0, 10);
 
     return { length: path.length, slaHours, slaCount, maxSlaLabel, costSum, costCount, team, bottlenecks };
-  }, [nodes, base.allPaths, pathIdx, base.inD, base.outD, edges]);
+  }, [nodes, base.allPaths, pathIdx, base.inDegree, base.outDegree, edges]);
 
   const clampPath = (i: number) => { setPathIdx(Math.max(0, Math.min(i, base.allPaths.length - 1))); setBnIdx(0); };
   const clampBn = (i: number) => setBnIdx(Math.max(0, Math.min(i, pathStats.bottlenecks.length - 1)));
@@ -336,6 +336,7 @@ export const StatsPanel = () => {
                   <div className="text-[11px] text-muted-foreground uppercase tracking-widest mb-3 font-medium">{t('statsExt.pathCost')}</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold text-foreground leading-none tracking-tight">{pathStats.costCount > 0 ? pathStats.costSum.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</span>
+                    {/* PLN (Polish Zloty) — intentionally hardcoded for the Polish market target audience */}
                     {pathStats.costCount > 0 && <span className="text-sm text-muted-foreground font-medium">PLN</span>}
                   </div>
                   <div className="text-xs text-muted-foreground mt-2 leading-relaxed">

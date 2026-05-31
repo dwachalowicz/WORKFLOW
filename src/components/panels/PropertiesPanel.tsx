@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useTranslation } from 'react-i18next';
 import { useReactFlow } from '@xyflow/react';
 import { useState, useEffect } from 'react';
@@ -426,7 +425,7 @@ export const PropertiesPanel = () => {
         {activeNode?.type === 'startstop' && activeNode?.data?.type === 'stop' && (
           <CollapsibleSection title={t('props.endAction')} isCollapsed={!!collapsedSections['stopActions']} onToggle={() => toggleSection('stopActions')}>
 <ActionSelector
-                isViewMode={isViewMode}
+              isViewMode={isViewMode}
               label=""
               question={t('props.endActionQuestion')}
               hint={t('props.actionHint')}
@@ -445,7 +444,6 @@ export const PropertiesPanel = () => {
                 current.splice(idx, 1);
                 updateNode(activeNode.id, { exitEmailGroups: current });
               }}
-              isViewMode={isViewMode}
               showHandoff
               handoffActive={!!activeNode?.data?.targetWorkflowId}
               onHandoffToggle={() => {
@@ -471,7 +469,7 @@ export const PropertiesPanel = () => {
         {/* Initial Action */}
         <CollapsibleSection title={t('props.startAction')} isCollapsed={!!collapsedSections['enterActions']} onToggle={() => toggleSection('enterActions')}>
 <ActionSelector
-                isViewMode={isViewMode}
+              isViewMode={isViewMode}
               label=""
               question={t('props.startActionQuestion')}
               hint={t('props.startActionHint')}
@@ -490,14 +488,13 @@ export const PropertiesPanel = () => {
                 current.splice(idx, 1);
                 updateNode(activeNode.id, { enterEmailGroups: current });
               }}
-              isViewMode={isViewMode}
             />
         </CollapsibleSection>
 
         {/* Final Action */}
         <CollapsibleSection title={t('props.endAction')} isCollapsed={!!collapsedSections['exitActions']} onToggle={() => toggleSection('exitActions')}>
 <ActionSelector
-                isViewMode={isViewMode}
+              isViewMode={isViewMode}
               label=""
               question={t('props.endActionQuestion')}
               hint={t('props.actionHint')}
@@ -517,7 +514,6 @@ export const PropertiesPanel = () => {
                 current.splice(idx, 1);
                 updateNode(activeNode.id, { exitEmailGroups: current });
               }}
-              isViewMode={isViewMode}
             />
         </CollapsibleSection>
 
@@ -657,24 +653,24 @@ export const PropertiesPanel = () => {
                   readOnly={isViewMode}
                 />
                 <div className="flex items-center gap-0.5 shrink-0">
-                  {varTypes.map((t) => (
-                    <SimpleTooltip key={t.value} content={t.label}>
+                  {varTypes.map((vt) => (
+                    <SimpleTooltip key={vt.value} content={vt.label}>
                       <Button
                         variant="ghost"
                         onClick={() => {
                           if (isViewMode) return;
                           const newVars = [...activeNode.data.variables];
-                          newVars[idx] = { ...newVars[idx], type: t.value };
+                          newVars[idx] = { ...newVars[idx], type: vt.value };
                           updateNode(activeNode.id, { variables: newVars });
                         }}
                         className={`w-6 h-6 p-0 rounded-md transition-all ${
-                          v.type === t.value
+                          v.type === vt.value
                             ? 'text-brand-gold bg-brand-gold/10 hover:bg-brand-gold/20 hover:text-brand-gold'
                             : 'text-muted-foreground hover:text-foreground hover:bg-background'
                         }`}
                         disabled={isViewMode}
                       >
-                        <t.icon size={13} />
+                        <vt.icon size={13} />
                       </Button>
                     </SimpleTooltip>
                   ))}

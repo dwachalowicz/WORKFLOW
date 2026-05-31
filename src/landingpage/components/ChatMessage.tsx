@@ -50,11 +50,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ type, delay, children,
         hidden: { opacity: 0, y: 10, transition: { duration: 0 } },
         visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay } }
       }}
-      className={`${isUser ? 'self-end flex-row-reverse' : 'self-start'} flex items-start gap-3 max-w-[${isWide ? '95%' : '88%'}]`}
+      className={`${isUser ? 'self-end flex-row-reverse' : 'self-start'} flex items-start gap-3 ${isWide ? 'max-w-[95%]' : 'max-w-[88%]'}`}
     >
       <div className={`w-8 h-8 rounded-full ${isUser ? 'bg-landing-section' : 'bg-[#0a0a0a]'} overflow-hidden shrink-0 flex items-center justify-center shadow-md`}>
         <img loading="lazy" 
-          src={isUser ? "/landingpage/avatar-hero1.png" : "/landingpage/avatar-gryf.png"} 
+          src={isUser ? "/landingpage/avatar-hero1.webp" : "/landingpage/avatar-gryf.webp"} 
           alt={isUser ? "User" : "Gryf AI Chatbot"} 
           className={`w-full h-full object-cover ${!isUser && 'scale-110'}`} 
         />

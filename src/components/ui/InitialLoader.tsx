@@ -21,7 +21,7 @@ export const InitialLoader = ({ isLoading }: InitialLoaderProps) => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <GryfSpinner size={48} label="Uruchamianie aplikacji..." />
+            <GryfSpinner size={48} label="Loading..." />
           </motion.div>
         </motion.div>
       )}

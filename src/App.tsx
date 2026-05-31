@@ -51,7 +51,7 @@ const PageLoader = () => {
       {showSpinner && (
         <GryfSpinner 
           size={48} 
-          label={!isAppInitialized ? "Uruchamianie aplikacji..." : undefined} 
+          label={!isAppInitialized ? "Loading..." : undefined} 
         />
       )}
     </div>

@@ -70,7 +70,7 @@ export const NotificationsTab = () => {
   const handleNotificationRealtime = useCallback((e: import('pocketbase').RecordSubscription<NotificationRecord>) => {
     if (e.action === 'create') {
       setNotifications(prev => [e.record, ...prev]);
-      useToastStore.getState().showToast(t('notifications.newNotification') || 'Nowe powiadomienie', 'info');
+      useToastStore.getState().showToast(t('notifications.newNotification') || 'New notification', 'info');
     } else if (e.action === 'update') {
       setNotifications(prev => prev.map(n => n.id === e.record.id ? e.record : n));
     } else if (e.action === 'delete') {
@@ -106,7 +106,14 @@ export const NotificationsTab = () => {
         requestKey: null
       });
       const unreadIds = unreadRecords.map(n => n.id);
-      await Promise.all(unreadIds.map(id => pb.collection('WORKFLOW_notifications').update(id, { isRead: true })));
+      
+      // Batch updates in chunks of 10 to avoid N+1 API pressure
+      const CHUNK_SIZE = 10;
+      for (let i = 0; i < unreadIds.length; i += CHUNK_SIZE) {
+        const chunk = unreadIds.slice(i, i + CHUNK_SIZE);
+        await Promise.all(chunk.map(id => pb.collection('WORKFLOW_notifications').update(id, { isRead: true })));
+      }
+      
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       useToastStore.getState().showToast(t('common.success'), 'success');
     } catch (err) {

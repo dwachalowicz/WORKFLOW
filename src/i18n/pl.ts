@@ -164,6 +164,7 @@ export const pl = {
     reasonChecklistLimit: 'Przekroczono limit elementów checklisty.',
     reasonSubworkflowsLimit: 'Węzły typu Subworkflow są ograniczone w obecnym planie.',
     reasonViewerRole: 'Masz rolę obserwatora w tym workspace — nie możesz edytować.',
+    readOnlyMode: 'Tryb tylko do odczytu',
   },
   errorBoundary: {
     title: 'Coś poszło nie tak',
@@ -308,6 +309,7 @@ export const pl = {
     pendingRegistration: 'Oczekuje rejestracji',
     inviteSuccessExisting: 'Zaproszenie wysłane!',
     inviteSuccessNew: 'Użytkownik nie ma jeszcze konta. Zaproszenie zostało zapisane — zobaczy je od razu po rejestracji na GRYF.AI.',
+    status: 'Status',
   },
 
   // Groups
@@ -651,6 +653,8 @@ export const pl = {
     passwordLabel: 'Hasło dostępowe (opcjonalne)',
     passwordHint: 'Jeśli ustawisz hasło, użytkownik będzie musiał je wpisać przed zobaczeniem procesu.',
     passwordSet: '✓ Hasło jest ustawione. Wpisz nowe, aby zmienić.',
+    passwordWillBeCleared: '⚠ Hasło zostanie usunięte po zapisaniu.',
+    clearPassword: 'Usuń hasło',
   },
 
   // Avatar Crop Modal
@@ -774,7 +778,7 @@ export const pl = {
     memoryLong: 'Długa',
     memoryDowngraded: 'Uwaga: Twój poprzedni limit to {{previous}}, but obecny plan pozwala maksymalnie na {{max}}. Przesunięcie suwaka zaktualizuje wartość.',
     memoryWarning: 'Wskazówka: Dłuższa pamięć daje szerszy kontekst, ale zużywa więcej tokenów API za każdym razem.',
-    aiMemory: 'Pamięć asystenta (ilość wiadomości)',
+    viewerReadOnly: 'Masz dostęp tylko do odczytu w tym workspace. Skontaktuj się z właścicielem, aby uzyskać wyższe uprawnienia.',
   },
 
   // Nodes

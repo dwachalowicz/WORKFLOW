@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useUiStore } from "@/store/uiStore";
+import DOMPurify from 'dompurify';
 
 interface TutorialStep {
   target: string; // CSS selector
@@ -13,8 +14,8 @@ interface TutorialStep {
 }
 
 /**
- * Rysuje trójkątny "dziubek" (strzałkę) wskazujący na element docelowy.
- * Kolor dopasowany do tła dymka (#0e0f11).
+ * Draws a triangular arrow pointing at the target element.
+ * Uses CSS variable --surface-nav for theme-aware coloring.
  */
 function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] }) {
   if (placement === 'center') return null;
@@ -26,6 +27,7 @@ function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] })
   // placement=top    → arrow on the bottom of the tooltip, pointing down
 
   const shared = 'absolute w-0 h-0';
+  const arrowColor = 'hsl(var(--surface-nav))';
 
   switch (placement) {
     case 'right':
@@ -38,7 +40,7 @@ function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] })
             marginTop: -8,
             borderTop: '8px solid transparent',
             borderBottom: '8px solid transparent',
-            borderRight: '10px solid #0e0f11',
+            borderRight: `10px solid ${arrowColor}`,
           }}
         />
       );
@@ -52,7 +54,7 @@ function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] })
             marginTop: -8,
             borderTop: '8px solid transparent',
             borderBottom: '8px solid transparent',
-            borderLeft: '10px solid #0e0f11',
+            borderLeft: `10px solid ${arrowColor}`,
           }}
         />
       );
@@ -66,7 +68,7 @@ function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] })
             marginLeft: -8,
             borderLeft: '8px solid transparent',
             borderRight: '8px solid transparent',
-            borderBottom: '10px solid #0e0f11',
+            borderBottom: `10px solid ${arrowColor}`,
           }}
         />
       );
@@ -80,7 +82,7 @@ function ArrowIndicator({ placement }: { placement: TutorialStep['placement'] })
             marginLeft: -8,
             borderLeft: '8px solid transparent',
             borderRight: '8px solid transparent',
-            borderTop: '10px solid #0e0f11',
+            borderTop: `10px solid ${arrowColor}`,
           }}
         />
       );
@@ -379,7 +381,7 @@ export const Tutorial = () => {
           {/* Content */}
           <div 
             className="text-sm text-muted-foreground leading-relaxed mb-6 mt-2"
-            dangerouslySetInnerHTML={{ __html: step.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(step.content) }}
           />
 
           {/* Przyciski nawigacji */}

@@ -1,6 +1,6 @@
 import { pb, type WorkflowProcess } from './pocketbase';
 import { getTierLimits } from './tierLimits';
-import { sanitizeForFilter } from './parseUtils';
+import { sanitizeForFilter, parseNodesFromRecord, parseEdgesFromRecord } from './parseUtils';
 
 export interface ProcessLockStatus {
   isLocked: boolean;
@@ -63,8 +63,8 @@ function checkProcessInternalLimits(process: WorkflowProcess | Record<string, un
 
     const pNodes = (process as WorkflowProcess).nodes;
     const pEdges = (process as WorkflowProcess).edges;
-    const nodes = typeof pNodes === 'string' ? JSON.parse(pNodes || '[]') : (pNodes || []);
-    const edges = typeof pEdges === 'string' ? JSON.parse(pEdges || '[]') : (pEdges || []);
+    const nodes = parseNodesFromRecord(pNodes);
+    const edges = parseEdgesFromRecord(pEdges);
 
     nodes.forEach((n: { type?: string; data?: { variables?: unknown[]; checklist?: unknown[] } }) => {
       if (n.type === 'note') notesCount++;

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { Share2, Copy, Check, Lock, Globe } from 'lucide-react';
+import { Share2, Copy, Check, Lock, Globe, X } from 'lucide-react';
 import { pb } from '@/lib/pocketbase';
 import { useAuthStore } from '@/store/authStore';
 import { getTierLimits } from '@/lib/tierLimits';
@@ -29,6 +29,7 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
   const [isPublic, setIsPublic] = useState(false);
   const [password, setPassword] = useState('');
   const [hasPassword, setHasPassword] = useState(false);
+  const [clearPassword, setClearPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -40,10 +41,20 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
       );
       if (record) {
         setIsPublic(record.isPublic || false);
-        // publicPassword is a Hidden field — we can't read it, only write.
-        // We use a boolean to indicate if one was previously set.
-        setHasPassword(!!record.publicPassword);
         setPassword('');
+        setClearPassword(false);
+      }
+
+      // Use dedicated server endpoint to check password status
+      // (publicPassword is a hidden field — regular users can't read it via SDK)
+      try {
+        const pwdStatus = await pb.send('/api/process/has-password', {
+          method: 'POST',
+          body: { processId },
+        });
+        setHasPassword(pwdStatus.hasPassword || false);
+      } catch {
+        setHasPassword(false);
       }
     };
 
@@ -55,15 +66,37 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
   const handleSave = async () => {
     if (!processId) return;
     setIsLoading(true);
+
+    // 1. Save isPublic via normal SDK update
     const result = await tryCatchToast(
-      () => pb.collection('WORKFLOW_processes').update(processId, {
-        isPublic,
-        // Only send password if user typed a new one (or explicitly cleared it)
-        ...(password ? { publicPassword: password } : {}),
-      }),
+      () => pb.collection('WORKFLOW_processes').update(processId, { isPublic }),
       { errorKey: t('errors.shareSaveFail') }
     );
-    if (result) onSaved?.();
+
+    // 2. Handle password via dedicated server endpoint
+    // (hidden field can't be written by regular users via SDK)
+    if (result) {
+      const shouldSetPassword = password.length > 0;
+      const shouldClearPassword = clearPassword && !password;
+
+      if (shouldSetPassword || shouldClearPassword) {
+        try {
+          const pwdResult = await pb.send('/api/process/set-password', {
+            method: 'POST',
+            body: {
+              processId,
+              password: shouldClearPassword ? '' : password,
+            },
+          });
+          setHasPassword(pwdResult.hasPassword || false);
+        } catch (err) {
+          console.error('Failed to update share password:', err);
+        }
+      }
+
+      onSaved?.();
+    }
+
     setIsLoading(false);
     onClose();
   };
@@ -158,11 +191,39 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
                         type="text" 
                         placeholder={t('share.passwordPlaceholder')}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          if (e.target.value) setClearPassword(false);
+                        }}
                       />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {hasPassword && !password ? t('share.passwordSet') : t('share.passwordHint')}
-                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          {clearPassword
+                            ? t('share.passwordWillBeCleared') 
+                            : hasPassword && !password
+                              ? t('share.passwordSet')
+                              : t('share.passwordHint')}
+                        </p>
+                        {hasPassword && !password && !clearPassword && (
+                          <button
+                            type="button"
+                            onClick={() => setClearPassword(true)}
+                            className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors"
+                          >
+                            <X size={12} />
+                            {t('share.clearPassword')}
+                          </button>
+                        )}
+                        {clearPassword && (
+                          <button
+                            type="button"
+                            onClick={() => setClearPassword(false)}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {t('common.cancel')}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/30 border border-border/50">

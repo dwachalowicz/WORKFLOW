@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ModalOverlay, ModalContainer, ModalBody } from '@/components/ui/ModalWrapper';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const ConfirmDialog = ({
   cancelLabel,
   variant = 'destructive',
 }: ConfirmDialogProps) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -55,7 +57,7 @@ export const ConfirmDialog = ({
                 variant="outline"
                 className="flex-1"
               >
-                {cancelLabel || 'Anuluj'}
+                {cancelLabel || t('common.cancel')}
               </Button>
               <Button
                 onClick={() => { onConfirm(); onClose(); }}

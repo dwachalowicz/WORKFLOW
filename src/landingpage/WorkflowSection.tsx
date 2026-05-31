@@ -167,7 +167,7 @@ export const WorkflowSection: React.FC = () => {
                 <span className="text-white font-bold text-xs">{t('landing.workflowsection.text21')}</span>
                 <div className="flex -space-x-1.5">
                   <div className="w-6 h-6 rounded-full bg-[#ec4899] flex items-center justify-center text-white text-[10px] font-bold border-[2px] border-[#16171a] z-20">M</div>
-                  <img loading="lazy" src="/landingpage/avatar-hero1.png" alt="Avatar" className="w-6 h-6 rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
+                  <img loading="lazy" src="/landingpage/avatar-hero1.webp" alt="Avatar" className="w-6 h-6 rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
                 </div>
                 {/* Output handle */}
                 <div className="absolute right-[-6px] top-[12px] w-3 h-3 rounded-full bg-brand-gold z-20"></div>
@@ -200,8 +200,8 @@ export const WorkflowSection: React.FC = () => {
                     <div className="flex items-center gap-4">
                       <div className="flex -space-x-1.5">
                         <div className="w-[22px] h-[22px] rounded-full bg-[#ec4899] flex items-center justify-center text-white text-[10px] font-bold border-[2px] border-[#16171a] z-30">M</div>
-                        <img loading="lazy" src="/landingpage/avatar-hero1.png" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-20 object-cover" />
-                        <img loading="lazy" src="/landingpage/avatar-hero2.png" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
+                        <img loading="lazy" src="/landingpage/avatar-hero1.webp" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-20 object-cover" />
+                        <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
                       </div>
                       {/* Dots grid */}
                       <div className="grid grid-cols-3 gap-1">
@@ -245,8 +245,8 @@ export const WorkflowSection: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-white/70 text-xs">{t('landing.workflowsection.text16')}</span>
                     <div className="flex -space-x-1.5">
-                      <img loading="lazy" src="/landingpage/avatar-hero1.png" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-20 object-cover" />
-                      <img loading="lazy" src="/landingpage/avatar-hero2.png" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
+                      <img loading="lazy" src="/landingpage/avatar-hero1.webp" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-20 object-cover" />
+                      <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-[22px] h-[22px] rounded-full border-[2px] border-[#16171a] z-10 object-cover" />
                     </div>
                   </div>
                   

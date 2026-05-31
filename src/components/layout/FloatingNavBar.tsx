@@ -1,5 +1,5 @@
  
-import { Search, Sparkles, StickyNote, Wand2, BookOpen, LayoutGrid, BarChart3, History, Play, Square, CheckSquare, UserCircle, MoreHorizontal, LogOut, ChevronDown, Lock } from 'lucide-react';
+import { Search, Sparkles, StickyNote, Wand2, BookOpen, LayoutGrid, BarChart3, History, Play, Square, CheckSquare, UserCircle, MoreHorizontal, ChevronDown, Lock } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl } from '@/lib/pocketbase';
@@ -16,35 +16,14 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { useCanvasStore } from "@/store/canvasStore";
 import { useUiStore } from "@/store/uiStore";
 import { useSimulationStore } from "@/store/simulationStore";
-
-/* ─── Shared nav helpers ─── */
-
-/** Standard nav button class with active/inactive state */
-const navBtnClass = (isActive: boolean) =>
-  `w-10 h-10 rounded-full flex items-center justify-center transition-colors border ${
-    isActive
-      ? 'bg-surface-elevated text-brand-gold border-transparent'
-      : 'bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-secondary border-transparent hover:border-border-hover'
-  }`;
-
-/** Static nav button (no active state) */
-const NAV_BTN_STATIC =
-  'w-10 h-10 rounded-full bg-surface-elevated hover:bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border-hover';
-
-/** Nav section divider */
-const NavDivider = ({ strong = false }: { strong?: boolean }) => (
-  <div className={`w-6 h-px my-1 dark:bg-white/5 ${strong ? 'bg-border-strong' : 'bg-border'}`} />
-);
-
-
-
+import { navBtnClass, NAV_BTN_STATIC, NavDivider } from './navHelpers';
+import { UserMenuPopover } from '@/components/ui/UserMenuPopover';
 
 export const FloatingNavBar = () => {
   const { t, i18n } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const limits = getTierLimits(user?.tier);
   const setProfileModalOpen = useAuthStore((state) => state.setProfileModalOpen);
-  const logout = useAuthStore((state) => state.logout);
   const autoLayout = useCanvasStore((state) => state.autoLayout);
   const isSearchPanelOpen = useUiStore((state) => state.isSearchPanelOpen);
   const setSearchPanelOpen = useUiStore((state) => state.setSearchPanelOpen);
@@ -102,7 +81,7 @@ export const FloatingNavBar = () => {
             href="/dashboard" 
             className="flex items-center justify-center w-full mt-2 hover:opacity-80 transition-opacity cursor-pointer"
           >
-            <div className="w-8 h-8 gryf-logo-mask" />
+            <div className="w-8 h-8 shrink-0 gryf-logo-mask" />
           </a>
         </SimpleTooltip>
 
@@ -112,10 +91,10 @@ export const FloatingNavBar = () => {
           {!isViewMode && (
             <SimpleTooltip content={t('ai.title')} side="right">
               <div 
-                className="flex items-center justify-center cursor-pointer group"
+                className="flex items-center justify-center cursor-pointer group shrink-0"
                 onClick={() => handleToggle('ai')}
               >
-                <div className="relative w-10 h-10 rounded-full bg-surface-elevated group-hover:bg-secondary transition-colors overflow-hidden">
+                <div className="relative w-10 h-10 shrink-0 rounded-full bg-surface-elevated group-hover:bg-secondary transition-colors overflow-hidden">
                   <div className="absolute inset-0 w-full h-full animate-pulse-scale">
                     <img 
                       src="/a1.webp" 
@@ -160,7 +139,7 @@ export const FloatingNavBar = () => {
               <SimpleTooltip content={limits.canUseAdvancedStats ? t('nav.stats') : t('tierLimits.statsLocked')} side="right">
                 <button 
                   onClick={() => limits.canUseAdvancedStats && handleToggle('stats')}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors border relative ${
+                  className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors border relative ${
                     !limits.canUseAdvancedStats
                       ? 'bg-surface-elevated text-muted-foreground/40 border-transparent cursor-not-allowed'
                       : isStatsPanelOpen ? 'bg-surface-elevated text-brand-gold border-transparent' : 'bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-secondary border-transparent hover:border-border-hover'
@@ -195,7 +174,7 @@ export const FloatingNavBar = () => {
                       toggleSimulation(startNode ? startNode.id : null);
                     }
                   }}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors border relative ${
+                  className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors border relative ${
                     !limits.canPresent
                       ? 'bg-surface-elevated text-muted-foreground/40 border-transparent cursor-not-allowed'
                       : isSimulating ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-secondary border-transparent hover:border-border-hover'
@@ -273,7 +252,7 @@ export const FloatingNavBar = () => {
         {!isViewMode && (
           <div className="flex flex-col items-center w-full pt-1 gap-3">
             {/* Language Selector Popover */}
-            <div className="relative flex justify-center items-center h-10 w-10" ref={langMenuRef}>
+            <div className="relative flex justify-center items-center h-10 w-10 shrink-0" ref={langMenuRef}>
               <button 
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                 className="cursor-pointer flex items-center gap-1 text-muted-foreground hover:text-brand-gold transition-colors text-xs font-bold uppercase"
@@ -311,7 +290,7 @@ export const FloatingNavBar = () => {
 
             <NavDivider />
 
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative shrink-0" ref={userMenuRef}>
               <SimpleTooltip content={t('common.user')} side="right">
                 <UserAvatarButton 
                   user={user}
@@ -320,39 +299,7 @@ export const FloatingNavBar = () => {
               </SimpleTooltip>
 
               {/* User Menu Popover */}
-              {isUserMenuOpen && (
-                <div className="absolute left-[calc(100%+12px)] bottom-0 bg-card border border-border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-modal animate-in fade-in slide-in-from-left-2 duration-150">
-                  {/* User info header */}
-                  <div className="px-3 py-2 border-b border-border">
-                    <p className="text-sm font-medium text-foreground truncate">{user?.name || t('common.user')}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      setProfileModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  >
-                    <UserCircle size={16} />
-                    {t('profile.editProfile')}
-                  </button>
-
-                  <div className="mx-2 h-px bg-border my-1" />
-
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-destructive hover:bg-secondary transition-colors"
-                  >
-                    <LogOut size={16} />
-                    {t('auth.logout')}
-                  </button>
-                </div>
-              )}
+              {isUserMenuOpen && <UserMenuPopover onClose={() => setIsUserMenuOpen(false)} />}
             </div>
           </div>
         )}

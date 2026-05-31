@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useEffect } from "react"
 import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -22,6 +23,15 @@ export const ModalOverlay = ({
   children,
   closeOnOverlayClick = false,
 }: ModalOverlayProps) => {
+  useEffect(() => {
+    if (!isOpen || !onClose) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null
 
   const content = (

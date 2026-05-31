@@ -27,6 +27,7 @@ interface MemberRecord {
 export const MembersTab = () => {
   const { t } = useTranslation();
   const { activeWorkspace, user } = useAuthStore();
+  const isAdminOrOwner = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';
 
   const [members, setMembers] = useState<MemberRecord[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
@@ -174,14 +175,16 @@ export const MembersTab = () => {
           </div>
         }
         actions={
-          <Button 
-            onClick={() => setIsInviteMemberModalOpen(true)}
-            size="pill"
-            className="flex items-center gap-2 whitespace-nowrap"
-          >
-            <Users size={18} />
-            {t('members.inviteMember')}
-          </Button>
+          isAdminOrOwner ? (
+            <Button 
+              onClick={() => setIsInviteMemberModalOpen(true)}
+              size="pill"
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Users size={18} />
+              {t('members.inviteMember')}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -197,7 +200,7 @@ export const MembersTab = () => {
               <tr className="border-b border-border/50 bg-secondary/20 text-xs uppercase tracking-wider text-muted-foreground">
                 <th className="p-4 font-medium">{t('common.user')}</th>
                 <th className="p-4 font-medium">{t('members.role')}</th>
-                <th className="p-4 font-medium">Status</th>
+                <th className="p-4 font-medium">{t('members.status')}</th>
                 <th className="p-4 font-medium text-right">{t('common.edit')}</th>
               </tr>
             </thead>
@@ -237,7 +240,7 @@ export const MembersTab = () => {
                         <select 
                           value={m.role}
                           onChange={(e) => handleUpdateMemberRole(m.id, e.target.value)}
-                          disabled={m.expand?.user?.id === user?.id}
+                          disabled={!isAdminOrOwner || m.expand?.user?.id === user?.id}
                           className={`text-xs font-bold px-2.5 py-1.5 rounded-full outline-none cursor-pointer border ${
                             m.role === 'admin' ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' 
                             : m.role === 'editor' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
@@ -274,7 +277,7 @@ export const MembersTab = () => {
                            {t('members.approve')}
                          </Button>
                       )}
-                      {m.role !== 'owner' && m.expand?.user?.id !== user?.id && (
+                      {isAdminOrOwner && m.role !== 'owner' && m.expand?.user?.id !== user?.id && (
                         <Button 
                           variant="ghost"
                           size="sm"

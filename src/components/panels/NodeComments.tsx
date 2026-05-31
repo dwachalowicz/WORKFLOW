@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { formatDate } from '@/lib/dateUtils';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl } from '@/lib/pocketbase';
 import { fetchComments, addComment, deleteComment, toggleResolveComment, type Comment } from '@/lib/commentService';
@@ -53,17 +54,19 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   // Realtime panel updates for comments
   const commentOptions = useMemo(() => ({ filter: processId ? `process = "${processId}"` : '' }), [processId]);
   
-  usePBSubscription('WORKFLOW_comments', '*', (e) => {
+  const handleCommentRealtime = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
     // Only refresh if the comment belongs to this node
     if (e.record && e.record.node_id === nodeId) {
       // Re-fetch comments to get expanded author data
-      if (isOpen && processId) {
+      if (processId) {
         fetchComments(processId, nodeId)
           .then(setComments)
           .catch(() => {});
       }
     }
-  }, !!processId && !!nodeId, commentOptions);
+  }, [nodeId, processId]);
+
+  usePBSubscription('WORKFLOW_comments', '*', handleCommentRealtime, !!processId && !!nodeId, commentOptions);
 
   const handleSend = async () => {
     if (!newComment.trim() || !user || !processId) return;
@@ -105,49 +108,8 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
     }
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return t('comments.noDate');
-    try {
-      let dateObj: Date;
-      if (dateStr.includes('T')) {
-        dateObj = new Date(dateStr);
-      } else {
-        dateObj = new Date(dateStr.replace(' ', 'T'));
-      }
-      
-      if (isNaN(dateObj.getTime())) {
-        const parts = dateStr.split(/[ T]/);
-        if (parts.length >= 2) {
-          const [y, m, d] = parts[0].split('-');
-          const [time] = parts[1].split('.');
-          const [h, min] = time.split(':');
-          return `${d}.${m}.${y}, ${h}:${min}`;
-        }
-        return dateStr;
-      }
-      
-      const now = new Date();
-      const diff = Math.max(0, now.getTime() - dateObj.getTime());
-      const mins = Math.floor(diff / 60000);
-      if (mins < 1) return t('comments.now');
-      if (mins < 60) return t('comments.minutesAgo', { count: mins });
-      const hours = Math.floor(mins / 60);
-      if (hours < 24) return t('comments.hoursAgo', { count: hours });
-      const days = Math.floor(hours / 24);
-      if (days < 7) return t('comments.daysAgo', { count: days });
-      
-      return dateObj.toLocaleDateString('pl-PL', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }) + ', ' + dateObj.toLocaleTimeString('pl-PL', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+  const formatCommentDate = (dateStr?: string) =>
+    formatDate(dateStr, { relative: true, t, noDateKey: 'comments.noDate' });
 
   return (
     <div className="bg-secondary/20 rounded-xl border border-border/40 p-3">
@@ -211,7 +173,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                     const author = comment.expand?.author;
                     const isOwn = author?.id === user?.id;
                     const dateStr = comment.created || comment.updated || (comment as Record<string, unknown>).createdAt || (comment as Record<string, unknown>).created_at || (comment as Record<string, unknown>).createdat as string;
-                    const dateText = formatDate(dateStr);
+                    const dateText = formatCommentDate(dateStr);
 
                     return (
                       <div

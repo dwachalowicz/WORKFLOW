@@ -128,6 +128,13 @@ export const AiAssistantPanel = () => {
   const { activeWorkspace, user, setProfileModalOpen } = useAuthStore();
   const tierLimits = getTierLimits(user?.tier);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
+
+  // Clear AI chat history when switching workspaces to prevent stale context
+  const wsId = activeWorkspace?.id;
+  useEffect(() => {
+    setMessages([]);
+  }, [wsId]);
+
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasKey, setHasKey] = useState<boolean | null>(null);
@@ -310,7 +317,16 @@ export const AiAssistantPanel = () => {
     const shouldIncludeTools = includeTools || /katalog|narzędz|narzedzi|tools/i.test(msg);
 
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: msg }]);
+    setMessages(prev => {
+      const updated = [...prev, { role: 'user', content: msg }];
+      // Cap message history to prevent memory leaks
+      if (updated.length > 200) {
+        return updated.slice(-200).map((m, i) =>
+          i < updated.length - 50 ? { ...m, workflowJson: undefined, workflowUpdate: undefined } : m
+        );
+      }
+      return updated;
+    });
     setIsLoading(true);
 
     if (abortControllerRef.current) {
@@ -366,23 +382,40 @@ export const AiAssistantPanel = () => {
           .trim();
       }
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: cleanResponse || (workflowJson ? t('aiExt.generatedWorkflow') : workflowUpdate ? t('aiExt.updatedNodes') : response),
-        toolNames: mentionedTools.length > 0 ? mentionedTools : undefined,
-        workflowJson: workflowJson || undefined,
-        workflowUpdate: workflowUpdate || undefined,
-        jsonParseError
-      }]);
+      setMessages(prev => {
+        const updated = [...prev, {
+          role: 'assistant' as const,
+          content: cleanResponse || (workflowJson ? t('aiExt.generatedWorkflow') : workflowUpdate ? t('aiExt.updatedNodes') : response),
+          toolNames: mentionedTools.length > 0 ? mentionedTools : undefined,
+          workflowJson: workflowJson || undefined,
+          workflowUpdate: workflowUpdate || undefined,
+          jsonParseError
+        }];
+        // Cap message history to prevent memory leaks
+        if (updated.length > 200) {
+          return updated.slice(-200).map((m, i) =>
+            i < updated.length - 50 ? { ...m, workflowJson: undefined, workflowUpdate: undefined } : m
+          );
+        }
+        return updated;
+      });
       // Server accepted the request → the key is valid
       setHasKey(true);
     } catch (err) {
       const errorObj = err as { name?: string; isAbort?: boolean };
       if (errorObj.name === 'AbortError' || errorObj.isAbort) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `🛑 ${t('aiExt.generationStopped')}`
-        }]);
+        setMessages(prev => {
+          const updated = [...prev, {
+            role: 'assistant' as const,
+            content: `🛑 ${t('aiExt.generationStopped')}`
+          }];
+          if (updated.length > 200) {
+            return updated.slice(-200).map((m, i) =>
+              i < updated.length - 50 ? { ...m, workflowJson: undefined, workflowUpdate: undefined } : m
+            );
+          }
+          return updated;
+        });
       } else {
         const errMsg = err instanceof Error ? err.message : String(err);
         let translatedMsg = errMsg;
@@ -401,10 +434,18 @@ export const AiAssistantPanel = () => {
           translatedMsg = t('aiExt.providerError');
         }
 
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `❌ ${translatedMsg}`
-        }]);
+        setMessages(prev => {
+          const updated = [...prev, {
+            role: 'assistant' as const,
+            content: `❌ ${translatedMsg}`
+          }];
+          if (updated.length > 200) {
+            return updated.slice(-200).map((m, i) =>
+              i < updated.length - 50 ? { ...m, workflowJson: undefined, workflowUpdate: undefined } : m
+            );
+          }
+          return updated;
+        });
       }
     } finally {
       setIsLoading(false);
