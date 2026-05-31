@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /shared/
+Allow: /page/
+
+Disallow: /app/
+Disallow: /dashboard/
+Disallow: /login/
+
+Sitemap: https://app.gryf.ai/sitemap.xml

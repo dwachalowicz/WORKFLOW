@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Environment variables (secrets)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Playwright
+.auth/
+test-results/
+playwright-report/
+
+# Dev artifacts
+do_usuniecia/
+PLIKI_WSTEPNE/
+lint_output*.txt
+compile_errors.txt
+*.json.bak
+
+# Audit & Check files
+audit*.json
+depcheck*.json
+outdated*.json

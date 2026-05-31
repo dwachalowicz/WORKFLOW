@@ -1,0 +1,924 @@
+
+=== Collection: _mfas (base) ===
+listRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+viewRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - collectionRef (text) [required: true, unique: undefined]
+ - recordRef (text) [required: true, unique: undefined]
+ - method (text) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: _otps (base) ===
+listRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+viewRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - collectionRef (text) [required: true, unique: undefined]
+ - recordRef (text) [required: true, unique: undefined]
+ - password (password) [required: true, unique: undefined]
+ - sentTo (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: _externalAuths (base) ===
+listRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+viewRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+createRule: null
+updateRule: null
+deleteRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - collectionRef (text) [required: true, unique: undefined]
+ - recordRef (text) [required: true, unique: undefined]
+ - provider (text) [required: true, unique: undefined]
+ - providerId (text) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: _authOrigins (base) ===
+listRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+viewRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+createRule: null
+updateRule: null
+deleteRule: @request.auth.id != '' && recordRef = @request.auth.id && collectionRef = @request.auth.collectionId
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - collectionRef (text) [required: true, unique: undefined]
+ - recordRef (text) [required: true, unique: undefined]
+ - fingerprint (text) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: _superusers (auth) ===
+listRule: null
+viewRule: null
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - password (password) [required: true, unique: undefined]
+ - tokenKey (text) [required: true, unique: undefined]
+ - email (email) [required: true, unique: undefined]
+ - emailVisibility (bool) [required: false, unique: undefined]
+ - verified (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_users (auth) ===
+listRule: id = @request.auth.id
+viewRule: @request.auth.id != ""
+createRule: 
+updateRule: id = @request.auth.id
+deleteRule: id = @request.auth.id
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - password (password) [required: true, unique: undefined]
+ - tokenKey (text) [required: true, unique: undefined]
+ - email (email) [required: true, unique: undefined]
+ - emailVisibility (bool) [required: false, unique: undefined]
+ - verified (bool) [required: false, unique: undefined]
+ - name (text) [required: false, unique: undefined]
+ - avatar (file) [required: false, unique: undefined]
+ - typ (select) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - tier (select) [required: false, unique: undefined]
+ - tier_expires_at (date) [required: false, unique: undefined]
+ - ai_source (text) [required: false, unique: undefined]
+ - ai_provider (text) [required: false, unique: undefined]
+ - ai_api_key (text) [required: false, unique: undefined]
+ - ai_model (text) [required: false, unique: undefined]
+ - ai_temperature (number) [required: false, unique: undefined]
+
+=== Collection: config (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - siteUrl (url) [required: false, unique: undefined]
+ - defaultVolume (number) [required: false, unique: undefined]
+ - defaultBgOpacity (number) [required: false, unique: undefined]
+ - defaultThemeId (text) [required: false, unique: undefined]
+ - color_brand_main (text) [required: false, unique: undefined]
+ - color_brand_bg (text) [required: false, unique: undefined]
+ - color_navy_main (text) [required: false, unique: undefined]
+ - color_navy_bg (text) [required: false, unique: undefined]
+ - color_emerald_main (text) [required: false, unique: undefined]
+ - color_emerald_bg (text) [required: false, unique: undefined]
+ - color_charcoal_main (text) [required: false, unique: undefined]
+ - color_charcoal_bg (text) [required: false, unique: undefined]
+ - color_amethyst_main (text) [required: false, unique: undefined]
+ - color_amethyst_bg (text) [required: false, unique: undefined]
+ - color_cyber_main (text) [required: false, unique: undefined]
+ - color_cyber_bg (text) [required: false, unique: undefined]
+ - logo (file) [required: false, unique: undefined]
+ - favicon (file) [required: false, unique: undefined]
+ - loader (file) [required: false, unique: undefined]
+ - ga_id (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: slides (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - lang (text) [required: false, unique: undefined]
+ - slide_id (text) [required: false, unique: undefined]
+ - subheading (text) [required: false, unique: undefined]
+ - mainheading_normal (text) [required: false, unique: undefined]
+ - mainheading_outline (text) [required: false, unique: undefined]
+ - first_letter_anime (bool) [required: false, unique: undefined]
+ - description (text) [required: false, unique: undefined]
+ - chatUrl (text) [required: false, unique: undefined]
+ - videoSrc (text) [required: false, unique: undefined]
+ - bgImage (text) [required: false, unique: undefined]
+ - audioSrc (text) [required: false, unique: undefined]
+ - order (number) [required: false, unique: undefined]
+ - slide_visible (bool) [required: false, unique: undefined]
+ - button_visible (bool) [required: false, unique: undefined]
+ - avatars (text) [required: false, unique: undefined]
+ - button_texts (text) [required: false, unique: undefined]
+ - chatbot (relation) [required: false, unique: undefined]
+ - show_in_menu (bool) [required: false, unique: undefined]
+ - button_is_link (bool) [required: false, unique: undefined]
+ - button_link_url (text) [required: false, unique: undefined]
+ - button_link_target (select) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: translations (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - lang (text) [required: false, unique: undefined]
+ - theme_brand (text) [required: false, unique: undefined]
+ - theme_navy (text) [required: false, unique: undefined]
+ - theme_emerald (text) [required: false, unique: undefined]
+ - theme_charcoal (text) [required: false, unique: undefined]
+ - theme_amethyst (text) [required: false, unique: undefined]
+ - theme_cyber (text) [required: false, unique: undefined]
+ - loaderAlt (text) [required: false, unique: undefined]
+ - meta_title (text) [required: false, unique: undefined]
+ - meta_description (text) [required: false, unique: undefined]
+ - meta_keywords (text) [required: false, unique: undefined]
+ - meta_ogTitle (text) [required: false, unique: undefined]
+ - meta_ogDescription (text) [required: false, unique: undefined]
+ - meta_author (text) [required: false, unique: undefined]
+ - meta_ogImage (text) [required: false, unique: undefined]
+ - meta_ogUrl (url) [required: false, unique: undefined]
+ - meta_ogSiteName (text) [required: false, unique: undefined]
+ - meta_twitterCard (text) [required: false, unique: undefined]
+ - meta_twitterImage (text) [required: false, unique: undefined]
+ - meta_canonical (url) [required: false, unique: undefined]
+ - header_altLogo (text) [required: false, unique: undefined]
+ - header_musicOn (text) [required: false, unique: undefined]
+ - header_musicOff (text) [required: false, unique: undefined]
+ - header_musicVolume (text) [required: false, unique: undefined]
+ - header_themePickerTitle (text) [required: false, unique: undefined]
+ - header_bgOpacityTitle (text) [required: false, unique: undefined]
+ - header_bgOpacityLabel (text) [required: false, unique: undefined]
+ - header_menuToggle (text) [required: false, unique: undefined]
+ - header_settingsToggle (text) [required: false, unique: undefined]
+ - menu_home (text) [required: false, unique: undefined]
+ - menu_chatbots (text) [required: false, unique: undefined]
+ - menu_likedChats (text) [required: false, unique: undefined]
+ - menu_offer (text) [required: false, unique: undefined]
+ - menu_terms (text) [required: false, unique: undefined]
+ - menu_privacy (text) [required: false, unique: undefined]
+ - menu_cookies (text) [required: false, unique: undefined]
+ - lang_pl_label (text) [required: false, unique: undefined]
+ - lang_en_label (text) [required: false, unique: undefined]
+ - scrollIndicator_text (text) [required: false, unique: undefined]
+ - subpage_oferta_title (text) [required: false, unique: undefined]
+ - subpage_oferta_content (editor) [required: false, unique: undefined]
+ - subpage_regulamin_title (text) [required: false, unique: undefined]
+ - subpage_regulamin_content (editor) [required: false, unique: undefined]
+ - subpage_polityka_title (text) [required: false, unique: undefined]
+ - subpage_polityka_content (editor) [required: false, unique: undefined]
+ - cookies_bannerText (text) [required: false, unique: undefined]
+ - cookies_acceptAll (text) [required: false, unique: undefined]
+ - cookies_acceptNecessary (text) [required: false, unique: undefined]
+ - cookies_settings (text) [required: false, unique: undefined]
+ - cookies_modalTitle (text) [required: false, unique: undefined]
+ - cookies_modalDesc (text) [required: false, unique: undefined]
+ - cookies_necessaryTitle (text) [required: false, unique: undefined]
+ - cookies_necessaryDesc (text) [required: false, unique: undefined]
+ - cookies_analyticalTitle (text) [required: false, unique: undefined]
+ - cookies_analyticalDesc (text) [required: false, unique: undefined]
+ - cookies_marketingTitle (text) [required: false, unique: undefined]
+ - cookies_marketingDesc (text) [required: false, unique: undefined]
+ - cookies_saveBtn (text) [required: false, unique: undefined]
+ - cookies_closeBtn (text) [required: false, unique: undefined]
+ - chat_backTitle (text) [required: false, unique: undefined]
+ - chat_backText (text) [required: false, unique: undefined]
+ - chat_likeTitle (text) [required: false, unique: undefined]
+ - chat_shareTitle (text) [required: false, unique: undefined]
+ - chat_copySuccess (text) [required: false, unique: undefined]
+ - chat_copyError (text) [required: false, unique: undefined]
+ - chat_titleSuffix (text) [required: false, unique: undefined]
+ - chat_loadError (text) [required: false, unique: undefined]
+ - chat_pageTitle (text) [required: false, unique: undefined]
+ - chat_metaDescription (text) [required: false, unique: undefined]
+ - social_fb_label (text) [required: false, unique: undefined]
+ - social_fb_url (url) [required: false, unique: undefined]
+ - social_x_label (text) [required: false, unique: undefined]
+ - social_x_url (url) [required: false, unique: undefined]
+ - social_yt_label (text) [required: false, unique: undefined]
+ - social_yt_url (url) [required: false, unique: undefined]
+ - chat_underConst (text) [required: false, unique: undefined]
+ - chat_pwdTitle (text) [required: false, unique: undefined]
+ - chat_pwdSubmit (text) [required: false, unique: undefined]
+ - chat_pwdError (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: media (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - type (select) [required: true, unique: undefined]
+ - file (file) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: chatbots (base) ===
+listRule: chat_password = "" || chat_password = @request.headers.x_chat_password
+viewRule: chat_password = "" || chat_password = @request.headers.x_chat_password
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - chat_visible (bool) [required: false, unique: undefined]
+ - chat_password (text) [required: false, unique: undefined]
+ - embedCode (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: KATALOG_NARZEDZI (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - NAZWA (text) [required: false, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - OPIS_PELNY (text) [required: false, unique: undefined]
+ - URL (url) [required: false, unique: undefined]
+ - url_film (url) [required: false, unique: undefined]
+ - LOGO (file) [required: false, unique: undefined]
+ - AKTYWNE (bool) [required: false, unique: undefined]
+ - tagi (relation) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - DATA_DEBIUTU (date) [required: false, unique: undefined]
+ - bole (relation) [required: false, unique: undefined]
+ - potrzeby (relation) [required: false, unique: undefined]
+
+=== Collection: KATALOG_WIDOK (view) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - NAZWA (text) [required: false, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - OPIS_PELNY (text) [required: false, unique: undefined]
+ - URL (url) [required: false, unique: undefined]
+ - url_film (url) [required: false, unique: undefined]
+ - tagi (relation) [required: false, unique: undefined]
+ - bole (relation) [required: false, unique: undefined]
+ - potrzeby (relation) [required: false, unique: undefined]
+ - AKTYWNE (bool) [required: false, unique: undefined]
+ - PELNE_LOGO (json) [required: false, unique: undefined]
+
+=== Collection: KATALOG_TAGI (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - NAZWA (text) [required: false, unique: undefined]
+ - OBRAZ (file) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: KATALOG_BOLE (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - KATEGORIA (text) [required: false, unique: undefined]
+ - PODKATEGORIA (relation) [required: false, unique: undefined]
+ - NAZWA (text) [required: true, unique: undefined]
+ - AKTYWNE (bool) [required: false, unique: undefined]
+ - OBRAZ (file) [required: false, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: KATALOG_EKSPERCI (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - user (relation) [required: false, unique: undefined]
+ - strona_www (url) [required: false, unique: undefined]
+ - nazwa_wyswietlana (text) [required: false, unique: undefined]
+ - opis (text) [required: false, unique: undefined]
+ - telefon (text) [required: false, unique: undefined]
+ - mail_kontaktowy (email) [required: false, unique: undefined]
+ - narzedzia (relation) [required: false, unique: undefined]
+ - logo (file) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: KATALOG_EKSPERCI_WIDOK (view) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - nazwa_wyswietlana (text) [required: false, unique: undefined]
+ - opis (text) [required: false, unique: undefined]
+ - strona_www (url) [required: false, unique: undefined]
+ - narzedzia (relation) [required: false, unique: undefined]
+ - telefon (text) [required: false, unique: undefined]
+ - mail_kontaktowy (email) [required: false, unique: undefined]
+ - specjalizacje (json) [required: false, unique: undefined]
+ - logo_url (json) [required: false, unique: undefined]
+
+=== Collection: KATALOG_BOLE_WIDOK (view) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - KATEGORIA (text) [required: false, unique: undefined]
+ - PODKATEGORIA (relation) [required: false, unique: undefined]
+ - NAZWA (text) [required: true, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - AKTYWNE (bool) [required: false, unique: undefined]
+ - PELNY_OBRAZ (json) [required: false, unique: undefined]
+ - NAZWA_PODKATEGORII (text) [required: false, unique: undefined]
+
+=== Collection: KATALOG_PODKATEGORIE (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - KATEGORIA (text) [required: false, unique: undefined]
+ - NAZWA (text) [required: false, unique: undefined]
+ - OBRAZ (file) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - GEMINI (text) [required: false, unique: undefined]
+ - CLAUDE (text) [required: false, unique: undefined]
+ - CHATGPT (text) [required: false, unique: undefined]
+ - BIELIK (text) [required: false, unique: undefined]
+ - QWEN (text) [required: false, unique: undefined]
+ - GROK (text) [required: false, unique: undefined]
+ - PERPLEXITY (text) [required: false, unique: undefined]
+ - GRYF (text) [required: false, unique: undefined]
+
+=== Collection: KATALOG_PODKATEGORIE_WIDOK (view) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - KATEGORIA (text) [required: false, unique: undefined]
+ - NAZWA (text) [required: false, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - OBRAZ (file) [required: false, unique: undefined]
+ - GEMINI (text) [required: false, unique: undefined]
+ - CLAUDE (text) [required: false, unique: undefined]
+ - CHATGPT (text) [required: false, unique: undefined]
+ - BIELIK (text) [required: false, unique: undefined]
+ - QWEN (text) [required: false, unique: undefined]
+ - GROK (text) [required: false, unique: undefined]
+ - PERPLEXITY (text) [required: false, unique: undefined]
+ - GRYF (text) [required: false, unique: undefined]
+ - PELNY_OBRAZ (json) [required: false, unique: undefined]
+ - BOLE (json) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_processes (base) ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active') || isPublic = true
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: false, unique: undefined]
+ - owner (relation) [required: false, unique: undefined]
+ - nodes (json) [required: false, unique: undefined]
+ - edges (json) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - workspace (relation) [required: false, unique: undefined]
+ - group (relation) [required: false, unique: undefined]
+ - isPublic (bool) [required: false, unique: undefined]
+ - publicPassword (text) [required: false, unique: undefined]
+ - avatar (file) [required: false, unique: undefined]
+ - lastEditedBy (relation) [required: false, unique: undefined]
+ - locked_by (relation) [required: false, unique: undefined]
+ - locked_at (date) [required: false, unique: undefined]
+ - icon (text) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_workspaces (base) ===
+listRule: owner = @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= id && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active'
+viewRule: owner = @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= id && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active'
+createRule: @request.auth.id != ""
+updateRule: owner = @request.auth.id
+deleteRule: owner = @request.auth.id
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - owner (relation) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - avatar (file) [required: false, unique: undefined]
+ - join_code (text) [required: false, unique: undefined]
+ - icon (text) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_workspace_members (base) ===
+listRule: user = @request.auth.id || @collection.WORKFLOW_workspaces.id ?= workspace && @collection.WORKFLOW_workspaces.owner ?= @request.auth.id
+viewRule: user = @request.auth.id || @collection.WORKFLOW_workspaces.id ?= workspace && @collection.WORKFLOW_workspaces.owner ?= @request.auth.id
+createRule: @request.auth.id != ""
+updateRule: @request.auth.id != ""
+deleteRule: @request.auth.id != ""
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - workspace (relation) [required: true, unique: undefined]
+ - user (relation) [required: false, unique: undefined]
+ - role (select) [required: true, unique: undefined]
+ - status (select) [required: true, unique: undefined]
+ - invited_email (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - invited_by (relation) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_process_groups (base) ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - workspace (relation) [required: true, unique: undefined]
+ - avatar (file) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_versions (base) ===
+listRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - process (relation) [required: true, unique: undefined]
+ - version_number (number) [required: true, unique: undefined]
+ - label (text) [required: false, unique: undefined]
+ - nodes_data (json) [required: false, unique: undefined]
+ - edges_data (json) [required: false, unique: undefined]
+ - process_name (text) [required: false, unique: undefined]
+ - created_by (relation) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_prompts (base) ===
+listRule: @request.auth.id != ''
+viewRule: @request.auth.id != ''
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - key (text) [required: true, unique: undefined]
+ - content (editor) [required: false, unique: undefined]
+ - active (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_quick_prompts (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - label (text) [required: true, unique: undefined]
+ - prompt (text) [required: true, unique: undefined]
+ - context (select) [required: true, unique: undefined]
+ - active (bool) [required: false, unique: undefined]
+ - sort_order (number) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+ - label_en (text) [required: false, unique: undefined]
+ - prompt_en (text) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_comments (base) ===
+listRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+updateRule: @request.auth.id = author
+deleteRule: @request.auth.id = author
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - process (relation) [required: true, unique: undefined]
+ - node_id (text) [required: true, unique: undefined]
+ - author (relation) [required: true, unique: undefined]
+ - content (text) [required: true, unique: undefined]
+ - resolved (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_site_settings (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - analytics_script (text) [required: false, unique: undefined]
+ - marketing_script (text) [required: false, unique: undefined]
+ - seo_title (text) [required: false, unique: undefined]
+ - seo_description (text) [required: false, unique: undefined]
+ - partner_view (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_groups (base) ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - workspace (relation) [required: true, unique: undefined]
+ - process (relation) [required: false, unique: undefined]
+ - avatar (file) [required: false, unique: undefined]
+ - color (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_templates (base) ===
+listRule: @request.auth.id != ''
+viewRule: @request.auth.id != ''
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - name (text) [required: true, unique: undefined]
+ - description (text) [required: false, unique: undefined]
+ - category (text) [required: false, unique: undefined]
+ - nodes_data (json) [required: false, unique: undefined]
+ - edges_data (json) [required: false, unique: undefined]
+ - preview_image (file) [required: false, unique: undefined]
+ - tier_required (select) [required: false, unique: undefined]
+ - active (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_pages (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - slug (text) [required: true, unique: undefined]
+ - title (text) [required: true, unique: undefined]
+ - content (editor) [required: false, unique: undefined]
+ - published (bool) [required: false, unique: undefined]
+ - sort_order (number) [required: false, unique: undefined]
+ - seo_title (text) [required: false, unique: undefined]
+ - seo_description (text) [required: false, unique: undefined]
+ - title_en (text) [required: false, unique: undefined]
+ - content_en (editor) [required: false, unique: undefined]
+ - seo_title_en (text) [required: false, unique: undefined]
+ - seo_description_en (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: CHAT_PIZZA_MENU (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - NAZWA (text) [required: true, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+ - OPIS_EN (text) [required: false, unique: undefined]
+ - CENA_M (number) [required: false, unique: undefined]
+ - CENA_L (number) [required: false, unique: undefined]
+ - CENA_XL (number) [required: false, unique: undefined]
+ - KATEGORIA (select) [required: false, unique: undefined]
+ - TAGI_GLOWNE (json) [required: false, unique: undefined]
+ - SKLADNIKI (json) [required: false, unique: undefined]
+ - ZDJECIE (file) [required: false, unique: undefined]
+
+=== Collection: CHAT_PIZZA_ORDERS (base) ===
+listRule: 
+viewRule: 
+createRule: 
+updateRule: 
+deleteRule: 
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - ORDER_ID (text) [required: true, unique: undefined]
+ - TELEFON (text) [required: false, unique: undefined]
+ - STATUS (select) [required: false, unique: undefined]
+ - ITEMS (json) [required: false, unique: undefined]
+ - TOTAL_PRICE (number) [required: false, unique: undefined]
+ - CHAT_SESSION_ID (text) [required: false, unique: undefined]
+ - LANGUAGE (text) [required: false, unique: undefined]
+
+=== Collection: WORKFLOW_process_map_layouts (base) ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - workspace (relation) [required: true, unique: undefined]
+ - positions (json) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_platform_settings (base) ===
+listRule: null
+viewRule: null
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - key (text) [required: true, unique: undefined]
+ - ai_api_key (text) [required: false, unique: undefined]
+ - ai_provider (text) [required: false, unique: undefined]
+ - ai_model (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_tier_config (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - tier (text) [required: true, unique: undefined]
+ - label (text) [required: true, unique: undefined]
+ - sort_order (number) [required: false, unique: undefined]
+ - price_monthly (number) [required: false, unique: undefined]
+ - price_annual (number) [required: false, unique: undefined]
+ - color (text) [required: false, unique: undefined]
+ - bg_color (text) [required: false, unique: undefined]
+ - max_workspaces (number) [required: false, unique: undefined]
+ - max_processes (number) [required: false, unique: undefined]
+ - max_versions_per_process (number) [required: false, unique: undefined]
+ - max_nodes_per_process (number) [required: false, unique: undefined]
+ - max_edges_per_process (number) [required: false, unique: undefined]
+ - max_notes_per_process (number) [required: false, unique: undefined]
+ - max_members_per_workspace (number) [required: false, unique: undefined]
+ - max_groups_per_workspace (number) [required: false, unique: undefined]
+ - max_comments_per_process (number) [required: false, unique: undefined]
+ - max_variables_per_process (number) [required: false, unique: undefined]
+ - max_checklist_items_per_node (number) [required: false, unique: undefined]
+ - ai_access (text) [required: false, unique: undefined]
+ - ai_memory_length (number) [required: false, unique: undefined]
+ - ai_multimodal (bool) [required: false, unique: undefined]
+ - can_use_templates (bool) [required: false, unique: undefined]
+ - can_present (bool) [required: false, unique: undefined]
+ - can_use_subworkflows (bool) [required: false, unique: undefined]
+ - can_use_cross_workflow_triggers (bool) [required: false, unique: undefined]
+ - can_use_process_map (bool) [required: false, unique: undefined]
+ - can_share_public (bool) [required: false, unique: undefined]
+ - can_share_with_password (bool) [required: false, unique: undefined]
+ - can_use_advanced_stats (bool) [required: false, unique: undefined]
+ - audit_log_days (number) [required: false, unique: undefined]
+ - support_level (text) [required: false, unique: undefined]
+ - price_monthly_pln (number) [required: false, unique: undefined]
+ - price_annual_pln (number) [required: false, unique: undefined]
+ - price_monthly_eur (number) [required: false, unique: undefined]
+ - price_annual_eur (number) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_ai_models (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - label (text) [required: true, unique: undefined]
+ - model_id (text) [required: true, unique: undefined]
+ - provider (select) [required: true, unique: undefined]
+ - active (bool) [required: false, unique: undefined]
+ - sort_order (number) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: KATALOG_POTRZEBY (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - NAZWA (text) [required: true, unique: undefined]
+ - AKTYWNE (bool) [required: false, unique: undefined]
+ - OBRAZ (file) [required: false, unique: undefined]
+ - OPIS (text) [required: false, unique: undefined]
+
+=== Collection: landing_translations (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+
+=== Collection: WORKFLOW_contact_messages (base) ===
+listRule: null
+viewRule: null
+createRule: 
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - email (email) [required: false, unique: undefined]
+ - message (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_faq (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - category_pl (text) [required: true, unique: undefined]
+ - category_en (text) [required: true, unique: undefined]
+ - question_pl (text) [required: true, unique: undefined]
+ - question_en (text) [required: true, unique: undefined]
+ - answer_pl (editor) [required: true, unique: undefined]
+ - answer_en (editor) [required: true, unique: undefined]
+ - order (number) [required: true, unique: undefined]
+ - is_active (bool) [required: false, unique: undefined]
+ - icon (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_process_cases (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - title_pl (text) [required: true, unique: undefined]
+ - title_en (text) [required: true, unique: undefined]
+ - shortTitle_pl (text) [required: true, unique: undefined]
+ - shortTitle_en (text) [required: true, unique: undefined]
+ - description_pl (text) [required: true, unique: undefined]
+ - description_en (text) [required: true, unique: undefined]
+ - avatar (url) [required: false, unique: undefined]
+ - strokeColor (text) [required: false, unique: undefined]
+ - strokeDasharray (text) [required: false, unique: undefined]
+ - footerTitle_pl (text) [required: false, unique: undefined]
+ - footerTitle_en (text) [required: false, unique: undefined]
+ - footerSubtitle_pl (text) [required: false, unique: undefined]
+ - footerSubtitle_en (text) [required: false, unique: undefined]
+ - link (url) [required: false, unique: undefined]
+ - order (number) [required: true, unique: undefined]
+ - is_active (bool) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_ai_services (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - icon_name (text) [required: false, unique: undefined]
+ - title_pl (text) [required: false, unique: undefined]
+ - title_en (text) [required: false, unique: undefined]
+ - description_pl (text) [required: false, unique: undefined]
+ - description_en (text) [required: false, unique: undefined]
+ - order (number) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_pricing (base) ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - plan_name_pl (text) [required: true, unique: undefined]
+ - plan_name_en (text) [required: true, unique: undefined]
+ - description_pl (text) [required: true, unique: undefined]
+ - description_en (text) [required: true, unique: undefined]
+ - features_pl (json) [required: false, unique: undefined]
+ - features_en (json) [required: false, unique: undefined]
+ - order (number) [required: true, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]
+
+=== Collection: WORKFLOW_notifications (base) ===
+listRule: user = @request.auth.id
+viewRule: user = @request.auth.id
+createRule: null
+updateRule: user = @request.auth.id
+deleteRule: user = @request.auth.id
+Fields:
+ - id (text) [required: true, unique: undefined]
+ - user (relation) [required: true, unique: undefined]
+ - title (text) [required: true, unique: undefined]
+ - message (text) [required: true, unique: undefined]
+ - type (text) [required: true, unique: undefined]
+ - isRead (bool) [required: false, unique: undefined]
+ - link (text) [required: false, unique: undefined]
+ - created (autodate) [required: undefined, unique: undefined]
+ - updated (autodate) [required: undefined, unique: undefined]

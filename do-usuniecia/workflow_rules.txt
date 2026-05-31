@@ -1,0 +1,161 @@
+=== Collection: WORKFLOW_users ===
+listRule: id = @request.auth.id
+viewRule: id = @request.auth.id
+createRule: 
+updateRule: id = @request.auth.id
+deleteRule: id = @request.auth.id
+
+=== Collection: WORKFLOW_processes ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active') || isPublic = true
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+
+=== Collection: WORKFLOW_workspaces ===
+listRule: owner = @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= id && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active'
+viewRule: owner = @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= id && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active'
+createRule: @request.auth.id != ""
+updateRule: owner = @request.auth.id
+deleteRule: owner = @request.auth.id
+
+=== Collection: WORKFLOW_workspace_members ===
+listRule: user = @request.auth.id || @collection.WORKFLOW_workspaces.id ?= workspace && @collection.WORKFLOW_workspaces.owner ?= @request.auth.id
+viewRule: user = @request.auth.id || @collection.WORKFLOW_workspaces.id ?= workspace && @collection.WORKFLOW_workspaces.owner ?= @request.auth.id
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin') || user = @request.auth.id
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin') || user = @request.auth.id
+
+=== Collection: WORKFLOW_process_groups ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+
+=== Collection: WORKFLOW_versions ===
+listRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+
+=== Collection: WORKFLOW_prompts ===
+listRule: @request.auth.id != ''
+viewRule: @request.auth.id != ''
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_quick_prompts ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_comments ===
+listRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_processes.id ?= process && (@collection.WORKFLOW_processes.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= @collection.WORKFLOW_processes.workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+updateRule: @request.auth.id = author
+deleteRule: @request.auth.id = author
+
+=== Collection: WORKFLOW_site_settings ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_groups ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id)
+
+=== Collection: WORKFLOW_templates ===
+listRule: @request.auth.id != ''
+viewRule: @request.auth.id != ''
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_pages ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_process_map_layouts ===
+listRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+viewRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active')
+createRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+updateRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && (@collection.WORKFLOW_workspace_members.role ?= 'admin' || @collection.WORKFLOW_workspace_members.role ?= 'editor'))
+deleteRule: @collection.WORKFLOW_workspaces.id ?= workspace && (@collection.WORKFLOW_workspaces.owner ?= @request.auth.id || @collection.WORKFLOW_workspace_members.workspace ?= workspace && @collection.WORKFLOW_workspace_members.user ?= @request.auth.id && @collection.WORKFLOW_workspace_members.status ?= 'active' && @collection.WORKFLOW_workspace_members.role ?= 'admin')
+
+=== Collection: WORKFLOW_platform_settings ===
+listRule: null
+viewRule: null
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_tier_config ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_ai_models ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_contact_messages ===
+listRule: null
+viewRule: null
+createRule: 
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_faq ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_process_cases ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_ai_services ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_pricing ===
+listRule: 
+viewRule: 
+createRule: null
+updateRule: null
+deleteRule: null
+
+=== Collection: WORKFLOW_notifications ===
+listRule: user = @request.auth.id
+viewRule: user = @request.auth.id
+createRule: null
+updateRule: user = @request.auth.id
+deleteRule: user = @request.auth.id
+

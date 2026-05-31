@@ -1,0 +1,19 @@
+const PB_URL = 'https://pb.gryf.ai';
+const ADMIN_EMAIL = 'admin@admin.pl';
+const ADMIN_PASS = '1234567890';
+
+async function main() {
+    const authRes = await fetch(`${PB_URL}/api/collections/_superusers/auth-with-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: ADMIN_EMAIL, password: ADMIN_PASS })
+    });
+    const { token } = await authRes.json();
+
+    const procRes = await fetch(`${PB_URL}/api/collections/WORKFLOW_processes/records?perPage=50`, {
+        headers: { 'Authorization': token }
+    });
+    const procData = await procRes.json();
+    procData.items.forEach(p => console.log(p.id, p.name));
+}
+main();
