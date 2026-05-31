@@ -57,7 +57,7 @@ export const LandingPage: React.FC = () => {
         <FloatingLandingNav />
         <main className="relative">
           <HeroSection />
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="w-full h-96 animate-pulse bg-[#e8ebee]" />}>
             <div ref={containerRef} className="bg-[#f1f4f6] bg-[radial-gradient(#ffffff_1.5px,transparent_1.5px)] [background-size:30px_30px] relative w-full z-0">
               <WorkflowConnections containerRef={containerRef} />
               <RadialMenuSection />
@@ -71,7 +71,7 @@ export const LandingPage: React.FC = () => {
             <PricingSection />
           </Suspense>
         </main>
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="w-full h-32 animate-pulse bg-[#1a1a1a]" />}>
           <Footer />
         </Suspense>
       </div>

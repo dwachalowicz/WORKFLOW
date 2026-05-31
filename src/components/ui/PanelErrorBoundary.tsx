@@ -32,6 +32,10 @@ export class PanelErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error(`[PanelErrorBoundary${this.props.panelName ? `: ${this.props.panelName}` : ''}]`, error, errorInfo);
+    // Sentry integration — uncomment when Sentry is configured:
+    // if (typeof window !== 'undefined' && (window as any).Sentry) {
+    //   (window as any).Sentry.captureException(error, { extra: { panelName: this.props.panelName, componentStack: errorInfo.componentStack } });
+    // }
   }
 
   handleReset = () => {
