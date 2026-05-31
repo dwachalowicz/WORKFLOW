@@ -675,6 +675,7 @@ export const pl = {
     invitedToCollaborate: 'Ktoś zaprosił Cię do współtworzenia procesów w tym Workspace.',
     invitedToCollaborateBy: '{{name}} zaprosił(a) Cię do współtworzenia procesów w tym Workspace.',
     asRole: 'Jako: {{role}}',
+    joinRequestSent: 'Wysłano prośbę o dołączenie. Oczekuje na akceptację.',
   },
 
   // Settings

@@ -632,6 +632,7 @@ export const en = {
     invitedToCollaborate: 'Someone invited you to collaborate on processes in this Workspace.',
     invitedToCollaborateBy: '{{name}} invited you to collaborate on processes in this Workspace.',
     asRole: 'As: {{role}}',
+    joinRequestSent: 'Join request sent. Awaiting approval.',
   },
   settingsTab: {
     title: 'Workspace Settings',

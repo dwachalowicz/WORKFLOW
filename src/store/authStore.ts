@@ -235,11 +235,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 email: m.expand.invited_by.email
               } : undefined
             };
-            if (m.invited_by) {
-              pendingInvites.push(inviteObj);
-            } else {
-              sentRequests.push(inviteObj);
-            }
+            pendingInvites.push(inviteObj);
           }
         });
 

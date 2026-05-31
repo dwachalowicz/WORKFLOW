@@ -80,7 +80,7 @@ export const InvitationsTab = () => {
                 <p className="text-sm text-muted-foreground">
                   {inv.invitedBy 
                     ? t('invitations.invitedToCollaborateBy', { name: inv.invitedBy.name || inv.invitedBy.email }) 
-                    : t('invitations.invitedToCollaborate')}
+                    : t('invitations.joinRequestSent', { defaultValue: 'Wysłano prośbę o dołączenie. Oczekuje na akceptację.' })}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -90,15 +90,17 @@ export const InvitationsTab = () => {
                   disabled={isProcessing}
                   className="flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <XCircle size={18} /> {t('invitations.reject')}
+                  <XCircle size={18} /> {inv.invitedBy ? t('invitations.reject') : t('common.cancel', { defaultValue: 'Anuluj' })}
                 </Button>
-                <Button 
-                  onClick={() => handleAccept(inv.id)}
-                  disabled={isProcessing}
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircle2 size={18} /> {t('invitations.accept')}
-                </Button>
+                {inv.invitedBy && (
+                  <Button 
+                    onClick={() => handleAccept(inv.id)}
+                    disabled={isProcessing}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 size={18} /> {t('invitations.accept')}
+                  </Button>
+                )}
               </div>
             </Card>
             );

@@ -901,6 +901,11 @@ onRecordCreateRequest(function(e) {
 
     if (!authRecord) return e.next();
 
+    // Ensure invited_by is set to the current user (overrides any API rule stripping)
+    if (!record.get("invited_by")) {
+        record.set("invited_by", authRecord.id);
+    }
+
     const wsId = record.get("workspace");
     if (!wsId) throw new Error("Workspace ID is required");
 
@@ -1776,12 +1781,11 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
         const userId = e.auth.id;
 
         // 1. Get all workspaces the user has access to (owner or active member)
-        const myWorkspaces = e.app.findRecordsByFilter(
-            "WORKFLOW_workspaces",
-            "owner = {:user} || id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:user} AND status = 'active')",
-            "", 5000, 0,
-            { user: userId }
-        );
+        const db = e.app.db ? e.app.db() : $app.db();
+        const myWorkspaces = arrayOf(new DynamicModel({ id: "", owner: "" }));
+        db.newQuery("SELECT id, owner FROM WORKFLOW_workspaces WHERE owner = {:user} OR id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:user} AND status = 'active')")
+            .bind({ user: userId })
+            .all(myWorkspaces);
 
         if (!myWorkspaces || myWorkspaces.length === 0) {
             return e.json(200, []);
@@ -1789,11 +1793,10 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
 
         // 2. Extract unique owners
         const ownersSet = new Set();
-        let myWsArray = [];
-        try { myWsArray = Array.from(myWorkspaces); } catch(err) { myWsArray = myWorkspaces || []; }
+        let myWsArray = myWorkspaces;
         
         myWsArray.forEach(ws => {
-            const ownerId = ws.get("owner");
+            const ownerId = ws.owner;
             if (ownerId) ownersSet.add(ownerId);
         });
         const uniqueOwners = Array.from(ownersSet);
@@ -2169,6 +2172,20 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                     });
 
                     e.app.newMailClient().send(message);
+                }
+
+                // Powiadomienie w aplikacji
+                try {
+                    const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
+                    const notifRecord = new Record(notifCollection);
+                    notifRecord.set("user", ownerId);
+                    notifRecord.set("title", "Prośba o dołączenie / Join request");
+                    notifRecord.set("message", `Użytkownik ${joinedName} prosi o dołączenie do obszaru roboczego "${wsName}". Zaakceptuj go w zakładce Członkowie. / User ${joinedName} requested to join workspace "${wsName}". Approve in Members tab.`);
+                    notifRecord.set("type", "info");
+                    notifRecord.set("isRead", false);
+                    e.app.save(notifRecord);
+                } catch(notifErr) {
+                    console.log("Error creating join request in-app notif: " + notifErr);
                 }
             }
         } catch (mailErr) {
