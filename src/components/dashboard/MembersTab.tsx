@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { pb, getAvatarUrl, type WorkflowUser } from '@/lib/pocketbase';
-import { Users, Mail } from 'lucide-react';
+import { Users, Mail, Loader2 } from 'lucide-react';
 import { InviteMemberModal } from '@/components/modals/InviteMemberModal';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +32,7 @@ export const MembersTab = () => {
   const [members, setMembers] = useState<MemberRecord[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [isInviteMemberModalOpen, setIsInviteMemberModalOpen] = useState(false);
+  const [processingMemberIds, setProcessingMemberIds] = useState<Set<string>>(new Set());
 
   const fetchMembers = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -116,6 +117,7 @@ export const MembersTab = () => {
   }, [activeWorkspace, user, fetchMembers]);
 
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
+    setProcessingMemberIds(prev => new Set(prev).add(memberId));
     try {
       await pb.collection('WORKFLOW_workspace_members').update(memberId, {
         status: newStatus
@@ -123,9 +125,18 @@ export const MembersTab = () => {
       setMembers(members.map(m => m.id === memberId ? { ...m, status: newStatus } : m));
       // Refresh pending members count in the nav badge
       useAuthStore.getState().fetchWorkspaces();
+      if (newStatus === 'active') {
+        useToastStore.getState().showToast(t('members.memberApproved', { defaultValue: 'Członek zatwierdzony' }), 'success');
+      }
     } catch (err) {
       console.error('Error updating member status:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
+    } finally {
+      setProcessingMemberIds(prev => {
+        const next = new Set(prev);
+        next.delete(memberId);
+        return next;
+      });
     }
   };
 
@@ -267,14 +278,15 @@ export const MembersTab = () => {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      {m.status === 'pending' && !m.invited_by && (
+                      {m.status === 'pending' && !m.invited_by && isAdminOrOwner && (
                          <Button 
                            variant="outline"
                            size="sm"
                            onClick={() => handleUpdateMemberStatus(m.id, 'active')}
+                           disabled={processingMemberIds.has(m.id)}
                            className="text-xs mr-2 border-green-500/30 text-green-500 hover:bg-green-500/10"
                          >
-                           {t('members.approve')}
+                           {processingMemberIds.has(m.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : t('members.approve')}
                          </Button>
                       )}
                       {isAdminOrOwner && m.role !== 'owner' && m.expand?.user?.id !== user?.id && (

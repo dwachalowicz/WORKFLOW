@@ -299,7 +299,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                   await joinByCode(joinCode);
                   setJoinCode('');
                   setIsJoining(false);
-                  useToastStore.getState().showToast(t('workspaces.joinRequestSent'), 'success');
+                  useToastStore.getState().showToast(t('workspaces.joinRequestSent') + '. ' + t('workspaces.checkInvitationsTab', { defaultValue: 'Sprawdź zakładkę Zaproszenia.' }), 'success');
                 } catch (err) {
                   setJoinError(err instanceof Error ? err.message : t('common.unknownError'));
                 }
@@ -542,6 +542,8 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
               <Users size={14} className="text-muted-foreground" />
               {t('workspaces.membersTab')}
             </button>
+            {ws.role === 'admin' && (
+              <>
             <button
               onClick={() => {
                 setRenamingWsId(ws.id);
@@ -578,6 +580,8 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                 <Trash2 size={14} />
                 {t('workspaces.removeAvatar')}
               </button>
+            )}
+              </>
             )}
             {ws.role === 'admin' && (
               <>

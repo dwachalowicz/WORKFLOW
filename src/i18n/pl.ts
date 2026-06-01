@@ -269,6 +269,7 @@ export const pl = {
     createDescription: 'Workspace to izolowana przestrzeń, w której możesz tworzyć procesy i zapraszać innych członków zespołu.',
     createError: 'Wystąpił błąd podczas tworzenia Workspace. Spróbuj ponownie.',
     namePlaceholder: 'np. Moja Firma Sp. z o.o.',
+    checkInvitationsTab: 'Sprawdź zakładkę Zaproszenia.',
   },
 
   // Members
@@ -297,6 +298,7 @@ export const pl = {
     inviteSuccessExisting: 'Zaproszenie wysłane!',
     inviteSuccessNew: 'Użytkownik nie ma jeszcze konta. Zaproszenie zostało zapisane — zobaczy je od razu po rejestracji na GRYF.AI.',
     status: 'Status',
+    memberApproved: 'Członek zatwierdzony',
   },
 
   // Groups

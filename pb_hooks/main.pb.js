@@ -1,4 +1,4 @@
-// PocketBase v0.36+ (JSVM hooks)
+// PocketBase v0.38+ (JSVM hooks)
 // Endpoint: POST /api/ai/chat
 // Klucz API nigdy nie opuszcza serwera.
 
@@ -597,7 +597,7 @@ onRecordAuthRequest((e) => {
 onRecordDeleteRequest((e) => {
     e.next();
     const userId = e.record.get("id");
-    const db = e.app.db ? e.app.db() : $app.db();
+    const db = e.app.db();
 
     try {
         // 1. Delete all comments authored by the user
@@ -907,13 +907,13 @@ onRecordCreateRequest(function(e) {
     }
 
     const wsId = record.get("workspace");
-    if (!wsId) throw new Error("Workspace ID is required");
+    if (!wsId) throw new BadRequestError("Workspace ID is required");
 
     let ws;
     try {
         ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
     } catch(err) {
-        throw new Error("Workspace not found");
+        throw new BadRequestError("Workspace not found");
     }
     let hasPermission = false;
     
@@ -922,7 +922,7 @@ onRecordCreateRequest(function(e) {
     }
 
     if (record.get("user") === ws.get("owner")) {
-        throw new Error("Właściciel jest już członkiem tego obszaru roboczego. / The owner is already a member of this workspace.");
+        throw new BadRequestError("Właściciel jest już członkiem tego obszaru roboczego. / The owner is already a member of this workspace.");
     }
     try {
         const admins = e.app.findRecordsByFilter(
@@ -935,7 +935,7 @@ onRecordCreateRequest(function(e) {
     } catch(err) {}
 
     if (!hasPermission) {
-        throw new Error("You don't have permission to add workspace members");
+        throw new BadRequestError("You don't have permission to add workspace members");
     }
 
     // --- ENFORCE MEMBER TIER LIMITS ---
@@ -1094,7 +1094,7 @@ onRecordDeleteRequest((e) => {
     // Users can delete their own membership to leave
     if (record.get("user") === authRecord.id) return e.next();
 
-    throw new Error("You don't have permission to delete workspace members");
+    throw new BadRequestError("You don't have permission to delete workspace members");
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
@@ -1301,7 +1301,7 @@ onRecordCreateRequest(function(e) {
     var maxV = Number(limits.maxVariablesPerProcess) || 999999;
     var maxC = Number(limits.maxChecklistItemsPerNode) || 999999;
 
-    console.log("CREATE HOOK DEBUG: nodesCount=" + nodesCount + ", nodesArray.length=" + nodesArray.length + ", typeof nodesRaw=" + typeof nodesRaw + ", maxN=" + maxN);
+    console.log("CREATE HOOK DEBUG: nodesCount=" + nodesCount + ", nodesArray.length=" + nodesArray.length + ", maxN=" + maxN);
 
     if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesów nie jest dostępna w Twoim planie. / Subworkflows not available in your plan.");
     if (nodesCount > maxN) throw new BadRequestError("Limit węzłów (" + maxN + ") osiągnięty. / Nodes limit (" + maxN + ") reached.");
@@ -1632,7 +1632,7 @@ routerAdd("GET", "/api/workspace-stats", (e) => {
         const bindParams = {};
         idArray.forEach(function(id, i) { bindParams["id" + i] = id; });
 
-        const db = e.app.db ? e.app.db() : $app.db();
+        const db = e.app.db();
 
         const processStats = {};
         const pRows = arrayOf(new DynamicModel({ workspace: "", cnt: 0 }));
@@ -1703,7 +1703,7 @@ routerAdd("GET", "/api/folder-stats/{workspaceId}", (e) => {
         }
         // ----------------------
 
-        const db = e.app.db ? e.app.db() : $app.db();
+        const db = e.app.db();
         // Zliczamy procesy dla poszczegolnych folderow (group) w danym workspace
         // Zabezpieczamy `group` znakami ucieczki, ponieważ jest to słowo kluczowe w SQL.
         // Ignorujemy procesy, ktore nie maja przypisanej grupy (group = '').
@@ -1733,7 +1733,7 @@ routerAdd("GET", "/api/user-stats", (e) => {
 
     try {
         const userId = e.auth.id;
-        const db = e.app.db ? e.app.db() : $app.db();
+        const db = e.app.db();
 
         let ownedWorkspacesCount = 0;
         const wRows = arrayOf(new DynamicModel({ cnt: 0 }));
@@ -1781,7 +1781,7 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
         const userId = e.auth.id;
 
         // 1. Get all workspaces the user has access to (owner or active member)
-        const db = e.app.db ? e.app.db() : $app.db();
+        const db = e.app.db();
         const myWorkspaces = arrayOf(new DynamicModel({ id: "", owner: "" }));
         db.newQuery("SELECT id, owner FROM WORKFLOW_workspaces WHERE owner = {:user} OR id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:user} AND status = 'active')")
             .bind({ user: userId })
@@ -2207,7 +2207,7 @@ onRecordDeleteRequest((e) => {
     try {
         const processId = e.record.id;
         const workspaceId = e.record.get("workspace");
-        const db = e.app.db ? e.app.db() : $app.db();
+        const db = e.app.db();
 
         // 1. Delete versions & comments
         db.newQuery("DELETE FROM WORKFLOW_versions WHERE process = {:processId}").bind({ processId: processId }).execute();
@@ -2338,7 +2338,7 @@ routerAdd("POST", "/api/ai/delete-account", (e) => {
         }
         
         const userId = authRecord.get("id");
-        const app = e.app ? e.app : $app;
+        const app = e.app;
         
         // 1. Delete user's comments
         const comments = app.findRecordsByFilter("WORKFLOW_comments", "author = {:userId}", "", 10000, 0, { userId: userId });
@@ -2669,12 +2669,12 @@ onRecordUpdateRequest((e) => {
         );
         if (adminsOrEditors && adminsOrEditors.length > 0) return e.next();
     } catch(err) {}
-    throw new Error("Tylko admin lub edytor może edytować grupy.");
+    throw new BadRequestError("Tylko admin lub edytor może edytować grupy. / Only admin or editor can edit groups.");
 }, "WORKFLOW_groups");
 
 onRecordDeleteRequest((e) => {
     const wsId = e.record.get("workspace");
-    if (!wsId || !e.auth) throw new Error("Unauthorized");
+    if (!wsId || !e.auth) throw new BadRequestError("Unauthorized");
     try {
         const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
         if (ws.get("owner") === e.auth.id) return e.next();
@@ -2686,7 +2686,7 @@ onRecordDeleteRequest((e) => {
         );
         if (admins && admins.length > 0) return e.next();
     } catch(err) {}
-    throw new Error("Tylko admin może usuwać grupy.");
+    throw new BadRequestError("Tylko admin może usuwać grupy. / Only admin can delete groups.");
 }, "WORKFLOW_groups");
 
 // =====================================================
@@ -2700,7 +2700,7 @@ onRecordUpdateRequest((e) => {
         if (String(original.get("tier")) !== String(record.get("tier")) || 
             String(original.get("tier_expires_at")) !== String(record.get("tier_expires_at")) ||
             String(original.get("role")) !== String(record.get("role"))) {
-            throw new Error("Nie możesz samodzielnie modyfikować swojego planu / ról.");
+            throw new BadRequestError("Nie możesz samodzielnie modyfikować swojego planu / ról. / You cannot modify your own plan or roles.");
         }
     }
     return e.next();
@@ -2728,7 +2728,7 @@ onRecordCreateRequest(function(e) {
     } catch(err) {}
     if (maxWorkspaces < 999999) {
         try {
-            var db = e.app.db ? e.app.db() : $app.db();
+            var db = e.app.db();
             var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
             db.newQuery('SELECT COUNT(*) as cnt FROM WORKFLOW_workspaces WHERE owner = {:owner}').bind({ owner: ownerId }).all(wRows);
             var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
@@ -2756,7 +2756,7 @@ onRecordCreateRequest(function(e) {
         var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
         if (configs && configs.length > 0) maxGroups = Number(configs[0].get("max_groups_per_workspace")) || 2;
         if (maxGroups < 999999) {
-            var db = e.app.db ? e.app.db() : $app.db();
+            var db = e.app.db();
             var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
             db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_process_groups WHERE workspace = {:ws}").bind({ ws: wsId }).all(wRows);
             var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
@@ -2785,7 +2785,7 @@ onRecordCreateRequest(function(e) {
         var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
         if (configs && configs.length > 0) maxComments = Number(configs[0].get("max_comments_per_process")) || 10;
         if (maxComments < 999999) {
-            var db = e.app.db ? e.app.db() : $app.db();
+            var db = e.app.db();
             var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
             db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_comments WHERE process = {:proc}").bind({ proc: processId }).all(wRows);
             var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
@@ -2814,7 +2814,7 @@ onRecordCreateRequest(function(e) {
         var configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
         if (configs && configs.length > 0) maxVersions = Number(configs[0].get("max_versions_per_process")) || 5;
         if (maxVersions < 999999) {
-            var db = e.app.db ? e.app.db() : $app.db();
+            var db = e.app.db();
             var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
             db.newQuery("SELECT COUNT(*) as cnt FROM WORKFLOW_versions WHERE process = {:proc}").bind({ proc: processId }).all(wRows);
             var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;

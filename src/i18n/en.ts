@@ -260,6 +260,7 @@ export const en = {
     createDescription: 'A Workspace is an isolated space where you can create processes and invite team members.',
     createError: 'An error occurred while creating the Workspace. Please try again.',
     namePlaceholder: 'e.g. My Company Inc.',
+    checkInvitationsTab: 'Check the Invitations tab.',
   },
   members: {
     inviteMember: 'Invite member',
@@ -286,6 +287,7 @@ export const en = {
     inviteSuccessExisting: 'Invitation sent!',
     inviteSuccessNew: 'The user doesn\'t have an account yet. The invitation has been saved — they will see it as soon as they register on GRYF.AI.',
     status: 'Status',
+    memberApproved: 'Member approved',
   },
   groups: {
     title: 'Manage Groups',
