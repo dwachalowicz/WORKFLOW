@@ -2447,6 +2447,7 @@ cronAdd("cleanUnverifiedUsers", "0 0 * * *", () => {
 // HOOK: Notifications for Invitations & Roles
 // =====================================================
 onRecordCreateRequest((e) => {
+    e.next();
     const record = e.record;
     if (record.get("status") !== "pending") return;
     
@@ -2478,6 +2479,7 @@ onRecordCreateRequest((e) => {
 }, "WORKFLOW_workspace_members");
 
 onRecordUpdateRequest((e) => {
+    e.next();
     const record = e.record;
     
     try {
