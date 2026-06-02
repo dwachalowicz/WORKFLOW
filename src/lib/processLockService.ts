@@ -107,6 +107,7 @@ export async function releaseLock(processId: string, userId: string): Promise<vo
       method: 'POST',
       body: { processId },
       requestKey: null,
+      keepalive: true,
     });
   } catch (unlockErr) {
     const unlockError = unlockErr as { status?: number; isAbort?: boolean };

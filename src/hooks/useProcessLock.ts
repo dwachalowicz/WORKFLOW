@@ -7,6 +7,7 @@ import i18n from '@/i18n/config';
 export function useProcessLock(urlProcessId: string | undefined, userId: string | undefined) {
   const [lockInfo, setLockInfo] = useState<ProcessLock | null>(null);
   const heartbeatCleanupRef = useRef<(() => void) | null>(null);
+  const recheckIntervalRef = useRef<number | null>(null);
 
   const evaluateLock = useCallback(async () => {
     if (!urlProcessId || !userId) return;
@@ -23,6 +24,10 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
         if (!heartbeatCleanupRef.current) {
           heartbeatCleanupRef.current = startHeartbeat(urlProcessId);
         }
+        if (recheckIntervalRef.current) {
+          clearInterval(recheckIntervalRef.current);
+          recheckIntervalRef.current = null;
+        }
       } else {
         // Locked by someone else → view-only mode
         setLockInfo(existing);
@@ -31,6 +36,12 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
         if (heartbeatCleanupRef.current) {
           heartbeatCleanupRef.current();
           heartbeatCleanupRef.current = null;
+        }
+        // Start an interval to re-evaluate the lock periodically in case it expired on the server
+        if (!recheckIntervalRef.current) {
+          recheckIntervalRef.current = window.setInterval(() => {
+            evaluateLock().catch(console.error);
+          }, 30000); // Check every 30 seconds
         }
       }
     } else {
@@ -44,6 +55,10 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
         // Start heartbeat if not already started
         if (!heartbeatCleanupRef.current) {
           heartbeatCleanupRef.current = startHeartbeat(urlProcessId);
+        }
+        if (recheckIntervalRef.current) {
+          clearInterval(recheckIntervalRef.current);
+          recheckIntervalRef.current = null;
         }
       }
     }
@@ -71,6 +86,10 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
       if (heartbeatCleanupRef.current) {
         heartbeatCleanupRef.current();
         heartbeatCleanupRef.current = null;
+      }
+      if (recheckIntervalRef.current) {
+        clearInterval(recheckIntervalRef.current);
+        recheckIntervalRef.current = null;
       }
       if (urlProcessId && userId) {
         releaseLock(urlProcessId, userId);
