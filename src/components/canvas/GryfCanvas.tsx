@@ -315,6 +315,13 @@ export const GryfCanvas = () => {
     }
   }, [menuConfig, addNode, screenToFlowPosition, deleteElements, getNextUniqueName, t]);
 
+  const isValidConnection = useCallback((connection: Connection) => {
+    // Prevent self-connections
+    if (connection.source === connection.target) return false;
+
+    return true;
+  }, []);
+
   const onReconnect = useCallback(
     (oldEdge: Edge, newConnection: Connection) => {
       // Validate the new connection before reconnecting
@@ -324,13 +331,6 @@ export const GryfCanvas = () => {
     },
     [setEdges, isValidConnection]
   );
-
-  const isValidConnection = useCallback((connection: Connection) => {
-    // Prevent self-connections
-    if (connection.source === connection.target) return false;
-
-    return true;
-  }, []);
 
   return (
     <div className="flex-1 h-full w-full relative" style={{ touchAction: 'none' }}>
@@ -355,7 +355,7 @@ export const GryfCanvas = () => {
         connectionMode={ConnectionMode.Strict}
         nodesDraggable={!isViewMode}
         nodesConnectable={!isViewMode}
-        multiSelectionKeyCode="Shift"
+        multiSelectionKeyCode={null}
         selectionOnDrag={false}
         panOnDrag
         zoomOnPinch
