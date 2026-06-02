@@ -23,9 +23,12 @@ interface NotificationRecord {
   created: string;
 }
 
+import { useNavigate } from 'react-router-dom';
+
 export const NotificationsTab = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -141,6 +144,12 @@ export const NotificationsTab = () => {
     }
   };
 
+  const handleCardClick = (link?: string) => {
+    if (link) {
+      navigate(link);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
@@ -179,14 +188,17 @@ export const NotificationsTab = () => {
                 notifications.map((n) => (
                   <Card 
                     key={n.id} 
-                    className={`p-5 flex items-start gap-4 transition-all duration-300 ${!n.isRead ? 'border-brand-gold/50 shadow-md shadow-brand-gold/5 bg-brand-gold/5' : 'border-border/50 bg-secondary/10 opacity-70 hover:opacity-100'}`}
+                    className={`p-5 flex items-start gap-4 transition-all duration-300 ${!n.isRead ? 'border-brand-gold/50 shadow-md shadow-brand-gold/5 bg-brand-gold/5' : 'border-border/50 bg-secondary/10 opacity-70 hover:opacity-100'} ${n.link ? 'hover:border-brand-gold/80' : ''}`}
                   >
                     <div className="mt-1 shrink-0">
                       {getIcon(n.type)}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div 
+                      className={`flex-1 min-w-0 ${n.link ? 'cursor-pointer' : ''}`}
+                      onClick={() => handleCardClick(n.link)}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                        <h3 className={`font-semibold text-lg ${!n.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        <h3 className={`font-semibold text-lg ${!n.isRead ? 'text-foreground' : 'text-muted-foreground'} ${n.link ? 'hover:text-brand-gold transition-colors' : ''}`}>
                           {parseBilingualText(n.title, i18n.language)}
                         </h3>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">

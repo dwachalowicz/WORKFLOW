@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl } from '@/lib/pocketbase';
 import { fetchComments, addComment, deleteComment, toggleResolveComment, type Comment } from '@/lib/commentService';
-import { Send, Trash2, CheckCircle2, Circle, Loader2, ChevronDown } from 'lucide-react';
+import { Send, Trash2, CheckCircle2, Circle, Loader2, ChevronDown, Reply } from 'lucide-react';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { useCanvasStore } from "@/store/canvasStore";
@@ -14,6 +14,105 @@ import { usePBSubscription } from '@/hooks/usePBSubscription';
 interface NodeCommentsProps {
   nodeId: string;
 }
+
+const formatCommentDate = (dateStr: string | undefined, t: any) =>
+  formatDate(dateStr, { relative: true, t, noDateKey: 'comments.noDate' });
+
+// --- Wydzielony komponent pojedynczego komentarza (wzorzec projektowy) ---
+interface CommentItemProps {
+  comment: Comment;
+  isViewMode: boolean;
+  user: any;
+  onResolve: (c: Comment) => void;
+  onDelete: (id: string) => void;
+  onReply: (parentId: string) => void;
+  isChild?: boolean;
+}
+
+const CommentItem = ({ comment, isViewMode, user, onResolve, onDelete, onReply, isChild }: CommentItemProps) => {
+  const { t } = useTranslation();
+  const author = comment.expand?.author;
+  const isOwn = author?.id === user?.id;
+  const dateStr = comment.created || comment.updated || (comment as any).createdAt || (comment as any).created_at || (comment as any).createdat;
+  const dateText = formatCommentDate(dateStr, t);
+  const parentIdForReply = isChild ? (comment.parent_id || comment.id) : comment.id;
+
+  return (
+    <div
+      className={`group relative p-3 rounded-xl border transition-all duration-200 ${
+        comment.resolved
+          ? 'bg-secondary/20 border-border/20 opacity-50'
+          : 'bg-card border-border/40 hover:border-border/60'
+      } ${isChild ? 'ml-8 relative before:absolute before:-left-4 before:top-5 before:w-4 before:h-px before:bg-border/50' : ''}`}
+    >
+      <div className="flex items-start gap-2.5">
+        {/* Avatar */}
+        <div className="w-6 h-6 rounded-full bg-secondary overflow-hidden shrink-0 mt-0.5 ring-1 ring-border/30">
+          {author?.avatar ? (
+            <img loading="lazy" src={getAvatarUrl(author, 100)} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-muted-foreground bg-secondary">
+              {(author?.name || author?.email || 'U').charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-foreground truncate">
+              {author?.name || author?.email || t('common.user')}
+            </span>
+            {dateText && (
+              <span className="text-[10px] text-muted-foreground/50 shrink-0">
+                {dateText}
+              </span>
+            )}
+          </div>
+          <p className={`text-xs leading-relaxed mt-0.5 break-words ${comment.resolved ? 'line-through text-muted-foreground' : 'text-foreground/80'}`}>
+            {comment.content}
+          </p>
+        </div>
+
+        {/* Actions — visible on hover */}
+        {!isViewMode && (
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <SimpleTooltip content={t('comments.reply', 'Odpowiedz')}>
+              <button
+                onClick={() => onReply(parentIdForReply)}
+                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              >
+                <Reply size={12} className="text-muted-foreground" />
+              </button>
+            </SimpleTooltip>
+            <SimpleTooltip content={comment.resolved ? t('comments.unresolve', 'Cofnij rozwiązanie') : t('comments.resolve', 'Rozwiąż')}>
+              <button
+                onClick={() => onResolve(comment)}
+                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              >
+                {comment.resolved ? (
+                  <Circle size={12} className="text-muted-foreground" />
+                ) : (
+                  <CheckCircle2 size={12} className="text-emerald-500" />
+                )}
+              </button>
+            </SimpleTooltip>
+            {isOwn && (
+              <SimpleTooltip content={t('comments.deleteComment', 'Usuń komentarz')}>
+                <button
+                  onClick={() => onDelete(comment.id)}
+                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-destructive/10 transition-colors"
+                >
+                  <Trash2 size={12} className="text-destructive/70" />
+                </button>
+              </SimpleTooltip>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   const { t } = useTranslation();
@@ -27,7 +126,13 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   const [newComment, setNewComment] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+  
+  // Wątki (odpowiedzi)
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const replyInputRef = useRef<HTMLInputElement>(null);
 
   const unresolvedCount = comments.filter(c => !c.resolved).length;
 
@@ -55,9 +160,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   const commentOptions = useMemo(() => ({ filter: processId ? `process = "${processId}"` : '' }), [processId]);
   
   const handleCommentRealtime = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
-    // Only refresh if the comment belongs to this node
     if (e.record && e.record.node_id === nodeId) {
-      // Re-fetch comments to get expanded author data
       if (processId) {
         fetchComments(processId, nodeId)
           .then(setComments)
@@ -79,7 +182,6 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
       });
       setNewComment('');
       inputRef.current?.focus();
-      // Refresh canvas badge counts
       refreshCommentCounts();
     } catch (err) {
       console.error('Error adding comment:', err);
@@ -89,10 +191,30 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
     }
   };
 
+  const handleSendReply = async (parentId: string) => {
+    if (!replyText.trim() || !user || !processId) return;
+    setIsSending(true);
+    try {
+      const comment = await addComment(processId, nodeId, user.id, replyText.trim(), parentId);
+      setComments(prev => {
+        if (prev.some(c => c.id === comment.id)) return prev;
+        return [comment, ...prev];
+      });
+      setReplyText('');
+      setReplyingToId(null);
+      refreshCommentCounts();
+    } catch (err) {
+      console.error('Error adding reply:', err);
+      useToastStore.getState().showToast(t('common.error'), 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleDelete = async (commentId: string) => {
     try {
       await deleteComment(commentId);
-      setComments(prev => prev.filter(c => c.id !== commentId));
+      setComments(prev => prev.filter(c => c.id !== commentId && c.parent_id !== commentId));
       refreshCommentCounts();
     } catch (err) {
       console.error('Error deleting comment:', err);
@@ -111,8 +233,17 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
     }
   };
 
-  const formatCommentDate = (dateStr?: string) =>
-    formatDate(dateStr, { relative: true, t, noDateKey: 'comments.noDate' });
+  const handleReplyClick = (parentId: string) => {
+    setReplyingToId(parentId);
+    setReplyText('');
+    setTimeout(() => {
+      replyInputRef.current?.focus();
+    }, 50);
+  };
+
+  // Grupowanie na rodziców i dzieci
+  const topLevelComments = comments.filter(c => !c.parent_id);
+  const getChildren = (parentId: string) => comments.filter(c => c.parent_id === parentId).reverse();
 
   return (
     <div className="bg-secondary/20 rounded-xl border border-border/40 p-3">
@@ -139,7 +270,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
             </p>
           ) : (
             <>
-              {/* Input */}
+              {/* Główny Input */}
               {!isViewMode && (
                 <div className="flex items-center gap-2 bg-secondary/50 rounded-xl px-3 py-2.5 border border-border/30">
                   <input
@@ -163,7 +294,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                 </div>
               )}
 
-              {/* Comments List */}
+              {/* Lista komentarzy */}
               {isLoading ? (
                 <div className="flex justify-center py-4">
                   <GryfSpinner size={18} />
@@ -171,82 +302,71 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
               ) : comments.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-3 opacity-60">{t('comments.noComments')}</p>
               ) : (
-                <div className="space-y-2 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-border pr-1">
-                  {comments.map(comment => {
-                    const author = comment.expand?.author;
-                    const isOwn = author?.id === user?.id;
-                    const dateStr = comment.created || comment.updated || (comment as Record<string, unknown>).createdAt || (comment as Record<string, unknown>).created_at || (comment as Record<string, unknown>).createdat as string;
-                    const dateText = formatCommentDate(dateStr);
+                <div className="space-y-4 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-border pr-1">
+                  {topLevelComments.map(parent => (
+                    <div key={parent.id} className="space-y-2 relative">
+                      {/* Główny komentarz */}
+                      <CommentItem
+                        comment={parent}
+                        isViewMode={isViewMode}
+                        user={user}
+                        onResolve={handleToggleResolve}
+                        onDelete={handleDelete}
+                        onReply={handleReplyClick}
+                      />
 
-                    return (
-                      <div
-                        key={comment.id}
-                        className={`group relative p-3 rounded-xl border transition-all duration-200 ${
-                          comment.resolved
-                            ? 'bg-secondary/20 border-border/20 opacity-50'
-                            : 'bg-card border-border/40 hover:border-border/60'
-                        }`}
-                      >
-                        <div className="flex items-start gap-2.5">
-                          {/* Avatar */}
-                          <div className="w-6 h-6 rounded-full bg-secondary overflow-hidden shrink-0 mt-0.5 ring-1 ring-border/30">
-                            {author?.avatar ? (
-                              <img loading="lazy" src={getAvatarUrl(author, 100)} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-muted-foreground bg-secondary">
-                                {(author?.name || author?.email || 'U').charAt(0).toUpperCase()}
-                              </div>
-                            )}
+                      {/* Odpowiedzi i Input odpowiedzi */}
+                      <div className="space-y-2 relative">
+                        {/* Linia łącząca odpowiedzi */}
+                        {getChildren(parent.id).length > 0 && (
+                          <div className="absolute left-3 top-0 bottom-4 w-px bg-border/30 -z-10"></div>
+                        )}
+
+                        {getChildren(parent.id).map(child => (
+                          <CommentItem
+                            key={child.id}
+                            comment={child}
+                            isViewMode={isViewMode}
+                            user={user}
+                            onResolve={handleToggleResolve}
+                            onDelete={handleDelete}
+                            onReply={handleReplyClick}
+                            isChild={true}
+                          />
+                        ))}
+
+                        {/* Input do odpowiedzi na ten wątek */}
+                        {replyingToId === parent.id && !isViewMode && (
+                          <div className="ml-8 relative flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2 border border-border/30 animate-in fade-in slide-in-from-top-1 duration-200">
+                            {/* Pozioma kreska nawiązująca do wątku */}
+                            <div className="absolute -left-4 top-1/2 w-4 h-px bg-border/50"></div>
+                            <input
+                              ref={replyInputRef}
+                              type="text"
+                              value={replyText}
+                              onChange={e => setReplyText(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleSendReply(parent.id);
+                                if (e.key === 'Escape') {
+                                  setReplyingToId(null);
+                                  setReplyText('');
+                                }
+                              }}
+                              placeholder={t('comments.replyPlaceholder', 'Napisz odpowiedź...')}
+                              className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
+                            />
+                            <button
+                              onClick={() => handleSendReply(parent.id)}
+                              disabled={!replyText.trim() || isSending}
+                              className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-brand-gold hover:bg-secondary transition-all disabled:opacity-30"
+                            >
+                              {isSending && replyingToId === parent.id ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                            </button>
                           </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-bold text-foreground truncate">
-                                {author?.name || author?.email || t('common.user')}
-                              </span>
-                              {dateText && (
-                                <span className="text-[10px] text-muted-foreground/50 shrink-0">
-                                  {dateText}
-                                </span>
-                              )}
-                            </div>
-                            <p className={`text-xs leading-relaxed mt-0.5 ${comment.resolved ? 'line-through text-muted-foreground' : 'text-foreground/80'}`}>
-                              {comment.content}
-                            </p>
-                          </div>
-
-                          {/* Actions — visible on hover */}
-                          {!isViewMode && (
-                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                              <SimpleTooltip content={comment.resolved ? t('comments.unresolve') : t('comments.resolve')}>
-                                <button
-                                  onClick={() => handleToggleResolve(comment)}
-                                  className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-                                >
-                                  {comment.resolved ? (
-                                    <Circle size={12} className="text-muted-foreground" />
-                                  ) : (
-                                    <CheckCircle2 size={12} className="text-emerald-500" />
-                                  )}
-                                </button>
-                              </SimpleTooltip>
-                              {isOwn && (
-                                <SimpleTooltip content={t('comments.deleteComment')}>
-                                  <button
-                                    onClick={() => handleDelete(comment.id)}
-                                    className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-destructive/10 transition-colors"
-                                  >
-                                    <Trash2 size={12} className="text-destructive/70" />
-                                  </button>
-                                </SimpleTooltip>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        )}
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
             </>

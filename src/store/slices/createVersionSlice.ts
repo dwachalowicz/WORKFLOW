@@ -75,7 +75,7 @@ export const createVersionSlice: StateCreator<CanvasState, [], [], VersionSlice>
         filter: `process = "${sanitizeForFilter(currentProcessId)}"`,
         sort: '-version_number',
         expand: 'created_by',
-        fields: 'id,version_number,label,created,expand.created_by.name,expand.created_by.email,expand.created_by.avatar',
+        fields: 'id,version_number,label,created,expand.created_by.id,expand.created_by.name,expand.created_by.email,expand.created_by.avatar',
         requestKey: null,
       });
       set({ versions: records, isLoadingVersions: false });

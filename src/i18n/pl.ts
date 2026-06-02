@@ -1522,6 +1522,25 @@ export const pl = {
       text13: "Sprzedaż",
       text14: "Dział IT"
     },
+    collaborationsection: {
+      html_1: "Współpraca",
+      html_2: "w przestrzeniach roboczych",
+      text2: "Zaproś zespół i pracujcie razem w zorganizowanych środowiskach (Workspace). Wymieniajcie uwagi bezpośrednio na płótnie, gdzie każdy element ma swoje miejsce.",
+      text3: "Błyskawicznie dołączaj użytkowników przy użyciu bezpiecznego kodu zaproszenia.",
+      text4: "Utrzymuj porządek, wydzielając osobne przestrzenie robocze.",
+      text5: "Dyskutuj, sugeruj i rozwiązuj problemy dzięki wbudowanemu systemowi komentarzy.",
+      text6: "Zarządzaj dostępem per Workspace. Nadawaj role: Edytor, Obserwator lub Administrator.",
+      text7: "DODAJ KOMENTARZ",
+      text8: "Do weryfikacji",
+      text9: "Marek Janicki",
+      text10: "Pamiętaj, że umowa wymaga podpisu dyrektora. Dodać tu wymóg?",
+      text11: "Ewa Kowalczyk",
+      text12: "Jasne, już zaktualizowałam checklistę dla tego etapu.",
+      text13: "Rozwiąż",
+      text14: "2h temu",
+      text15: "10 min temu",
+      text16: "DO ZROBIENIA"
+    },
     radialmenusection: {
       text1: "Odkryj",
       text2: "radialne menu",

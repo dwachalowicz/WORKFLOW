@@ -90,6 +90,7 @@ export interface WorkflowComment {
   id: string;
   process: string;
   node_id: string;
+  parent_id?: string;
   author: string;
   content: string;
   resolved: boolean;
@@ -194,6 +195,18 @@ export interface LandingTranslation {
   updated: string;
 }
 
+export interface WorkflowNotification {
+  id: string;
+  user: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  link?: string;
+  created: string;
+  updated: string;
+}
+
 // ── Typed PocketBase client ──────────────────────────────────
 
 interface TypedPocketBase extends PocketBase {
@@ -204,6 +217,7 @@ interface TypedPocketBase extends PocketBase {
   collection(idOrName: 'WORKFLOW_workspace_members'): RecordService<WorkspaceMember>;
   collection(idOrName: 'WORKFLOW_process_groups'): RecordService<ProcessGroup>;
   collection(idOrName: 'WORKFLOW_comments'): RecordService<WorkflowComment>;
+  collection(idOrName: 'WORKFLOW_notifications'): RecordService<WorkflowNotification>;
   collection(idOrName: 'WORKFLOW_templates'): RecordService<WorkflowTemplate>;
   collection(idOrName: 'WORKFLOW_groups'): RecordService<WfGroup>;
   collection(idOrName: 'WORKFLOW_process_map_layouts'): RecordService<ProcessMapLayout>;

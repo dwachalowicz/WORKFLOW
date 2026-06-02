@@ -6,7 +6,7 @@ export const StatsSection: React.FC = () => {
   const { t, language } = useLandingTranslation();
 
   return (
-    <section className="w-full bg-transparent pt-4 pb-24 md:py-24 px-4 text-[#1a1a1a]">
+    <section className="w-full bg-transparent pt-4 pb-16 md:py-24 px-4 text-[#1a1a1a]">
       <div className="max-w-[1600px] mx-auto px-[5%] md:px-16 flex flex-col-reverse md:flex-row items-center justify-between relative">
         
         {/* Left Content (Text) */}
@@ -159,6 +159,9 @@ export const StatsSection: React.FC = () => {
           
           {/* Connection Node (Top) */}
           <div id="node-stats-top" className="absolute -top-[8px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-brand-gold z-20 hidden md:block"></div>
+          
+          {/* Connection Node (Bottom) */}
+          <div id="node-stats-bottom" className="absolute -bottom-[8px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-brand-gold z-20 hidden md:block"></div>
         </div>
 
       </div>

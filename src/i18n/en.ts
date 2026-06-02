@@ -1439,6 +1439,25 @@ export const en = {
       "text13": "Sales",
       "text14": "IT Dept"
     },
+    "collaborationsection": {
+      html_1: "Collaboration",
+      html_2: "in workspaces",
+      "text2": "Invite your team and work together in organized environments (Workspaces). Exchange feedback directly on the canvas, where every element has its place.",
+      "text3": "Instantly onboard users using a secure invitation code.",
+      "text4": "Keep things organized by creating separate workspaces.",
+      "text5": "Discuss, suggest, and solve issues using the built-in comment system.",
+      "text6": "Manage access per Workspace. Assign roles: Editor, Viewer, or Administrator.",
+      "text7": "ADD COMMENT",
+      "text8": "For review",
+      "text9": "John Smith",
+      "text10": "Remember that this contract requires the director's signature. Should we add it?",
+      "text11": "Emma White",
+      "text12": "Sure, I already updated the checklist for this stage.",
+      "text13": "Resolve",
+      "text14": "2h ago",
+      "text15": "10m ago",
+      "text16": "TODO"
+    },
     "radialmenusection": {
       "text1": "Discover the",
       "text2": "radial menu",

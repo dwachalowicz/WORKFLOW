@@ -11,6 +11,7 @@ const FeaturesSection = lazy(() => import('./FeaturesSection').then(m => ({ defa
 const WorkflowSection = lazy(() => import('./WorkflowSection').then(m => ({ default: m.WorkflowSection })));
 const OrganizationSection = lazy(() => import('./OrganizationSection').then(m => ({ default: m.OrganizationSection })));
 const StatsSection = lazy(() => import('./StatsSection').then(m => ({ default: m.StatsSection })));
+const CollaborationSection = lazy(() => import('./CollaborationSection').then(m => ({ default: m.CollaborationSection })));
 const StepsSection = lazy(() => import('./StepsSection').then(m => ({ default: m.StepsSection })));
 const CasesSection = lazy(() => import('./CasesSection').then(m => ({ default: m.CasesSection })));
 const PricingSection = lazy(() => import('./PricingSection').then(m => ({ default: m.PricingSection })));
@@ -65,6 +66,7 @@ export const LandingPage: React.FC = () => {
               <WorkflowSection />
               <OrganizationSection />
               <StatsSection />
+              <CollaborationSection />
             </div>
             <StepsSection />
             <CasesSection />

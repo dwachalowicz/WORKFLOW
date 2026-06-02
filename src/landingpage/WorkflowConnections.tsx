@@ -41,8 +41,10 @@ export const WorkflowConnections: React.FC<WorkflowConnectionsProps> = ({ contai
       const n3 = getPos('node-org-top');
       const n4 = getPos('node-org-bottom');
       const n5 = getPos('node-stats-top');
+      const n6 = getPos('node-stats-bottom');
+      const n7 = getPos('node-collab-top');
 
-      const allNodes = [n_r_b, n_f_t, n0, n1, n2, n3, n4, n5];
+      const allNodes = [n_r_b, n_f_t, n0, n1, n2, n3, n4, n5, n6, n7];
       if (allNodes.some(n => n === null)) return;
 
       setNodes(allNodes as Point[]);
@@ -52,6 +54,7 @@ export const WorkflowConnections: React.FC<WorkflowConnectionsProps> = ({ contai
         { start: n0!, end: n1!, isL2R: n0!.x < n1!.x },
         { start: n2!, end: n3!, isL2R: n2!.x < n3!.x },
         { start: n4!, end: n5!, isL2R: n4!.x < n5!.x },
+        { start: n6!, end: n7!, isL2R: n6!.x < n7!.x },
       ]);
     };
 
@@ -73,7 +76,7 @@ export const WorkflowConnections: React.FC<WorkflowConnectionsProps> = ({ contai
   const [dotPos, setDotPos] = useState({ x: 0, y: 0, opacity: 0 });
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    if (nodes.length < 8 || segments.length < 4) return;
+    if (nodes.length < 10 || segments.length < 5) return;
     
     // The total height of the container dictates the Y mapping
     const containerHeight = containerRef.current?.getBoundingClientRect().height || 0;

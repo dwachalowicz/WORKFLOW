@@ -64,7 +64,7 @@ export async function fetchCommentCounts(processId: string): Promise<Map<string,
  * Add a comment to a node.
  * Respects maxCommentsPerProcess tier limit.
  */
-export async function addComment(processId: string, nodeId: string, authorId: string, content: string): Promise<Comment> {
+export async function addComment(processId: string, nodeId: string, authorId: string, content: string, parentId?: string): Promise<Comment> {
   // Tier gate: maxCommentsPerProcess
   const user = useAuthStore.getState().user;
   const limits = getTierLimits(user?.tier);
@@ -77,17 +77,81 @@ export async function addComment(processId: string, nodeId: string, authorId: st
     throw new Error(i18n.t('tierLimits.commentLimitReached', { limit: limits.maxCommentsPerProcess }));
   }
 
-  const record = await pb.collection('WORKFLOW_comments').create({
+  const data: any = {
     process: processId,
     node_id: nodeId,
     author: authorId,
     content,
     resolved: false,
-  });
+  };
+  if (parentId) {
+    data.parent_id = parentId;
+  }
+
+  const record = await pb.collection('WORKFLOW_comments').create(data);
   // Fetch with expand to get author details
   const expanded = await pb.collection('WORKFLOW_comments').getOne(record.id, {
     expand: 'author',
   });
+
+  // --- Powiadomienia ---
+  try {
+    const process = await pb.collection('WORKFLOW_processes').getOne(processId, { requestKey: null });
+    const processName = process.name || 'Nieznany proces';
+    
+    if (!parentId) {
+      // Główny komentarz: do wszystkich w workspace lub do właściciela
+      const title = `Nowy komentarz / New Comment`;
+      const message = `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"`;
+      
+      if (process.workspace) {
+        const members = await pb.collection('WORKFLOW_workspace_members').getFullList({
+          filter: `workspace = "${process.workspace}"`,
+          requestKey: null,
+        });
+        
+        for (const member of members) {
+          if (member.user && member.user !== authorId) {
+            await pb.collection('WORKFLOW_notifications').create({
+              user: member.user,
+              title,
+              message,
+              type: 'info',
+              isRead: false,
+              link: `/app/${processId}`
+            });
+          }
+        }
+      } else {
+        if (process.owner && process.owner !== authorId) {
+          await pb.collection('WORKFLOW_notifications').create({
+            user: process.owner,
+            title,
+            message,
+            type: 'info',
+            isRead: false,
+            link: `/app/${processId}`
+          });
+        }
+      }
+    } else {
+      // Odpowiedź: do autora głównego komentarza
+      const parentComment = await pb.collection('WORKFLOW_comments').getOne(parentId, { requestKey: null });
+      if (parentComment.author && parentComment.author !== authorId) {
+        await pb.collection('WORKFLOW_notifications').create({
+          user: parentComment.author,
+          title: `Nowa odpowiedź / New Reply`,
+          message: `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"`,
+          type: 'info',
+          isRead: false,
+          link: `/app/${processId}`
+        });
+      }
+    }
+  } catch (notifErr) {
+    console.error('Failed to create comment notifications:', notifErr);
+  }
+
   return expanded as Comment;
 }
 
