@@ -141,7 +141,7 @@ export const PricingSection: React.FC = () => {
           {/* Medium Tier */}
           <div 
             className="border-4 border-brand-gold rounded-2xl overflow-hidden p-8 flex flex-col relative transform scale-105 z-10 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: 'url(/landingpage/bg-offer.webp)' }}
+            style={{ backgroundImage: 'url(/landingpage/bg-offer.png)' }}
           >
             <h3 className="text-2xl font-bold text-white mb-3">{isPL ? mediumPlan?.plan_name_pl : mediumPlan?.plan_name_en || 'Medium'}</h3>
             <p className="text-white/70 text-xs h-12 mb-8 leading-relaxed">

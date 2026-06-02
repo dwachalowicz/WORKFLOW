@@ -878,7 +878,13 @@ export const ProcessesTab = () => {
                 }`}
               >
                 {(activeWorkspace?.isLocked || activeWorkspace?.role === 'viewer') ? <Lock size={32} className="mb-3" /> : <Plus size={32} className="mb-3" />}
-                <span className="font-bold text-sm">{(activeWorkspace?.isLocked || activeWorkspace?.role === 'viewer') ? t('common.locked') : t('processes.createProcess')}</span>
+                <span className="font-bold text-sm">
+                  {activeWorkspace?.isLocked 
+                    ? t('common.locked') 
+                    : activeWorkspace?.role === 'viewer'
+                      ? t('tierLimits.readOnlyMode')
+                      : t('processes.createProcess')}
+                </span>
               </div>
 
               {currentFolderId === null && !isSearchActive && groups.map(group => (

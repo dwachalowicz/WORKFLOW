@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 interface ModalOverlayProps {
   isOpen: boolean
   onClose?: () => void
-  zIndex?: "default" | "high"
+  zIndex?: "default" | "high" | "highest"
   children: React.ReactNode
   /** If true, clicking the overlay calls onClose */
   closeOnOverlayClick?: boolean
@@ -38,7 +38,7 @@ export const ModalOverlay = ({
     <div
       className={cn(
         "fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4 overflow-y-auto",
-        zIndex === "high" ? "z-[200]" : "z-modal"
+        zIndex === "highest" ? "z-[300]" : zIndex === "high" ? "z-[200]" : "z-modal"
       )}
       onClick={closeOnOverlayClick && onClose ? (e) => { if (e.target === e.currentTarget) onClose() } : undefined}
     >

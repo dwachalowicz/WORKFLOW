@@ -81,7 +81,7 @@ export const TierComparisonModal = ({ isOpen, onClose, currentTier = 'FREE' }: T
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay isOpen={isOpen} onClose={onClose} closeOnOverlayClick>
+    <ModalOverlay isOpen={isOpen} onClose={onClose} closeOnOverlayClick zIndex="highest">
       <ModalContainer size="lg">
         <ModalHeader
           title={t('tierCompare.title')}

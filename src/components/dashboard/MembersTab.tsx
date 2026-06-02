@@ -34,20 +34,38 @@ export const MembersTab = () => {
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [isInviteMemberModalOpen, setIsInviteMemberModalOpen] = useState(false);
   const [processingMemberIds, setProcessingMemberIds] = useState<Set<string>>(new Set());
-  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
+  const [roleDropdownState, setRoleDropdownState] = useState<{ memberId: string; role: string; x: number; y: number } | null>(null);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close role dropdown on outside click
   useEffect(() => {
-    if (!editingRoleId) return;
+    if (!roleDropdownState) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
-        setEditingRoleId(null);
+        setRoleDropdownState(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingRoleId]);
+  }, [roleDropdownState]);
+
+  // Adjust dropdown position to stay within viewport
+  useLayoutEffect(() => {
+    const el = roleDropdownRef.current;
+    if (!el || !roleDropdownState) return;
+    const rect = el.getBoundingClientRect();
+    let newTop = roleDropdownState.y;
+    let newLeft = roleDropdownState.x;
+    if (newTop + rect.height > window.innerHeight) {
+      newTop = Math.max(0, roleDropdownState.y - rect.height - 40);
+    }
+    if (newLeft < 0) newLeft = 8;
+    if (newLeft + rect.width > window.innerWidth) {
+      newLeft = Math.max(0, window.innerWidth - rect.width - 8);
+    }
+    el.style.top = `${newTop}px`;
+    el.style.left = `${newLeft}px`;
+  }, [roleDropdownState]);
 
   const fetchMembers = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -288,12 +306,17 @@ export const MembersTab = () => {
                           {t('workspaces.roleOwner')}
                         </span>
                       ) : (
-                        <div className="relative" ref={editingRoleId === m.id ? roleDropdownRef : undefined}>
+                        <div className="relative">
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
                               if (!isAdminOrOwner || m.expand?.user?.id === user?.id) return;
-                              setEditingRoleId(editingRoleId === m.id ? null : m.id);
+                              if (roleDropdownState?.memberId === m.id) {
+                                setRoleDropdownState(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setRoleDropdownState({ memberId: m.id, role: m.role, x: rect.left, y: rect.bottom + 4 });
+                              }
                             }}
                             className={`text-xs font-bold px-2.5 py-1.5 rounded-full outline-none border inline-flex items-center gap-1 transition-colors ${
                               m.role === 'admin' ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' 
@@ -304,29 +327,6 @@ export const MembersTab = () => {
                             {m.role === 'admin' ? t('workspaces.roleAdmin') : m.role === 'editor' ? t('workspaces.roleEditor') : t('workspaces.roleViewer')}
                             {isAdminOrOwner && m.expand?.user?.id !== user?.id && <ChevronDown size={12} />}
                           </button>
-                          {editingRoleId === m.id && (
-                            <div className="absolute left-0 top-full mt-1 z-50 min-w-[120px] rounded-lg border border-border bg-popover shadow-lg py-1 animate-in fade-in-0 zoom-in-95">
-                              {(['admin', 'editor', 'viewer'] as const).map((role) => (
-                                <button
-                                  key={role}
-                                  type="button"
-                                  onClick={() => {
-                                    handleUpdateMemberRole(m.id, role);
-                                    setEditingRoleId(null);
-                                  }}
-                                  className={`w-full text-left text-xs font-semibold px-3 py-2 transition-colors hover:bg-secondary/80 ${
-                                    role === m.role ? 'bg-secondary/50' : ''
-                                  } ${
-                                    role === 'admin' ? 'text-brand-gold'
-                                    : role === 'editor' ? 'text-blue-400'
-                                    : 'text-muted-foreground'
-                                  }`}
-                                >
-                                  {role === 'admin' ? t('workspaces.roleAdmin') : role === 'editor' ? t('workspaces.roleEditor') : t('workspaces.roleViewer')}
-                                </button>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       )}
                     </td>
@@ -406,6 +406,34 @@ export const MembersTab = () => {
           }}
           workspaceId={activeWorkspace.id}
         />
+      )}
+
+      {roleDropdownState && (
+        <div 
+          ref={roleDropdownRef}
+          className="fixed z-50 min-w-[120px] rounded-lg border border-border bg-popover shadow-lg py-1 animate-in fade-in-0 zoom-in-95"
+          style={{ top: roleDropdownState.y, left: roleDropdownState.x }}
+        >
+          {(['admin', 'editor', 'viewer'] as const).map((role) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => {
+                handleUpdateMemberRole(roleDropdownState.memberId, role);
+                setRoleDropdownState(null);
+              }}
+              className={`w-full text-left text-xs font-semibold px-3 py-2 transition-colors hover:bg-secondary/80 ${
+                role === roleDropdownState.role ? 'bg-secondary/50' : ''
+              } ${
+                role === 'admin' ? 'text-brand-gold'
+                : role === 'editor' ? 'text-blue-400'
+                : 'text-muted-foreground'
+              }`}
+            >
+              {role === 'admin' ? t('workspaces.roleAdmin') : role === 'editor' ? t('workspaces.roleEditor') : t('workspaces.roleViewer')}
+            </button>
+          ))}
+        </div>
       )}
     </DashboardPageLayout>
   );

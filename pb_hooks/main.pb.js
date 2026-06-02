@@ -600,7 +600,6 @@ onRecordAuthRequest((e) => {
 // HOOK: Clean up required relations after User delete
 // =====================================================
 onRecordDeleteRequest((e) => {
-    e.next();
     const userId = e.record.get("id");
     const db = e.app.db();
 
@@ -611,8 +610,8 @@ onRecordDeleteRequest((e) => {
         // 2. Delete all versions created by the user
         db.newQuery("DELETE FROM WORKFLOW_versions WHERE created_by = {:userId}").bind({ userId: userId }).execute();
 
-        // 3. Clear locked_by and lastEditedBy references
-        db.newQuery("UPDATE WORKFLOW_processes SET locked_by = '' WHERE locked_by = {:userId}").bind({ userId: userId }).execute();
+        // 3. Clear locked_by, locked_at and lastEditedBy references
+        db.newQuery("UPDATE WORKFLOW_processes SET locked_by = '', locked_at = '' WHERE locked_by = {:userId}").bind({ userId: userId }).execute();
         db.newQuery("UPDATE WORKFLOW_processes SET lastEditedBy = '' WHERE lastEditedBy = {:userId}").bind({ userId: userId }).execute();
 
         // 4. Transfer ownership of orphaned processes in shared workspaces to the workspace owner
@@ -625,7 +624,10 @@ onRecordDeleteRequest((e) => {
         // 5. Delete user's workspace memberships and pending invitations
         db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE user = {:userId} OR invited_by = {:userId}").bind({ userId: userId }).execute();
 
-        // 6. Delete workspaces owned by the user and all their related records
+        // 6. Delete notifications for this user
+        db.newQuery("DELETE FROM WORKFLOW_notifications WHERE user = {:userId}").bind({ userId: userId }).execute();
+
+        // 7. Delete workspaces owned by the user and all their related records
         db.newQuery("DELETE FROM WORKFLOW_versions WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
         db.newQuery("DELETE FROM WORKFLOW_comments WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
         db.newQuery("DELETE FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
@@ -638,6 +640,8 @@ onRecordDeleteRequest((e) => {
     } catch (err) {
         console.error("Cleanup after user delete failed:", err);
     }
+
+    e.next();
 }, "WORKFLOW_users");
 
 // =====================================================
@@ -802,7 +806,11 @@ onRecordCreateRequest((e) => {
             html: html,
         });
 
-        e.app.newMailClient().send(message);
+        try {
+            e.app.newMailClient().send(message);
+        } catch (mailSendErr) {
+            console.log("Error sending invitation email: " + String(mailSendErr.message || mailSendErr));
+        }
 
         // Powiadomienie w aplikacji (tylko jeśli użytkownik istnieje w systemie)
         if (status === "pending" && record.get("user")) {
@@ -869,8 +877,12 @@ onRecordCreateRequest((e) => {
             html: html,
         });
 
-        e.app.newMailClient().send(message);
-        console.log("Wiadomość do administracji wysłana pomyślnie na kontakt@gryf.ai");
+        try {
+            e.app.newMailClient().send(message);
+            console.log("Wiadomość do administracji wysłana pomyślnie na kontakt@gryf.ai");
+        } catch (mailSendErr) {
+            console.log("Error sending contact email to admin: " + String(mailSendErr.message || mailSendErr));
+        }
 
         // Potwierdzenie do nadawcy
         if (senderEmail !== "Brak emaila / No email" && senderEmail.indexOf("@") !== -1) {
@@ -892,8 +904,12 @@ onRecordCreateRequest((e) => {
                 subject: userSubject,
                 html: userHtml,
             });
-            e.app.newMailClient().send(userConfirmation);
-            console.log("Potwierdzenie do użytkownika wysłane pomyślnie na " + senderEmail);
+            try {
+                e.app.newMailClient().send(userConfirmation);
+                console.log("Potwierdzenie do użytkownika wysłane pomyślnie na " + senderEmail);
+            } catch (mailSendErr) {
+                console.log("Error sending confirmation email to user: " + String(mailSendErr.message || mailSendErr));
+            }
         }
 
     } catch (err) {
@@ -2476,7 +2492,11 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         html: html,
                     });
 
-                    e.app.newMailClient().send(message);
+                    try {
+                        e.app.newMailClient().send(message);
+                    } catch (mailSendErr) {
+                        console.log("Error sending join email: " + String(mailSendErr.message || mailSendErr));
+                    }
                 }
 
                 // Powiadomienie w aplikacji dla ownera i wszystkich adminów
@@ -2568,7 +2588,6 @@ routerAdd("GET", "/api/workspaces/pending-invitations", (e) => {
 // HOOK: Cascade Delete for WORKFLOW_processes
 // =====================================================
 onRecordDeleteRequest((e) => {
-    e.next();
     try {
         const processId = e.record.id;
         const workspaceId = e.record.get("workspace");
@@ -2618,6 +2637,8 @@ onRecordDeleteRequest((e) => {
     } catch (err) {
         console.error("Cascade Delete Error: " + err);
     }
+    
+    e.next();
 }, "WORKFLOW_processes");
 
 // =====================================================
@@ -2753,8 +2774,41 @@ routerAdd("POST", "/api/ai/delete-account", (e) => {
             throw new Error("Unauthorized");
         }
         
-        // This will trigger onRecordDeleteRequest for WORKFLOW_users
-        // which now handles all the cascading deletes.
+        const userId = authRecord.get("id");
+        const db = e.app.db();
+        
+        // 1. Delete user's comments and versions
+        db.newQuery("DELETE FROM WORKFLOW_comments WHERE author = {:userId}").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_versions WHERE created_by = {:userId}").bind({ userId: userId }).execute();
+
+        // 2. Clear locked_by & lastEditedBy
+        db.newQuery("UPDATE WORKFLOW_processes SET locked_by = '', locked_at = '' WHERE locked_by = {:userId}").bind({ userId: userId }).execute();
+        db.newQuery("UPDATE WORKFLOW_processes SET lastEditedBy = '' WHERE lastEditedBy = {:userId}").bind({ userId: userId }).execute();
+
+        // 3. Transfer orphaned processes
+        db.newQuery(`
+            UPDATE WORKFLOW_processes 
+            SET owner = (SELECT owner FROM WORKFLOW_workspaces WHERE id = WORKFLOW_processes.workspace)
+            WHERE owner = {:userId}
+        `).bind({ userId: userId }).execute();
+
+        // 4. Delete memberships
+        db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE user = {:userId} OR invited_by = {:userId}").bind({ userId: userId }).execute();
+
+        // 5. Delete notifications for this user
+        db.newQuery("DELETE FROM WORKFLOW_notifications WHERE user = {:userId}").bind({ userId: userId }).execute();
+
+        // 6. Delete workspaces and all their related records
+        db.newQuery("DELETE FROM WORKFLOW_versions WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_comments WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_process_map_layouts WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_process_groups WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_groups WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_workspaces WHERE owner = {:userId}").bind({ userId: userId }).execute();
+
+        // 6. Finally delete the user
         e.app.delete(authRecord);
 
         return e.json(200, { success: true });
@@ -2783,8 +2837,30 @@ cronAdd("cleanUnverifiedUsers", "0 0 * * *", () => {
             { date: dateString }
         );
         
+        const db = app.db();
         for (let i = 0; i < unverified.length; i++) {
-            app.delete(unverified[i]);
+            try {
+                const uid = unverified[i].id;
+                // Cascade-delete all related records before deleting the user
+                db.newQuery("DELETE FROM WORKFLOW_comments WHERE author = {:uid}").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_versions WHERE created_by = {:uid}").bind({ uid: uid }).execute();
+                db.newQuery("UPDATE WORKFLOW_processes SET locked_by = '', locked_at = '' WHERE locked_by = {:uid}").bind({ uid: uid }).execute();
+                db.newQuery("UPDATE WORKFLOW_processes SET lastEditedBy = '' WHERE lastEditedBy = {:uid}").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE user = {:uid} OR invited_by = {:uid}").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_notifications WHERE user = {:uid}").bind({ uid: uid }).execute();
+                // Delete owned workspaces and their children
+                db.newQuery("DELETE FROM WORKFLOW_versions WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid}))").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_comments WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid}))").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid})").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_process_map_layouts WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid})").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_process_groups WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid})").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_groups WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid})").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:uid})").bind({ uid: uid }).execute();
+                db.newQuery("DELETE FROM WORKFLOW_workspaces WHERE owner = {:uid}").bind({ uid: uid }).execute();
+                app.delete(unverified[i]);
+            } catch (delErr) {
+                console.error("Failed to delete unverified user " + unverified[i].id + ":", delErr);
+            }
         }
         console.log("Cleaned up " + unverified.length + " abandoned unverified accounts.");
     } catch (err) {
@@ -2873,7 +2949,6 @@ onRecordUpdateRequest((e) => {
 // HOOK: Notifications for Workspace Deletion & Cleanup
 // =====================================================
 onRecordDeleteRequest((e) => {
-    e.next();
     const ws = e.record;
     const wsId = ws.id;
     const wsName = ws.get("name") || "Workspace";
@@ -2890,6 +2965,10 @@ onRecordDeleteRequest((e) => {
         db.newQuery("DELETE FROM WORKFLOW_process_groups WHERE workspace = {:wsId}").bind({ wsId: wsId }).execute();
         db.newQuery("DELETE FROM WORKFLOW_groups WHERE workspace = {:wsId}").bind({ wsId: wsId }).execute();
         
+        // 2. Delete notifications for users in this workspace (cleanup orphaned notifs)
+        // Note: we can't easily filter by workspace, so we delete notifs whose link references processes in this workspace
+        // For simplicity, individual user notif cleanup happens in user delete hook
+
         // We fetch members to notify before deleting them
         const members = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
@@ -2930,17 +3009,18 @@ onRecordDeleteRequest((e) => {
     } catch (err) {
         console.log("Error during workspace deletion & cleanup: " + err);
     }
+    
+    e.next();
 }, "WORKFLOW_workspaces");
 
 // =====================================================
 // HOOK: Notifications for Process Deletion
 // =====================================================
 onRecordDeleteRequest((e) => {
-    e.next();
     const process = e.record;
     const processName = process.get("name") || "Proces";
     const wsId = process.get("workspace");
-    if (!wsId) return;
+    if (!wsId) return e.next();
 
     try {
         let wsName = "Workspace";
@@ -2992,6 +3072,8 @@ onRecordDeleteRequest((e) => {
     } catch (err) {
         console.log("Error creating process deletion notifs: " + err);
     }
+    
+    e.next();
 }, "WORKFLOW_processes");
 
 // =====================================================
