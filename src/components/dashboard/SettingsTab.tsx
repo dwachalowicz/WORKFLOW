@@ -16,13 +16,13 @@ import { DashboardHeader } from '@/components/dashboard/layout/DashboardHeader';
 
 export const SettingsTab = () => {
   const { t } = useTranslation();
-  const { activeWorkspace, setActiveWorkspace } = useAuthStore();
+  const { activeWorkspace, setActiveWorkspace, user } = useAuthStore();
 
   const [editingWorkspaceName, setEditingWorkspaceName] = useState(activeWorkspace?.name || '');
   const [prevWorkspaceId, setPrevWorkspaceId] = useState(activeWorkspace?.id);
   const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
 
-  const isAdminOrOwner = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';
+  const isAdminOrOwner = (activeWorkspace?.owner === user?.id) || activeWorkspace?.role === 'admin';
 
   if (activeWorkspace?.id !== prevWorkspaceId) {
     setPrevWorkspaceId(activeWorkspace?.id);

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { CheckSquare, ChevronRight, Circle, AlertCircle } from 'lucide-react';
+import { useMemo, useState, useCallback } from 'react';
+import { CheckSquare, ChevronRight, ChevronDown, Circle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCanvasStore } from "@/store/canvasStore";
 
@@ -10,6 +10,19 @@ import { useCanvasStore } from "@/store/canvasStore";
 export const GlobalChecklist = () => {
   const { t } = useTranslation();
   const nodes = useCanvasStore(s => s.nodes);
+  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+
+  const toggleNode = useCallback((nodeId: string) => {
+    setCollapsedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  }, []);
 
   const checklistData = useMemo(() => {
     return nodes
@@ -64,33 +77,46 @@ export const GlobalChecklist = () => {
       </div>
 
       {/* Per-node checklists */}
-      {checklistData.map(nodeData => (
-        <div key={nodeData.nodeId} className="bg-card border border-border/50 rounded-xl overflow-hidden">
-          {/* Node header */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border/30 bg-secondary/30">
-            <ChevronRight size={12} className="text-muted-foreground" />
-            <span className="text-xs font-bold text-foreground truncate">{nodeData.label}</span>
-            <span className="ml-auto text-[10px] text-muted-foreground font-mono">
-              {nodeData.items.filter(i => i.required).length}/{nodeData.items.length}
-            </span>
-          </div>
+      {checklistData.map(nodeData => {
+        const isCollapsed = collapsedNodes.has(nodeData.nodeId);
+        return (
+          <div key={nodeData.nodeId} className="bg-card border border-border/50 rounded-xl overflow-hidden">
+            {/* Node header — clickable to collapse/expand */}
+            <button
+              type="button"
+              onClick={() => toggleNode(nodeData.nodeId)}
+              className="w-full flex items-center gap-2 px-4 py-3 border-b border-border/30 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer text-left"
+            >
+              {isCollapsed ? (
+                <ChevronRight size={12} className="text-muted-foreground shrink-0 transition-transform" />
+              ) : (
+                <ChevronDown size={12} className="text-muted-foreground shrink-0 transition-transform" />
+              )}
+              <span className="text-xs font-bold text-foreground truncate">{nodeData.label}</span>
+              <span className="ml-auto text-[10px] text-muted-foreground font-mono shrink-0">
+                {nodeData.items.filter(i => i.required).length}/{nodeData.items.length}
+              </span>
+            </button>
 
-          {/* Items */}
-          <div className="divide-y divide-border/20">
-            {nodeData.items.map((item, idx) => (
-              <div key={item.id || idx} className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary/20 transition-colors">
-                <Circle size={14} className={`shrink-0 ${item.required ? 'text-brand-gold' : 'text-muted-foreground/40'}`} />
-                <span className="text-sm flex-1 text-foreground">
-                  {item.label}
-                </span>
-                {item.required && (
-                  <span className="text-[9px] font-bold text-brand-gold uppercase tracking-wider">{t('globalChecklist.requiredBadge')}</span>
-                )}
+            {/* Items — hidden when collapsed */}
+            {!isCollapsed && (
+              <div className="divide-y divide-border/20">
+                {nodeData.items.map((item, idx) => (
+                  <div key={item.id || idx} className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary/20 transition-colors">
+                    <Circle size={14} className={`shrink-0 ${item.required ? 'text-brand-gold' : 'text-muted-foreground/40'}`} />
+                    <span className="text-sm flex-1 text-foreground">
+                      {item.label}
+                    </span>
+                    {item.required && (
+                      <span className="text-[9px] font-bold text-brand-gold uppercase tracking-wider">{t('globalChecklist.requiredBadge')}</span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

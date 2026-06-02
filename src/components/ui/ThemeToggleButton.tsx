@@ -6,8 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { NAV_BTN_STATIC } from '@/components/layout/navHelpers';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const ThemeToggleButton = ({ isStatic = false }: { isStatic?: boolean }) => {
+export const ThemeToggleButton = () => {
   const { isDark, toggleTheme, brandColor, changeBrandColor } = useThemeToggle();
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);

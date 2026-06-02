@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect, useRef, useCallback, lazy, Suspense, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense, useMemo, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { pb, getRecordFileUrl, getAvatarUrl } from '@/lib/pocketbase';
@@ -25,7 +25,7 @@ import {
   Lock,
   LayoutTemplate
 } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getIcon } from '@/lib/iconMap';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
 import { LoadMoreButton } from '@/components/ui/LoadMoreButton';
 import { SimpleTooltip } from '@/components/ui/tooltip';
@@ -44,6 +44,7 @@ import { getLockedProcessIdsForWorkspace } from '@/lib/limitEnforcer';
 import type { WorkflowProcess, ProcessGroup } from '@/lib/pocketbase';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
+import { useLockTimer } from '@/hooks/useLockTimer';
 import { Card } from '@/components/ui/card';
 
 // ── Lazy-loaded modals ───────────────────────────────────────
@@ -64,11 +65,8 @@ export const ProcessesTab = () => {
   const { user, activeWorkspace } = useAuthStore();
   const limits = getTierLimits(user?.tier);
   
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 30000);
-    return () => clearInterval(timer);
-  }, []);
+  // Live clock for lock-badge freshness (updates every 30s)
+  const now = useLockTimer();
   
   const [groups, setGroups] = useState<Group[]>([]);
   const [processes, setProcesses] = useState<Process[]>([]);
@@ -129,6 +127,42 @@ export const ProcessesTab = () => {
   useClickOutside(folderContextMenuRef, () => {
     if (folderContextMenu) setFolderContextMenu(null);
   });
+
+  // Viewport boundary adjustment for process context menu
+  useLayoutEffect(() => {
+    const el = contextMenuRef.current;
+    if (!el || !contextMenu) return;
+    const rect = el.getBoundingClientRect();
+    let newTop = contextMenu.y;
+    let newLeft = contextMenu.x - rect.width;
+    if (newTop + rect.height > window.innerHeight) {
+      newTop = Math.max(0, window.innerHeight - rect.height - 8);
+    }
+    if (newLeft < 0) newLeft = 8;
+    if (newLeft + rect.width > window.innerWidth) {
+      newLeft = Math.max(0, window.innerWidth - rect.width - 8);
+    }
+    el.style.top = `${newTop}px`;
+    el.style.left = `${newLeft}px`;
+  }, [contextMenu]);
+
+  // Viewport boundary adjustment for folder context menu
+  useLayoutEffect(() => {
+    const el = folderContextMenuRef.current;
+    if (!el || !folderContextMenu) return;
+    const rect = el.getBoundingClientRect();
+    let newTop = folderContextMenu.y;
+    let newLeft = folderContextMenu.x - rect.width;
+    if (newTop + rect.height > window.innerHeight) {
+      newTop = Math.max(0, window.innerHeight - rect.height - 8);
+    }
+    if (newLeft < 0) newLeft = 8;
+    if (newLeft + rect.width > window.innerWidth) {
+      newLeft = Math.max(0, window.innerWidth - rect.width - 8);
+    }
+    el.style.top = `${newTop}px`;
+    el.style.left = `${newLeft}px`;
+  }, [folderContextMenu]);
 
   const fetchAllProcesses = useCallback(async (query?: string) => {
     if (!activeWorkspace || !user) return;
@@ -565,7 +599,8 @@ export const ProcessesTab = () => {
         group: '',
       });
       setProcesses(prev => prev.filter(p => p.id !== proc.id));
-      setAllWorkspaceProcesses(prev => prev.filter(p => p.id !== proc.id));
+      // Keep process in allWorkspaceProcesses — it's not deleted, just moved to root
+      setAllWorkspaceProcesses(prev => prev.map(p => p.id === proc.id ? { ...p, group: '' } : p));
     } catch (err) {
       console.error('Error removing process from folder:', JSON.stringify(err, null, 2), err);
       const errMsg = (err as { response?: { message?: string }; message?: string })?.response?.message || (err as { message?: string })?.message || '';
@@ -979,7 +1014,7 @@ export const ProcessesTab = () => {
                   {/* Avatar/Icon */}
                   {(() => {
                     const avatarUrl = getProcessAvatarUrl(proc);
-                    const IconCmp = proc.icon ? (LucideIcons as Record<string, React.ElementType>)[proc.icon] : null;
+                    const IconCmp = proc.icon ? getIcon(proc.icon) : null;
                     if (avatarUrl) {
                       return (
                         <div className="flex justify-center my-2">
@@ -1018,12 +1053,12 @@ export const ProcessesTab = () => {
                                 {(editor?.name || editor?.email || '?').charAt(0).toUpperCase()}
                               </div>
                             )}
-                            <span>{editor?.name || editor?.email || t('processes.unknownUser')} · {new Date(proc.updated).toLocaleDateString()} {new Date(proc.updated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>{editor?.name || editor?.email || t('processes.unknownUser')} · {new Date(proc.created).toLocaleDateString()} {new Date(proc.created).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         }>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-fit">
                             <Clock size={12} />
-                            <span>{new Date(proc.created).toLocaleDateString()} {new Date(proc.created).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>{new Date(proc.updated).toLocaleDateString()} {new Date(proc.updated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </SimpleTooltip>
                       );
@@ -1067,7 +1102,6 @@ export const ProcessesTab = () => {
           style={{ 
             top: contextMenu.y, 
             left: contextMenu.x,
-            transform: 'translateX(-100%)'
           }}
         >
           {(() => {
@@ -1171,7 +1205,6 @@ export const ProcessesTab = () => {
             style={{ 
               top: folderContextMenu.y, 
               left: folderContextMenu.x,
-              transform: 'translateX(-100%)'
             }}
           >
             <button

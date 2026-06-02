@@ -38,7 +38,7 @@ export const SimulationControl = () => {
                 variant="iconGhost"
                 size="icon"
                 onClick={prevSimulationStep}
-                disabled={simulationHistory.length === 0 && simulationPendingChoices.length === 0}
+                disabled={simulationHistory.length === 0}
                 className="text-foreground/70 hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:hover:bg-transparent"
               >
                 <SkipBack size={14} />

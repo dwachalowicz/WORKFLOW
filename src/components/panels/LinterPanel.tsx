@@ -8,6 +8,10 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { useCanvasStore } from "@/store/canvasStore";
 
 export const LinterPanel = () => {
+  // Use structural selectors so lint doesn't re-run when nodes are just dragged (position-only changes)
+  const nodesFingerprint = useCanvasStore(state =>
+    state.nodes.map(n => `${n.id}:${n.type}:${n.data?.type}:${n.data?.label}`).join('|')
+  );
   const nodes = useCanvasStore(state => state.nodes);
   const edges = useCanvasStore(state => state.edges);
   const incomingLinks = useCanvasStore(state => state.incomingLinks);
@@ -85,7 +89,8 @@ export const LinterPanel = () => {
     });
 
     return newIssues;
-  }, [nodes, edges, incomingLinks, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodesFingerprint, edges, incomingLinks, t]);
 
   const handleIssueClick = (nodeId?: string) => {
     if (!nodeId) return;
@@ -169,7 +174,7 @@ export const LinterPanel = () => {
             <TriangleAlert size={20} />
           )}
           {issues.length > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-foreground border-[3px] border-surface-nav shadow-sm">
+            <span className={`absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full ${errorsCount > 0 ? 'bg-red-500' : 'bg-amber-500'} text-xs font-bold text-foreground border-[3px] border-surface-nav shadow-sm`}>
               {issues.length}
             </span>
           )}

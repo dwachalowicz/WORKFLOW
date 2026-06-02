@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-/* eslint-disable react-hooks/set-state-in-effect */
+// Per-effect eslint suppressions used instead of whole-file disable
 import { Plus, Search, X, Camera } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { fetchGroups, createGroup, getGroupAvatarUrl, toGroupRef, GROUP_COLORS } from '@/lib/groupService';
@@ -53,6 +53,7 @@ export const GroupPickerDropdown = ({ onSelect, excludeIds = [], trigger }: Grou
   });
 
   // Load groups when opened
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isOpen && activeWorkspace) {
       setIsLoading(true);
@@ -137,6 +138,7 @@ export const GroupPickerDropdown = ({ onSelect, excludeIds = [], trigger }: Grou
     setIsOpen(true);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!isOpen) return;
     const updatePosition = () => {

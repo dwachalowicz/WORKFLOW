@@ -15,6 +15,7 @@ const SidePanel = React.forwardRef<HTMLDivElement, SidePanelProps>(
     return (
       <div
         ref={ref}
+        role="complementary"
         className={cn(
           "fixed top-0 bottom-14 md:top-6 md:bottom-6 z-[110] flex flex-col bg-card md:rounded-2xl shadow-2xl overflow-hidden w-full",
           positionClasses,

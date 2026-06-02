@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
+import { invalidateGroupCache } from '@/lib/groupService';
 
 /**
  * Mounts globally when the user is authenticated.
@@ -10,6 +11,12 @@ import { usePBSubscription } from '@/hooks/usePBSubscription';
 export function GlobalRealtimeListener() {
   const { isAuthenticated, user, fetchWorkspaces, checkAuth, fetchUnreadNotificationsCount, workspaces } = useAuthStore();
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use ref for workspaces to break the subscribe→fetch→resubscribe dependency cycle
+  const workspacesRef = useRef(workspaces);
+  useEffect(() => {
+    workspacesRef.current = workspaces;
+  }, [workspaces]);
 
   // Debounced workspace refresh to prevent query spikes (server throttling)
   const debouncedFetchWorkspaces = useCallback(() => {
@@ -52,12 +59,12 @@ export function GlobalRealtimeListener() {
 
   const onWorkspaceMemberChange = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
     const isRelevantToMe = user && (e.record.user === user.id || e.record.invited_email === user.email);
-    const amIOwner = workspaces.some(w => w.id === e.record.workspace && w.role === 'admin');
+    const amIOwner = workspacesRef.current.some(w => w.id === e.record.workspace && w.role === 'admin');
     
     if (isRelevantToMe || amIOwner) {
       debouncedFetchWorkspaces();
     }
-  }, [debouncedFetchWorkspaces, user, workspaces]);
+  }, [debouncedFetchWorkspaces, user]);
 
   // We can't easily filter workspaces if we want to hear about newly shared ones, so topic '*' is kept.
   usePBSubscription('WORKFLOW_workspaces', '*', onWorkspaceChange, isAuthenticated);
@@ -72,6 +79,12 @@ export function GlobalRealtimeListener() {
   const userId = user?.id;
   const notificationOptions = useMemo(() => ({ filter: userId ? `user = "${userId}"` : '' }), [userId]);
   usePBSubscription('WORKFLOW_notifications', '*', onNotificationChange, isAuthenticated, notificationOptions);
+
+  // 4. Listen for Group changes (invalidate local cache so other tabs/users see fresh data)
+  const onGroupChange = useCallback(() => {
+    invalidateGroupCache();
+  }, []);
+  usePBSubscription('WORKFLOW_groups', '*', onGroupChange, isAuthenticated);
 
   return null; // This is a headless listener component
 }

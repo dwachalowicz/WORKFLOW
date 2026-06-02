@@ -57,6 +57,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           {/* Workspace Switcher */}
           <SimpleTooltip content={t('dashboard.manageWorkspaces')} side="right">
             <button 
+              id="nav-workspaces"
               onClick={onOpenWorkspaceSwitcher}
               className={`cursor-pointer w-10 h-10 rounded-full flex items-center justify-center bg-brand-gold text-background font-bold text-sm uppercase transition-all hover:scale-105 overflow-hidden ${activeTab === 'workspaces' ? 'ring-2 ring-white/30 scale-105' : ''}`}
             >
@@ -77,8 +78,10 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           {/* Primary Navigation — ordered by importance & ergonomics */}
           <SimpleTooltip content={t('dashboard.processes')} side="right">
             <button 
+              id="nav-processes"
               onClick={() => setActiveTab('processes')}
               className={navBtnClass(activeTab === 'processes')}
+              aria-label={t('dashboard.processes')}
             >
               <LayoutGrid size={18} />
             </button>
@@ -86,6 +89,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
 
           <SimpleTooltip content={limits.canUseProcessMap ? t('dashboard.processMap') : t('tierLimits.processMapLocked')} side="right">
             <button 
+              id="nav-processmap"
               onClick={() => limits.canUseProcessMap && setActiveTab('processmap')}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors border relative ${
                 !limits.canUseProcessMap
@@ -106,13 +110,15 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           <SimpleTooltip content={t('dashboard.members')} side="right">
             <div className="relative">
               <button 
+                id="nav-members"
                 onClick={() => setActiveTab('members')}
                 className={navBtnClass(activeTab === 'members')}
+                aria-label={t('dashboard.members')}
               >
                 <Users size={18} />
               </button>
               {pendingMembersCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav">
+                <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav" aria-label={t('dashboard.pendingMembers', { count: pendingMembersCount })}>
                   {pendingMembersCount}
                 </div>
               )}
@@ -121,8 +127,10 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
 
           <SimpleTooltip content={t('dashboard.groups')} side="right">
             <button 
+              id="nav-groups"
               onClick={() => setActiveTab('groups')}
               className={navBtnClass(activeTab === 'groups')}
+              aria-label={t('dashboard.groups')}
             >
               <Contact size={18} />
             </button>
@@ -131,13 +139,15 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           <SimpleTooltip content={t('dashboard.invitations')} side="right">
             <div className="relative">
               <button 
+                id="nav-invitations"
                 onClick={() => setActiveTab('invitations')}
                 className={navBtnClass(activeTab === 'invitations')}
+                aria-label={t('dashboard.invitations')}
               >
                 <Mail size={18} />
               </button>
               {pendingInvitations.length > 0 && (
-                <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav">
+                <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav" aria-label={t('dashboard.pendingInvitations', { count: pendingInvitations.length })}>
                   {pendingInvitations.length}
                 </div>
               )}
@@ -147,13 +157,15 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           <SimpleTooltip content={t('dashboard.notifications')} side="right">
             <div className="relative">
               <button 
+                id="nav-notifications"
                 onClick={() => setActiveTab('notifications')}
                 className={navBtnClass(activeTab === 'notifications')}
+                aria-label={t('dashboard.notifications')}
               >
                 <Bell size={18} />
               </button>
               {unreadNotificationsCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-brand-gold text-background text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav">
+                <div className="absolute -top-1 -right-1 bg-brand-gold text-background text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-surface-nav" aria-label={t('dashboard.unreadNotifications', { count: unreadNotificationsCount })}>
                   {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
                 </div>
               )}
@@ -165,8 +177,10 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
           {/* Utility — Settings, Theme, Language */}
           <SimpleTooltip content={t('dashboard.settings')} side="right">
             <button 
+              id="nav-settings"
               onClick={() => setActiveTab('settings')}
               className={navBtnClass(activeTab === 'settings')}
+              aria-label={t('dashboard.settings')}
             >
               <Settings size={18} />
             </button>
@@ -180,7 +194,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
               onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
               className="cursor-pointer flex items-center gap-1 text-muted-foreground hover:text-brand-gold transition-colors text-xs font-bold uppercase"
             >
-              <span>{localStorage.getItem('gryf-lang') === 'en' ? 'EN' : 'PL'}</span>
+              <span>{i18n.language === 'en' ? 'EN' : 'PL'}</span>
               <ChevronDown size={14} className={`transition-transform duration-200 ${isLangMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -193,7 +207,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
                     i18n.changeLanguage('pl');
                     setIsLangMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${localStorage.getItem('gryf-lang') !== 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${i18n.language !== 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                 >
                   PL (Polski)
                 </button>
@@ -203,7 +217,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
                     i18n.changeLanguage('en');
                     setIsLangMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${localStorage.getItem('gryf-lang') === 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${i18n.language === 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                 >
                   EN (English)
                 </button>
@@ -231,7 +245,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
     {/* Mobile Bottom Navigation */}
     <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden bg-surface-nav border-t border-border shadow-2xl">
       <div className="flex items-center justify-around px-2 py-2">
-        <button onClick={onOpenWorkspaceSwitcher} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'workspaces' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+        <button onClick={onOpenWorkspaceSwitcher} aria-label={t('dashboard.manageWorkspaces')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'workspaces' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           {activeWorkspace?.avatar ? (
             <img src={getRecordFileUrl('WORKFLOW_workspaces', activeWorkspace, activeWorkspace.avatar, 32)} alt="" className="w-6 h-6 rounded-full object-cover" />
           ) : (
@@ -240,7 +254,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
             </div>
           )}
         </button>
-        <button onClick={() => setActiveTab('processes')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'processes' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+        <button onClick={() => setActiveTab('processes')} aria-label={t('dashboard.processes')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'processes' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <LayoutGrid size={22} />
         </button>
         <button onClick={() => limits.canUseProcessMap && setActiveTab('processmap')} className={`flex items-center justify-center p-2 rounded-xl transition-colors ${!limits.canUseProcessMap ? 'text-muted-foreground/40 cursor-not-allowed' : activeTab === 'processmap' ? 'text-brand-gold bg-brand-gold/10 cursor-pointer' : 'text-muted-foreground cursor-pointer'}`}>
@@ -249,31 +263,37 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
             {!limits.canUseProcessMap && <Lock size={14} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
           </div>
         </button>
-        <button onClick={() => setActiveTab('members')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'members' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+        <button onClick={() => setActiveTab('members')} aria-label={t('dashboard.members')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'members' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <Users size={22} />
           {pendingMembersCount > 0 && (
-            <div className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+            <div className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" aria-label={t('dashboard.pendingMembers', { count: pendingMembersCount })}>
               {pendingMembersCount}
             </div>
           )}
         </button>
-        <button onClick={() => setActiveTab('invitations')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'invitations' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+        <button onClick={() => setActiveTab('invitations')} aria-label={t('dashboard.invitations')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'invitations' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <Mail size={22} />
           {pendingInvitations.length > 0 && (
-            <div className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+            <div className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" aria-label={t('dashboard.pendingInvitations', { count: pendingInvitations.length })}>
               {pendingInvitations.length}
             </div>
           )}
         </button>
-        <button onClick={() => setActiveTab('notifications')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'notifications' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+        <button onClick={() => setActiveTab('notifications')} aria-label={t('dashboard.notifications')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'notifications' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <Bell size={22} />
           {unreadNotificationsCount > 0 && (
-            <div className="absolute -top-0.5 -right-0.5 bg-brand-gold text-background text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+            <div className="absolute -top-0.5 -right-0.5 bg-brand-gold text-background text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" aria-label={t('dashboard.unreadNotifications', { count: unreadNotificationsCount })}>
               {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
             </div>
           )}
         </button>
-        <button onClick={() => { setProfileModalOpen(true); }} className="cursor-pointer flex items-center justify-center p-2 rounded-xl text-muted-foreground">
+        <button onClick={() => setActiveTab('groups')} aria-label={t('dashboard.groups')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'groups' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+          <Contact size={22} />
+        </button>
+        <button onClick={() => setActiveTab('settings')} aria-label={t('dashboard.settings')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+          <Settings size={22} />
+        </button>
+        <button onClick={() => { setProfileModalOpen(true); }} aria-label={t('dashboard.profile')} className="cursor-pointer flex items-center justify-center p-2 rounded-xl text-muted-foreground">
           {user?.avatar ? (
             <img src={getAvatarUrl(user, 28)} alt="" className="w-6 h-6 rounded-full object-cover" />
           ) : (

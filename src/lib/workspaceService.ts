@@ -34,8 +34,11 @@ export const cascadeDeleteWorkspace = async (workspaceId: string): Promise<void>
     filter: `workspace = '${safeId}'`,
     fields: 'id',
   });
-  await Promise.allSettled(
+  const folderResults = await Promise.allSettled(
     wsFolderGroups.map(g => pb.collection('WORKFLOW_process_groups').delete(g.id))
+  );
+  folderResults.filter(r => r.status === 'rejected').forEach(r => 
+    console.warn('[cascadeDeleteWorkspace] Failed to delete folder group:', (r as PromiseRejectedResult).reason)
   );
 
   // 3. Delete all permission groups (WORKFLOW_groups)
@@ -56,8 +59,11 @@ export const cascadeDeleteWorkspace = async (workspaceId: string): Promise<void>
     filter: `workspace = '${safeId}'`,
     fields: 'id',
   });
-  await Promise.allSettled(
+  const memberResults = await Promise.allSettled(
     wsMembers.map(m => pb.collection('WORKFLOW_workspace_members').delete(m.id))
+  );
+  memberResults.filter(r => r.status === 'rejected').forEach(r => 
+    console.warn('[cascadeDeleteWorkspace] Failed to delete member:', (r as PromiseRejectedResult).reason)
   );
 
   // 5. Delete process map layouts

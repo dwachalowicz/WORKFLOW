@@ -13,6 +13,10 @@ export const useCanvasStore = create<CanvasState>()(
       ...createProcessSlice(...a),
       ...createVersionSlice(...a),
       ...createMetadataSlice(...a),
+      searchQuery: '',
+      searchSelectedUsers: [] as string[],
+      setSearchQuery: (query: string) => a[0]({ searchQuery: query }),
+      setSearchSelectedUsers: (users: string[]) => a[0]({ searchSelectedUsers: users }),
     }),
     {
       partialize: (state) => {

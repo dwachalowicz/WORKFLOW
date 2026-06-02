@@ -324,13 +324,15 @@ const ProcessMapInner = () => {
     setIsLoading(true);
     try {
       // Load saved positions and process data in parallel
-      const [records, loadedPositions] = await Promise.all([
+      // MED-9: No longer fetch 'nodes' — links are extracted server-side
+      const [records, loadedPositions, linksResponse] = await Promise.all([
         pb.collection('WORKFLOW_processes').getList(1, 50, {
           filter: `workspace = '${sanitizeForFilter(activeWorkspace.id)}'`,
-          fields: 'id,name,nodes,avatar',
+          fields: 'id,name,avatar',
           requestKey: null,
         }),
         loadSavedPositions(activeWorkspace.id),
+        pb.send(`/api/process-links/${activeWorkspace.id}`, { method: 'GET' }),
       ]);
       setProcesses(records.items as ProcessRecord[]);
       setPage(records.page);
@@ -347,35 +349,8 @@ const ProcessMapInner = () => {
       }
       setPositionsLoaded(true);
 
-      // Extract cross-workflow links
-      const foundLinks: ProcessLink[] = [];
-      const processNameMap: Record<string, string> = {};
-      for (const proc of records.items) {
-        processNameMap[proc.id] = proc.name || 'Unnamed';
-      }
-
-      for (const proc of records.items) {
-        let nodes: { type?: string; data?: { targetWorkflowId?: string; targetNodeId?: string; targetNodeLabel?: string; targetWorkflowName?: string; actionTypes?: string[]; actionType?: string } }[] = [];
-        if (typeof proc.nodes === 'string') {
-          try { nodes = JSON.parse(proc.nodes as string); } catch { continue; }
-        } else if (Array.isArray(proc.nodes)) {
-          nodes = proc.nodes as typeof nodes;
-        }
-        for (const node of nodes) {
-          if (node.data?.targetWorkflowId && node.data.targetWorkflowId !== proc.id) {
-            const isSubworkflow = node.type === 'subworkflow';
-            foundLinks.push({
-              sourceProcessId: proc.id,
-              sourceProcessName: processNameMap[proc.id],
-              targetProcessId: node.data.targetWorkflowId,
-              targetProcessName: processNameMap[node.data.targetWorkflowId] || node.data.targetWorkflowName || 'Unknown',
-              targetNodeLabel: node.data.targetNodeLabel,
-              linkType: isSubworkflow ? 'subworkflow' : 'handoff',
-            });
-          }
-        }
-      }
-      setLinks(foundLinks);
+      // Cross-workflow links from server endpoint (MED-9)
+      setLinks((linksResponse as { links: ProcessLink[] }).links || []);
     } catch (err) {
       console.error('Error fetching process map data:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -391,44 +366,15 @@ const ProcessMapInner = () => {
       const nextPage = page + 1;
       const records = await pb.collection('WORKFLOW_processes').getList(nextPage, 50, {
         filter: `workspace = '${sanitizeForFilter(activeWorkspace.id)}'`,
-        fields: 'id,name,nodes,avatar',
+        fields: 'id,name,avatar',
         requestKey: null,
       });
 
       const newProcesses = records.items as ProcessRecord[];
-      const allProcs = [...processes, ...newProcesses];
       
-      // Extract cross-workflow links for the newly loaded items
-      const newLinks: ProcessLink[] = [];
-      const processNameMap: Record<string, string> = {};
-      for (const proc of allProcs) {
-        processNameMap[proc.id] = proc.name || 'Unnamed';
-      }
-
-      for (const proc of newProcesses) {
-        let nodes: { type?: string; data?: { targetWorkflowId?: string; targetNodeId?: string; targetNodeLabel?: string; targetWorkflowName?: string; actionTypes?: string[]; actionType?: string } }[] = [];
-        if (typeof proc.nodes === 'string') {
-          try { nodes = JSON.parse(proc.nodes as string); } catch { continue; }
-        } else if (Array.isArray(proc.nodes)) {
-          nodes = proc.nodes as typeof nodes;
-        }
-        for (const node of nodes) {
-          if (node.data?.targetWorkflowId && node.data.targetWorkflowId !== proc.id) {
-            const isSubworkflow = node.type === 'subworkflow';
-            newLinks.push({
-              sourceProcessId: proc.id,
-              sourceProcessName: processNameMap[proc.id],
-              targetProcessId: node.data.targetWorkflowId,
-              targetProcessName: processNameMap[node.data.targetWorkflowId] || node.data.targetWorkflowName || 'Unknown',
-              targetNodeLabel: node.data.targetNodeLabel,
-              linkType: isSubworkflow ? 'subworkflow' : 'handoff',
-            });
-          }
-        }
-      }
-      
+      // Links already fetched from server on initial load (all workspace processes)
+      // No need to re-extract — they cover the entire workspace
       setProcesses(prev => [...prev, ...newProcesses]);
-      setLinks(prevLinks => [...prevLinks, ...newLinks]);
       
       setPage(records.page);
       setTotalPages(records.totalPages);
@@ -438,7 +384,7 @@ const ProcessMapInner = () => {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [activeWorkspace, page, totalPages, processes, t]);
+  }, [activeWorkspace, page, totalPages, t]);
 
   useEffect(() => {
     fetchData();

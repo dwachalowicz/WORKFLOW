@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
@@ -25,7 +24,7 @@ import {
   RefreshCw,
   PowerOff
 } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getIcon } from '@/lib/iconMap';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
 import { AvatarCropModal } from '@/components/modals/AvatarCropModal';
 import { SimpleTooltip } from '@/components/ui/tooltip';
@@ -54,6 +53,14 @@ interface WorkspaceInfo {
 interface WorkspacesTabProps {
   onSwitchTab: (tab: string) => void;
 }
+
+/** Generate a random 12-character join code (uppercase alphanumeric) */
+const generateJoinCode = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const randomArray = new Uint8Array(12);
+  crypto.getRandomValues(randomArray);
+  return Array.from(randomArray).map(b => chars[b % chars.length]).join('');
+};
 
 export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
   const { t } = useTranslation();
@@ -85,6 +92,23 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
     if (contextMenu) setContextMenu(null);
   });
 
+  // LOW-C4: Deduplicated join code update helper
+  const handleJoinCodeAction = async (wsId: string, action: 'generate' | 'disable') => {
+    try {
+      const code = action === 'generate' ? generateJoinCode() : '';
+      await pb.collection('WORKFLOW_workspaces').update(wsId, { join_code: code });
+      await fetchWorkspaces();
+      fetchEnrichedWorkspaces();
+      setContextMenu(null);
+      useToastStore.getState().showToast(
+        t(action === 'generate' ? 'workspaces.joinCodeRegenerated' : 'workspaces.joinCodeDisabled'),
+        'success'
+      );
+    } catch {
+      useToastStore.getState().showToast(t('common.error'), 'error');
+    }
+  };
+
   const fetchEnrichedWorkspaces = useCallback(async () => {
     setIsLoading(true);
     if (workspaces.length === 0) {
@@ -104,17 +128,10 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
 
     // 2. Fetch all stats in a single optimized DB query via custom endpoint
     try {
-      const statsRes = await fetch(`${pb.baseUrl}/api/workspace-stats`, {
-        headers: {
-          'Authorization': pb.authStore.token
-        }
+      const stats = await pb.send('/api/workspace-stats', {
+        method: 'GET',
+        requestKey: null,
       });
-      
-      if (!statsRes.ok) {
-        throw new Error('Failed to load workspace stats');
-      }
-      
-      const stats = await statsRes.json();
       
       setWsInfos(prev => prev.map(ws => ({
         ...ws,
@@ -131,6 +148,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
     }
   }, [workspaces]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchEnrichedWorkspaces();
   }, [fetchEnrichedWorkspaces]);
@@ -415,7 +433,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                               : 'bg-brand-gold/10 text-brand-gold border border-brand-gold/30'
                           }`}>
                             {(() => {
-                              const IconCmp = (LucideIcons as Record<string, React.ElementType>)[ws.icon];
+                              const IconCmp = getIcon(ws.icon);
                               return IconCmp ? <IconCmp size={24} /> : <div className="font-bold text-2xl">{ws.name.charAt(0).toUpperCase()}</div>;
                             })()}
                           </div>
@@ -599,38 +617,14 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                       {t('workspaces.copyJoinCode')}
                     </button>
                     <button
-                      onClick={async () => {
-                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                        const randomArray = new Uint8Array(12);
-                        crypto.getRandomValues(randomArray);
-                        const code = Array.from(randomArray).map(b => chars[b % chars.length]).join('');
-                        try {
-                          await pb.collection('WORKFLOW_workspaces').update(ws.id, { join_code: code });
-                          await fetchWorkspaces();
-                          fetchEnrichedWorkspaces();
-                          setContextMenu(null);
-                          useToastStore.getState().showToast(t('workspaces.joinCodeRegenerated'), 'success');
-                        } catch {
-                          useToastStore.getState().showToast(t('common.error'), 'error');
-                        }
-                      }}
+                      onClick={() => handleJoinCodeAction(ws.id, 'generate')}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors text-left"
                     >
                       <RefreshCw size={14} className="text-muted-foreground" />
                       {t('workspaces.regenerateJoinCode')}
                     </button>
                     <button
-                      onClick={async () => {
-                        try {
-                          await pb.collection('WORKFLOW_workspaces').update(ws.id, { join_code: "" });
-                          await fetchWorkspaces();
-                          fetchEnrichedWorkspaces();
-                          setContextMenu(null);
-                          useToastStore.getState().showToast(t('workspaces.joinCodeDisabled'), 'success');
-                        } catch {
-                          useToastStore.getState().showToast(t('common.error'), 'error');
-                        }
-                      }}
+                      onClick={() => handleJoinCodeAction(ws.id, 'disable')}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-orange-500 hover:bg-orange-500/10 transition-colors text-left"
                     >
                       <PowerOff size={14} className="text-orange-500/70" />
@@ -639,21 +633,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                   </>
                 ) : (
                   <button
-                    onClick={async () => {
-                      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                      const randomArray = new Uint8Array(12);
-                      crypto.getRandomValues(randomArray);
-                      const code = Array.from(randomArray).map(b => chars[b % chars.length]).join('');
-                      try {
-                        await pb.collection('WORKFLOW_workspaces').update(ws.id, { join_code: code });
-                        await fetchWorkspaces();
-                        fetchEnrichedWorkspaces();
-                        setContextMenu(null);
-                        useToastStore.getState().showToast(t('workspaces.joinCodeRegenerated'), 'success');
-                      } catch {
-                        useToastStore.getState().showToast(t('common.error'), 'error');
-                      }
-                    }}
+                    onClick={() => handleJoinCodeAction(ws.id, 'generate')}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors text-left"
                   >
                     <RefreshCw size={14} className="text-muted-foreground" />

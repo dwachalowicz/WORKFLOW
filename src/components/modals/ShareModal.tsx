@@ -91,14 +91,16 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
           setHasPassword(pwdResult.hasPassword || false);
         } catch (err) {
           console.error('Failed to update share password:', err);
+          setIsLoading(false);
+          return; // Don't close modal or call onSaved on password failure
         }
       }
 
       onSaved?.();
+      onClose();
     }
 
     setIsLoading(false);
-    onClose();
   };
 
   const shareUrl = processId ? `${window.location.origin}/shared/${processId}` : '';
@@ -188,7 +190,7 @@ export const ShareModal = ({ isOpen, onClose, processId: propProcessId, onSaved 
                         {t('share.passwordLabel')}
                       </FormLabel>
                       <Input 
-                        type="text" 
+                        type="password" 
                         placeholder={t('share.passwordPlaceholder')}
                         value={password}
                         onChange={(e) => {

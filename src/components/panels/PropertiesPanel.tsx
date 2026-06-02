@@ -68,6 +68,7 @@ export const PropertiesPanel = () => {
 
   const handleDeleteNode = () => {
     if (activeNode) {
+      if (activeNode?.data?.type === 'start') return;
       setNodes(nodes => nodes.filter(n => n.id !== activeNode.id));
       setEdges(edges => edges.filter(e => e.source !== activeNode.id && e.target !== activeNode.id));
     }

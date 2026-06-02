@@ -7,7 +7,6 @@ import { InlineTooltip } from '@/components/ui/tooltip';
 import { GroupAvatar } from '@/components/ui/GroupAvatar';
 import { useTranslation } from 'react-i18next';
 import { useCanvasStore } from "@/store/canvasStore";
-import { useUiStore } from "@/store/uiStore";
 import { useSimulationStore } from "@/store/simulationStore";
 
 export const CustomEdge = memo(({
@@ -30,8 +29,8 @@ export const CustomEdge = memo(({
   const { t } = useTranslation();
   const sourceNodeType = useCanvasStore(state => state.nodes.find(n => n.id === source)?.type);
   const targetNodeType = useCanvasStore(state => state.nodes.find(n => n.id === target)?.type);
-  const searchQuery = useUiStore(state => state.searchQuery);
-  const searchSelectedUsers = useUiStore(state => state.searchSelectedUsers);
+  const searchQuery = useCanvasStore(state => state.searchQuery);
+  const searchSelectedUsers = useCanvasStore(state => state.searchSelectedUsers);
   const isDataEdge = sourceNodeType === 'database' || targetNodeType === 'database';
   const isDbHandleEdge = data?.dbOperation !== undefined; // New DB handle system
   const dbOperation: string = (data?.dbOperation as string) || 'read';
@@ -213,7 +212,7 @@ export const CustomEdge = memo(({
                 
                 {hasLabel && (
                   <div className={cn("group/label relative flex items-center justify-center shrink-0", decisionMakers.length > 0 ? "mr-1.5" : "")}>
-                    <span className="text-[10px] font-semibold text-foreground truncate max-w-[50px]">
+                    <span className="text-[10px] font-semibold text-foreground truncate max-w-[120px]">
                       {labelText}
                     </span>
                     <InlineTooltip groupName="label">

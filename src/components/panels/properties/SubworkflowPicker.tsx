@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+// Per-effect eslint suppressions used instead of whole-file disable
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +58,7 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
     }
   }, [activeWorkspace, user, currentProcessId, t]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchProcesses();
   }, [fetchProcesses]);
@@ -95,6 +96,7 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
   }, [t]);
 
   // When targetWorkflowId changes, load its nodes
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const twId = activeNode?.data?.targetWorkflowId;
     if (twId) {

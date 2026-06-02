@@ -10,6 +10,7 @@ import { SimpleTooltip } from '@/components/ui/tooltip';
 import { useCanvasStore } from "@/store/canvasStore";
 import { useToastStore } from '@/store/toastStore';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
+import { sanitizeForFilter } from '@/lib/parseUtils';
 
 interface NodeCommentsProps {
   nodeId: string;
@@ -157,7 +158,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   }, [isOpen, processId, nodeId, t]);
 
   // Realtime panel updates for comments
-  const commentOptions = useMemo(() => ({ filter: processId ? `process = "${processId}"` : '' }), [processId]);
+  const commentOptions = useMemo(() => ({ filter: processId ? `process = "${sanitizeForFilter(processId)}"` : '' }), [processId]);
   
   const handleCommentRealtime = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
     if (e.record && e.record.node_id === nodeId) {

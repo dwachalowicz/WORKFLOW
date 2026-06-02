@@ -97,12 +97,12 @@ export async function addComment(processId: string, nodeId: string, authorId: st
   // --- Powiadomienia ---
   try {
     const process = await pb.collection('WORKFLOW_processes').getOne(processId, { requestKey: null });
-    const processName = process.name || 'Nieznany proces';
+    const processName = process.name || i18n.t('defaults.unknownProcess', { defaultValue: 'Unknown process' });
     
     if (!parentId) {
       // Główny komentarz: do wszystkich w workspace lub do właściciela
-      const title = `Nowy komentarz / New Comment`;
-      const message = `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"`;
+      const title = i18n.t('comments.newCommentNotifTitle', { defaultValue: 'Nowy komentarz / New Comment' });
+      const message = i18n.t('comments.newCommentNotifMessage', { processName, defaultValue: `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"` });
       
       if (process.workspace) {
         const members = await pb.collection('WORKFLOW_workspace_members').getFullList({
@@ -140,8 +140,8 @@ export async function addComment(processId: string, nodeId: string, authorId: st
       if (parentComment.author && parentComment.author !== authorId) {
         await pb.collection('WORKFLOW_notifications').create({
           user: parentComment.author,
-          title: `Nowa odpowiedź / New Reply`,
-          message: `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"`,
+          title: i18n.t('comments.newReplyNotifTitle', { defaultValue: 'Nowa odpowiedź / New Reply' }),
+          message: i18n.t('comments.newReplyNotifMessage', { processName, defaultValue: `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"` }),
           type: 'info',
           isRead: false,
           link: `/app/${processId}`

@@ -3,7 +3,7 @@ import { memo, useEffect, useState } from 'react';
 import { Handle, Position, useUpdateNodeInternals } from '@xyflow/react';
 import { cn } from '@/lib/utils';
 import { Clock, CalendarDays, CheckSquare, Database, ChevronDown, MessageCircle, Ban, Mail, Webhook, CheckCircle2, Network, MoreHorizontal } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getIcon } from '@/lib/iconMap';
 import { getRotatedHandlePosition, getHandleClass, getDbHandleClass, getSharedNodeClasses } from './nodeUtils';
 import { useHandleActive, useNodeVisualState, useNodeRotation } from './useNodeHooks';
 import { NodeToolbar } from './NodeToolbar';
@@ -120,11 +120,11 @@ export const SimpleNode = memo(({
             className={cn("text-muted-foreground transition-transform duration-200 shrink-0 group-hover:text-foreground", isExpanded && "rotate-180")} 
           />
           {(() => {
-            const IconCmp = data.icon ? (LucideIcons as Record<string, React.ElementType>)[data.icon] : null;
+            const IconCmp = data.icon ? getIcon(data.icon) : null;
             return IconCmp ? <IconCmp size={14} className="text-brand-gold shrink-0" /> : null;
           })()}
           <SimpleTooltip content={data.label} side="top">
-            <span className="text-sm font-semibold tracking-tight text-foreground leading-tight truncate max-w-[100px] select-none">
+            <span className="text-sm font-semibold tracking-tight text-foreground leading-tight truncate max-w-[160px] select-none">
               {data.label}
             </span>
           </SimpleTooltip>

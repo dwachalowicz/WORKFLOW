@@ -79,14 +79,17 @@ export const StatsPanel = () => {
 
     const starts = nodes.filter(n => n.type === 'startstop' && n.data?.type === 'start').map(n => n.id);
     const ends = new Set(nodes.filter(n => n.type === 'startstop' && n.data?.type === 'stop').map(n => n.id));
+    const MAX_PATHS = 1000;
     const allPaths: string[][] = [];
+    let pathLimitHit = false;
     function dfs(c: string, v: string[]) {
+      if (allPaths.length >= MAX_PATHS) { pathLimitHit = true; return; }
       if (ends.has(c)) { allPaths.push([...v]); return; }
       const neighbors = (adjacencyList.get(c) || []).filter(nb => nodeType.get(nb) !== 'database');
       if (neighbors.length === 0) { allPaths.push([...v]); return; }
       for (const nb of neighbors) { if (!v.includes(nb)) { v.push(nb); dfs(nb, v); v.pop(); } }
     }
-    for (const s of starts) dfs(s, [s]);
+    for (const s of starts) { dfs(s, [s]); if (pathLimitHit) break; }
     allPaths.sort((a, b) => b.length - a.length);
 
     const total = nodes.length || 1;
@@ -122,7 +125,7 @@ export const StatsPanel = () => {
       };
     });
 
-    return { flowEdges: flowEdges.length, stages, branching, allPaths, donut, inDegree, outDegree, nodeType, nodeLabel, avgCompleteness, hasSla, hasCost, hasTeam, wTotal, completenessItems };
+    return { flowEdges: flowEdges.length, stages, branching, allPaths, pathLimitHit, donut, inDegree, outDegree, nodeType, nodeLabel, avgCompleteness, hasSla, hasCost, hasTeam, wTotal, completenessItems };
   }, [nodes, edges, t]);
 
   const pathStats = useMemo(() => {
@@ -288,6 +291,11 @@ export const StatsPanel = () => {
                        )
                     })}
                   </motion.div>
+                </div>
+              )}
+              {base.pathLimitHit && (
+                <div className="text-center text-xs text-amber-500 py-2 px-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                  ⚠️ {t('statsExt.pathLimitWarning', 'Graf jest zbyt złożony do pełnej analizy ścieżek. Wyświetlono pierwsze 1000 ścieżek.')}
                 </div>
               )}
               {!hasPaths && (

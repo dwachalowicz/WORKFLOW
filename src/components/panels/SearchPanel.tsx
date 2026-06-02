@@ -11,13 +11,27 @@ export const SearchPanel = () => {
   const { t } = useTranslation();
   const isSearchPanelOpen = useUiStore(state => state.isSearchPanelOpen);
   const setSearchPanelOpen = useUiStore(state => state.setSearchPanelOpen);
-  const searchQuery = useUiStore(state => state.searchQuery);
-  const setSearchQuery = useUiStore(state => state.setSearchQuery);
-  const searchSelectedUsers = useUiStore(state => state.searchSelectedUsers);
-  const setSearchSelectedUsers = useUiStore(state => state.setSearchSelectedUsers);
+  const searchQuery = useCanvasStore(state => state.searchQuery);
+  const setSearchQuery = useCanvasStore(state => state.setSearchQuery);
+  const searchSelectedUsers = useCanvasStore(state => state.searchSelectedUsers);
+  const setSearchSelectedUsers = useCanvasStore(state => state.setSearchSelectedUsers);
   
   const nodes = useCanvasStore(state => state.nodes);
   const edges = useCanvasStore(state => state.edges);
+  // Structural fingerprint: only recompute when editors/readers/decisionMakers change, not on drag
+  const usersFingerprint = useCanvasStore(state => {
+    const parts: string[] = [];
+    for (const n of state.nodes) {
+      const eds = (n.data?.editors as { name?: string }[]) || [];
+      const rds = (n.data?.readers as { name?: string }[]) || [];
+      for (const u of [...eds, ...rds]) if (u?.name) parts.push(u.name);
+    }
+    for (const e of state.edges) {
+      const dms = (e.data?.decisionMakers as { name?: string }[]) || [];
+      for (const u of dms) if (u?.name) parts.push(u.name);
+    }
+    return parts.sort().join('|');
+  });
 
   // Collect unique users from nodes and edges
   const uniqueUsers = useMemo(() => {
@@ -39,7 +53,8 @@ export const SearchPanel = () => {
     });
 
     return Array.from(usersMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [nodes, edges]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usersFingerprint]);
 
   const toggleUser = (userName: string) => {
     if (searchSelectedUsers.includes(userName)) {

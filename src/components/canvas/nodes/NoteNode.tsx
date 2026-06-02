@@ -4,7 +4,6 @@ import { type NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import { StickyNote, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCanvasStore } from "@/store/canvasStore";
-import { useUiStore } from "@/store/uiStore";
 import { useSimulationStore } from "@/store/simulationStore";
 
 export const NoteNode = memo(({
@@ -27,8 +26,8 @@ export const NoteNode = memo(({
   }, []);
 
   const updateNode = useCanvasStore(state => state.updateNode);
-  const searchQuery = useUiStore(state => state.searchQuery);
-  const searchSelectedUsers = useUiStore(state => state.searchSelectedUsers);
+  const searchQuery = useCanvasStore(state => state.searchQuery);
+  const searchSelectedUsers = useCanvasStore(state => state.searchSelectedUsers);
   const isSimulating = useSimulationStore(state => state.isSimulating);
 
   // Local state + debounced sync to avoid store spam on every keystroke

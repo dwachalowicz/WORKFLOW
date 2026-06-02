@@ -1,5 +1,5 @@
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, Component, type ErrorInfo, type ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { getTierLimits } from '@/lib/tierLimits';
@@ -44,14 +44,44 @@ const TabLoader = () => {
   );
 };
 
-type TabType = 'processes' | 'members' | 'groups' | 'settings' | 'profile' | 'invitations' | 'workspaces' | 'processmap' | 'notifications';
+type TabType = 'processes' | 'members' | 'groups' | 'settings' | 'invitations' | 'workspaces' | 'processmap' | 'notifications';
 
-const VALID_TABS: TabType[] = ['processes', 'members', 'groups', 'settings', 'profile', 'invitations', 'workspaces', 'processmap', 'notifications'];
+const VALID_TABS: TabType[] = ['processes', 'members', 'groups', 'settings', 'invitations', 'workspaces', 'processmap', 'notifications'];
+
+// Error Boundary for lazy-loaded tab content
+class TabErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Tab Error Boundary caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
+          <p className="text-lg font-semibold mb-2">Something went wrong</p>
+          <button
+            onClick={() => this.setState({ hasError: false })}
+            className="text-sm text-brand-gold hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export const DashboardPage = () => {
   const { tab: urlTab } = useParams<{ tab?: string }>();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const limits = getTierLimits(user?.tier);
   
   const activeTab: TabType = (urlTab && VALID_TABS.includes(urlTab as TabType)) 
@@ -89,31 +119,29 @@ export const DashboardPage = () => {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+
 
   return (
     <div className="flex h-screen w-screen bg-background text-foreground font-sans overflow-hidden">
       <FloatingDashboardNav 
         activeTab={activeTab} 
         setActiveTab={handleTabChange as (tab: string) => void} 
-        onLogout={handleLogout} 
         onOpenWorkspaceSwitcher={() => handleTabChange('workspaces')}
       />
 
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col bg-background overflow-hidden pl-0 md:pl-24 pb-20 md:pb-0">
         <Suspense fallback={<TabLoader />}>
-          {activeTab === 'workspaces' && <WorkspacesTab onSwitchTab={(tab) => handleTabChange(tab as TabType)} />}
-          {activeTab === 'processes' && <ProcessesTab />}
-          {activeTab === 'groups' && <GroupsTab />}
-          {activeTab === 'members' && <MembersTab />}
-          {activeTab === 'invitations' && <InvitationsTab />}
-          {activeTab === 'notifications' && <NotificationsTab />}
-          {activeTab === 'settings' && <SettingsTab />}
-          {activeTab === 'processmap' && limits.canUseProcessMap && <ProcessMapTab />}
+          <TabErrorBoundary>
+            {activeTab === 'workspaces' && <WorkspacesTab onSwitchTab={(tab) => handleTabChange(tab as TabType)} />}
+            {activeTab === 'processes' && <ProcessesTab />}
+            {activeTab === 'groups' && <GroupsTab />}
+            {activeTab === 'members' && <MembersTab />}
+            {activeTab === 'invitations' && <InvitationsTab />}
+            {activeTab === 'notifications' && <NotificationsTab />}
+            {activeTab === 'settings' && <SettingsTab />}
+            {activeTab === 'processmap' && limits.canUseProcessMap && <ProcessMapTab />}
+          </TabErrorBoundary>
         </Suspense>
       </main>
     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
 import { pb } from '@/lib/pocketbase';
+import { sanitizeForFilter } from '@/lib/parseUtils';
 import { Bell, Check, Trash2, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import { LoadMoreButton } from '@/components/ui/LoadMoreButton';
 import { DashboardPageLayout } from '@/components/dashboard/layout/DashboardPageLayout';
 import { DashboardHeader } from '@/components/dashboard/layout/DashboardHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SimpleTooltip } from '@/components/ui/tooltip';
 
 interface NotificationRecord {
   id: string;
@@ -44,7 +46,7 @@ export const NotificationsTab = () => {
     
     try {
       const result = await pb.collection('WORKFLOW_notifications').getList(pageNum, PER_PAGE, {
-        filter: `user = '${user.id}'`,
+        filter: `user = '${sanitizeForFilter(user.id)}'`,
         sort: '-created',
         requestKey: null
       });
@@ -94,6 +96,8 @@ export const NotificationsTab = () => {
     try {
       await pb.collection('WORKFLOW_notifications').update(id, { isRead: true });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      // Refresh nav badge count
+      useAuthStore.getState().fetchUnreadNotificationsCount();
     } catch (err) {
       console.error('Error marking as read:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -104,7 +108,7 @@ export const NotificationsTab = () => {
     if (!user) return;
     try {
       const unreadRecords = await pb.collection('WORKFLOW_notifications').getFullList({
-        filter: `user = '${user.id}' && isRead = false`,
+        filter: `user = '${sanitizeForFilter(user.id)}' && isRead = false`,
         fields: 'id',
         requestKey: null
       });
@@ -118,6 +122,8 @@ export const NotificationsTab = () => {
       }
       
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      // Refresh nav badge count
+      useAuthStore.getState().fetchUnreadNotificationsCount();
       useToastStore.getState().showToast(t('common.success'), 'success');
     } catch (err) {
       console.error('Error marking all as read:', err);
@@ -248,20 +254,14 @@ export const NotificationsTab = () => {
   );
 };
 
-const SimpleTooltip = ({ children, content }: { children: React.ReactNode, content: string }) => {
-  return (
-    <div className="relative group flex items-center justify-center">
-      {children}
-      <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-surface-elevated text-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl border border-border">
-        {content}
-      </div>
-    </div>
-  );
-};
-
+/** Parse bilingual text format "PL / EN" based on current language */
 function parseBilingualText(text: string, currentLang: string): string {
   if (!text) return '';
-  const parts = text.split(' / ');
-  if (parts.length !== 2) return text;
-  return currentLang.startsWith('pl') ? parts[0] : parts[1];
+  // Only split if the separator exists and produces exactly 2 non-empty parts
+  const separatorIdx = text.indexOf(' / ');
+  if (separatorIdx === -1) return text;
+  const plPart = text.substring(0, separatorIdx).trim();
+  const enPart = text.substring(separatorIdx + 3).trim();
+  if (!plPart || !enPart) return text; // Malformed — return original
+  return currentLang.startsWith('pl') ? plPart : enPart;
 }

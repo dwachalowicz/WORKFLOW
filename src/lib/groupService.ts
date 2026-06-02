@@ -196,7 +196,13 @@ export async function deleteGroup(groupId: string, workspaceId: string): Promise
 /** Get avatar URL for a group */
 export function getGroupAvatarUrl(group: WorkflowGroup | GroupRef, size = 100): string {
   if (!group.avatar) return '';
-  if (group.avatar.startsWith('http')) return group.avatar;
+  if (group.avatar.startsWith('http')) {
+    // Only allow URLs from our PocketBase domain
+    try {
+      const url = new URL(group.avatar);
+      if (url.hostname === new URL(pb.baseUrl).hostname) return group.avatar;
+    } catch { /* invalid URL, fall through to construct from PB */ }
+  }
   return `${pb.baseUrl}/api/files/WORKFLOW_groups/${group.id}/${group.avatar}?thumb=${size}x${size}`;
 }
 

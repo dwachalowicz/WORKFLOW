@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-/* eslint-disable react-hooks/set-state-in-effect */
+// Per-effect eslint suppressions used instead of whole-file disable
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useUiStore } from "@/store/uiStore";
@@ -220,6 +220,7 @@ export const Tutorial = () => {
   const TOTAL_STEPS = steps.length;
 
   // Auto-start for new users
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const isCompleted = localStorage.getItem('gryf-tutorial-completed');
     if (!isCompleted && !isTutorialActive) {
@@ -263,6 +264,7 @@ export const Tutorial = () => {
   }, [updatePosition]);
 
   // Reset step when tutorial restarts
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isTutorialActive) {
       setCurrentStep(0);

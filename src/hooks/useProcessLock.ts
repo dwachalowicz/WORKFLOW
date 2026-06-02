@@ -35,7 +35,7 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
       }
     } else {
       // Free → try to acquire lock
-      const acquired = await acquireLock(urlProcessId, userId);
+      const acquired = await acquireLock(urlProcessId);
       if (acquired) {
         setLockInfo(null);
         if (!useCanvasStore.getState().lockedReason) {

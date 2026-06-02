@@ -15,8 +15,10 @@ export const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
         {/* Dark banner for the transparent Navbar to sit on */}
         <div className="bg-[#111] h-[100px] absolute top-0 left-0 w-full z-0 pointer-events-none" />
         
-        <Navbar />
-        <FloatingLandingNav />
+        <div className="dark">
+          <Navbar />
+          <FloatingLandingNav />
+        </div>
         <main className="relative pt-[120px] pb-24 flex-grow z-10 w-full">
           {children}
         </main>

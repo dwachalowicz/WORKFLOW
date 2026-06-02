@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { pb, getAvatarUrl, type WorkflowUser } from '@/lib/pocketbase';
-import { Users, Mail, Loader2, LogOut } from 'lucide-react';
+import { usePBSubscription } from '@/hooks/usePBSubscription';
+import { Users, Mail, Loader2, LogOut, ChevronDown } from 'lucide-react';
 import { InviteMemberModal } from '@/components/modals/InviteMemberModal';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -27,12 +28,26 @@ interface MemberRecord {
 export const MembersTab = () => {
   const { t } = useTranslation();
   const { activeWorkspace, user, leaveWorkspace, fetchWorkspaces } = useAuthStore();
-  const isAdminOrOwner = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';
+  const isAdminOrOwner = (activeWorkspace?.owner === user?.id) || activeWorkspace?.role === 'admin';
 
   const [members, setMembers] = useState<MemberRecord[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [isInviteMemberModalOpen, setIsInviteMemberModalOpen] = useState(false);
   const [processingMemberIds, setProcessingMemberIds] = useState<Set<string>>(new Set());
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close role dropdown on outside click
+  useEffect(() => {
+    if (!editingRoleId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setEditingRoleId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [editingRoleId]);
 
   const fetchMembers = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -109,12 +124,19 @@ export const MembersTab = () => {
 
   useEffect(() => {
     if (activeWorkspace && user) {
-      const timer = setTimeout(() => {
-        fetchMembers();
-      }, 0);
-      return () => clearTimeout(timer);
+      fetchMembers();
     }
   }, [activeWorkspace, user, fetchMembers]);
+
+  // Realtime subscription for workspace members
+  const wsId = activeWorkspace?.id;
+  const realtimeOptions = useMemo(() => ({ filter: wsId ? `workspace = "${wsId}"` : '' }), [wsId]);
+  const handleMemberRealtime = useCallback((e: import('pocketbase').RecordSubscription<MemberRecord>) => {
+    if (e.action === 'create' || e.action === 'update' || e.action === 'delete') {
+      fetchMembers();
+    }
+  }, [fetchMembers]);
+  usePBSubscription<MemberRecord>('WORKFLOW_workspace_members', '*', handleMemberRealtime, !!activeWorkspace, realtimeOptions);
 
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
     setProcessingMemberIds(prev => new Set(prev).add(memberId));
@@ -265,20 +287,46 @@ export const MembersTab = () => {
                           {t('workspaces.roleOwner')}
                         </span>
                       ) : (
-                        <select 
-                          value={m.role}
-                          onChange={(e) => handleUpdateMemberRole(m.id, e.target.value)}
-                          disabled={!isAdminOrOwner || m.expand?.user?.id === user?.id}
-                          className={`text-xs font-bold px-2.5 py-1.5 rounded-full outline-none cursor-pointer border ${
-                            m.role === 'admin' ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' 
-                            : m.role === 'editor' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
-                            : 'bg-secondary text-muted-foreground border-border'
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          <option value="admin">{t('workspaces.roleAdmin')}</option>
-                          <option value="editor">{t('workspaces.roleEditor')}</option>
-                          <option value="viewer">{t('workspaces.roleViewer')}</option>
-                        </select>
+                        <div className="relative" ref={editingRoleId === m.id ? roleDropdownRef : undefined}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!isAdminOrOwner || m.expand?.user?.id === user?.id) return;
+                              setEditingRoleId(editingRoleId === m.id ? null : m.id);
+                            }}
+                            className={`text-xs font-bold px-2.5 py-1.5 rounded-full outline-none border inline-flex items-center gap-1 transition-colors ${
+                              m.role === 'admin' ? 'bg-brand-gold/20 text-brand-gold border-brand-gold/30' 
+                              : m.role === 'editor' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                              : 'bg-secondary text-muted-foreground border-border'
+                            } ${!isAdminOrOwner || m.expand?.user?.id === user?.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:brightness-110'}`}
+                          >
+                            {m.role === 'admin' ? t('workspaces.roleAdmin') : m.role === 'editor' ? t('workspaces.roleEditor') : t('workspaces.roleViewer')}
+                            {isAdminOrOwner && m.expand?.user?.id !== user?.id && <ChevronDown size={12} />}
+                          </button>
+                          {editingRoleId === m.id && (
+                            <div className="absolute left-0 top-full mt-1 z-50 min-w-[120px] rounded-lg border border-border bg-popover shadow-lg py-1 animate-in fade-in-0 zoom-in-95">
+                              {(['admin', 'editor', 'viewer'] as const).map((role) => (
+                                <button
+                                  key={role}
+                                  type="button"
+                                  onClick={() => {
+                                    handleUpdateMemberRole(m.id, role);
+                                    setEditingRoleId(null);
+                                  }}
+                                  className={`w-full text-left text-xs font-semibold px-3 py-2 transition-colors hover:bg-secondary/80 ${
+                                    role === m.role ? 'bg-secondary/50' : ''
+                                  } ${
+                                    role === 'admin' ? 'text-brand-gold'
+                                    : role === 'editor' ? 'text-blue-400'
+                                    : 'text-muted-foreground'
+                                  }`}
+                                >
+                                  {role === 'admin' ? t('workspaces.roleAdmin') : role === 'editor' ? t('workspaces.roleEditor') : t('workspaces.roleViewer')}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="p-4">

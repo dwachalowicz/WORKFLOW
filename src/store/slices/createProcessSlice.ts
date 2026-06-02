@@ -60,6 +60,24 @@ export const createProcessSlice: StateCreator<CanvasState, [], [], ProcessSlice>
     });
   },
 
+  applyAiChanges: (nodes: Node[], edges: Edge[]) => {
+    // Deduplicate nodes by ID (AI may generate duplicates)
+    const seen = new Set<string>();
+    const uniqueNodes = nodes.filter(n => {
+      if (seen.has(n.id)) return false;
+      seen.add(n.id);
+      return true;
+    });
+    // Filter out orphaned edges whose source or target doesn't exist
+    const nodeIds = new Set(uniqueNodes.map(n => n.id));
+    const validEdges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+    set({
+      nodes: uniqueNodes,
+      edges: validEdges,
+      isDirty: true
+    });
+  },
+
   loadProcess: async (id: string) => {
     try {
       const record = await pb.collection('WORKFLOW_processes').getOne(id, { requestKey: null });

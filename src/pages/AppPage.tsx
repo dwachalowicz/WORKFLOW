@@ -152,7 +152,7 @@ export const AppPage = () => {
             disabled={isViewMode}
             className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={14} />
+            <Download size={14} />
           </button>
         </SimpleTooltip>
 
@@ -172,7 +172,7 @@ export const AppPage = () => {
             disabled={isViewMode}
             className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Download size={14} />
+            <Upload size={14} />
           </button>
         </SimpleTooltip>
 

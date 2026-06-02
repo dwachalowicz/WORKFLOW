@@ -1,19 +1,41 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { useUpdateNodeInternals, type Edge } from '@xyflow/react';
 import { useCanvasStore } from "@/store/canvasStore";
-import { useUiStore } from "@/store/uiStore";
 import { useSimulationStore } from "@/store/simulationStore";
 
 /**
  * Hook to check if a specific handle is visually active (selected node or selected edge).
  * Replaces 5 identical inline implementations across all node components.
  */
+/** Selector that computes a Map<nodeId, Edge[]> from all edges — O(E) once, O(1) per node lookup.
+ *  Cached: only recomputes when edges array reference changes. */
+let _cachedEdges: Edge[] | null = null;
+let _cachedMap: Map<string, Edge[]> = new Map();
+
+const selectEdgesByNode = (state: { edges: Edge[] }): Map<string, Edge[]> => {
+  if (state.edges === _cachedEdges) return _cachedMap;
+  _cachedEdges = state.edges;
+  const map = new Map<string, Edge[]>();
+  for (const e of state.edges) {
+    const srcArr = map.get(e.source);
+    if (srcArr) srcArr.push(e); else map.set(e.source, [e]);
+    if (e.target !== e.source) {
+      const tgtArr = map.get(e.target);
+      if (tgtArr) tgtArr.push(e); else map.set(e.target, [e]);
+    }
+  }
+  _cachedMap = map;
+  return map;
+};
+
 export const useHandleActive = (id: string, selected: boolean) => {
   const edges = useCanvasStore(state => state.edges);
+  const edgesByNode = useCanvasStore(selectEdgesByNode);
+  const nodeEdges = edgesByNode.get(id) ?? [];
 
   const isHandleActive = useCallback((handleId: string | null | undefined, type: 'source' | 'target') => {
     if (selected) return true;
-    return edges.some(e => {
+    return nodeEdges.some(e => {
       if (!e.selected) return false;
       if (type === 'source') {
         return e.source === id && (!e.sourceHandle || e.sourceHandle === handleId);
@@ -21,11 +43,11 @@ export const useHandleActive = (id: string, selected: boolean) => {
         return e.target === id && (!e.targetHandle || e.targetHandle === handleId);
       }
     });
-  }, [edges, id, selected]);
+  }, [nodeEdges, id, selected]);
 
   const isAnyHandleActive = useMemo(() => 
-    selected || edges.some((e: Edge) => e.selected && (e.source === id || e.target === id)),
-    [edges, id, selected]
+    selected || nodeEdges.some((e: Edge) => e.selected && (e.source === id || e.target === id)),
+    [nodeEdges, id, selected]
   );
 
   return { isHandleActive, isAnyHandleActive, edges };
@@ -41,8 +63,8 @@ interface NodeGroupRef {
 }
 
 export const useNodeVisualState = (id: string, data: Record<string, unknown>) => {
-  const searchQuery = useUiStore(state => state.searchQuery);
-  const searchSelectedUsers = useUiStore(state => state.searchSelectedUsers);
+  const searchQuery = useCanvasStore(state => state.searchQuery);
+  const searchSelectedUsers = useCanvasStore(state => state.searchSelectedUsers);
   const isSimulating = useSimulationStore(state => state.isSimulating);
   const isActiveInSimulation = useSimulationStore(state => state.activeSimulationNodes.includes(id));
   const isViewMode = useCanvasStore(state => state.isViewMode);

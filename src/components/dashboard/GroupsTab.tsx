@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import {
   fetchGroups,
@@ -72,6 +71,7 @@ export const GroupsTab = () => {
     }
   }, [activeWorkspace]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadGroups(); }, [loadGroups]);
 
   // ── File selected → open cropper ──
@@ -159,7 +159,7 @@ export const GroupsTab = () => {
           </div>
         }
         actions={
-          <Button onClick={() => setShowCreate(true)} size="pill" className="flex items-center gap-2 whitespace-nowrap">
+          <Button onClick={() => setShowCreate(true)} size="pill" disabled={activeWorkspace?.role === 'viewer'} className="flex items-center gap-2 whitespace-nowrap">
             <Plus size={18} /> {t('groups.newGroup')}
           </Button>
         }
@@ -201,7 +201,7 @@ export const GroupsTab = () => {
                   <Camera className="w-5 h-5 text-foreground" />
                 </div>
               </div>
-              <p className="text-[10px] text-muted-foreground text-center mt-1">Avatar</p>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">{t('common.avatar', { defaultValue: 'Avatar' })}</p>
               {newAvatarPreview && (
                 <button onClick={(e) => { e.stopPropagation(); setNewAvatarBlob(null); setNewAvatarPreview(''); }}
                   className="text-[10px] text-muted-foreground hover:text-destructive text-center mt-0.5 transition-colors">{t('common.delete')}</button>
@@ -253,40 +253,52 @@ export const GroupsTab = () => {
         />
       ) : (
         <div className="space-y-6">
+          <GroupsContext.Provider value={{
+            editName, editColor, editAvatarPreview, isSaving,
+            onCancelEdit: () => setEditingId(null), onSaveEdit: handleSaveEdit,
+            onEditNameChange: setEditName, onEditColorChange: setEditColor,
+            onEditAvatarFileSelected: (f) => handleFileSelected(f, 'edit'),
+            onRemoveEditAvatar: () => { setEditAvatarBlob(null); setEditAvatarPreview(''); },
+            editFileRef,
+          }}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredGroups.map(group => (
               <GroupCard key={group.id} group={group} isEditing={editingId === group.id} isDeleting={deletingId === group.id}
-                editName={editName} editColor={editColor} editAvatarPreview={editAvatarPreview} isSaving={isSaving}
-                onStartEdit={() => startEdit(group)} onCancelEdit={() => setEditingId(null)} onSaveEdit={handleSaveEdit}
-                onEditNameChange={setEditName} onEditColorChange={setEditColor}
-                onEditAvatarFileSelected={(f) => handleFileSelected(f, 'edit')}
-                onRemoveEditAvatar={() => { setEditAvatarBlob(null); setEditAvatarPreview(''); }}
-                editFileRef={editFileRef}
+                onStartEdit={() => startEdit(group)}
                 onStartDelete={() => setDeletingId(group.id)} onCancelDelete={() => setDeletingId(null)} onConfirmDelete={() => handleDelete(group.id)} />
             ))}
           </div>
+          </GroupsContext.Provider>
         </div>
       )}
     </DashboardPageLayout>
   );
 };
 
-// ── GroupCard ────────────────────────────────────────────────
-interface GroupCardProps {
-  group: WorkflowGroup; isEditing: boolean; isDeleting: boolean;
+// ── GroupsContext — shared across all GroupCards ─────────────
+interface GroupsContextValue {
   editName: string; editColor: string; editAvatarPreview: string; isSaving: boolean;
-  onStartEdit: () => void; onCancelEdit: () => void; onSaveEdit: () => void;
+  onCancelEdit: () => void; onSaveEdit: () => void;
   onEditNameChange: (n: string) => void; onEditColorChange: (c: string) => void;
   onEditAvatarFileSelected: (f: File) => void;
   onRemoveEditAvatar: () => void;
   editFileRef: React.RefObject<HTMLInputElement | null>;
+}
+
+const GroupsContext = createContext<GroupsContextValue>(null!);
+
+// ── GroupCard ────────────────────────────────────────────────
+interface GroupCardProps {
+  group: WorkflowGroup; isEditing: boolean; isDeleting: boolean;
+  onStartEdit: () => void;
   onStartDelete: () => void; onCancelDelete: () => void; onConfirmDelete: () => void;
 }
 
-const GroupCard = ({ group, isEditing, isDeleting, editName, editColor, editAvatarPreview, isSaving,
-  onStartEdit, onCancelEdit, onSaveEdit, onEditNameChange, onEditColorChange, onEditAvatarFileSelected, onRemoveEditAvatar, editFileRef,
+const GroupCard = ({ group, isEditing, isDeleting,
+  onStartEdit,
   onStartDelete, onCancelDelete, onConfirmDelete }: GroupCardProps) => {
   const { t } = useTranslation();
+  const { editName, editColor, editAvatarPreview, isSaving, onCancelEdit, onSaveEdit, onEditNameChange, onEditColorChange, onEditAvatarFileSelected, onRemoveEditAvatar, editFileRef } = useContext(GroupsContext);
 
   if (isDeleting) {
     return (

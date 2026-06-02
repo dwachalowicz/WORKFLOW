@@ -1,6 +1,7 @@
  
 import { Search, Sparkles, StickyNote, Wand2, BookOpen, LayoutGrid, BarChart3, History, Play, Square, CheckSquare, UserCircle, MoreHorizontal, ChevronDown, Lock } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl } from '@/lib/pocketbase';
 import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
@@ -22,6 +23,7 @@ import { UserMenuPopover } from '@/components/ui/UserMenuPopover';
 
 export const FloatingNavBar = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const limits = getTierLimits(user?.tier);
   const setProfileModalOpen = useAuthStore((state) => state.setProfileModalOpen);
@@ -92,6 +94,7 @@ export const FloatingNavBar = () => {
           {!isViewMode && (
             <SimpleTooltip content={t('ai.title')} side="right">
               <div 
+                id="tool-ai"
                 className="flex items-center justify-center cursor-pointer group shrink-0"
                 onClick={() => handleToggle('ai')}
               >
@@ -117,8 +120,10 @@ export const FloatingNavBar = () => {
 
           <SimpleTooltip content={t('nav.search')} side="right">
             <button 
+              id="tool-search"
               onClick={() => handleToggle('search')}
               className={navBtnClass(isSearchPanelOpen)}
+              aria-label={t('nav.search')}
             >
               <Search size={18} />
             </button>
@@ -129,8 +134,10 @@ export const FloatingNavBar = () => {
               {/* Primary workflow tools */}
               <SimpleTooltip content={t('nav.checklist')} side="right">
                 <button 
+                  id="tool-checklist"
                   onClick={() => handleToggle('checklist')}
                   className={navBtnClass(isChecklistPanelOpen)}
+                  aria-label={t('nav.checklist')}
                 >
                   <CheckSquare size={18} />
                 </button>
@@ -139,6 +146,7 @@ export const FloatingNavBar = () => {
               {/* Analytics & history */}
               <SimpleTooltip content={limits.canUseAdvancedStats ? t('nav.stats') : t('tierLimits.statsLocked')} side="right">
                 <button 
+                  id="tool-stats"
                   onClick={() => limits.canUseAdvancedStats && handleToggle('stats')}
                   className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors border relative ${
                     !limits.canUseAdvancedStats
@@ -153,8 +161,10 @@ export const FloatingNavBar = () => {
 
               <SimpleTooltip content={t('nav.versionHistory')} side="right">
                 <button 
+                  id="tool-version"
                   onClick={() => handleToggle('version')}
                   className={navBtnClass(isVersionModalOpen)}
+                  aria-label={t('nav.versionHistory')}
                 >
                   <History size={18} />
                 </button>
@@ -165,6 +175,7 @@ export const FloatingNavBar = () => {
               {/* Canvas actions */}
               <SimpleTooltip content={!limits.canPresent ? t('tierLimits.simulationLocked') : isSimulating ? t('nav.stopSimulation') : t('nav.simulation')} side="right">
                 <button 
+                  id="tool-simulation"
                   onClick={() => {
                     if (!limits.canPresent) return;
                     if (isSimulating) {
@@ -188,8 +199,10 @@ export const FloatingNavBar = () => {
 
               <SimpleTooltip content={t('nav.autoLayout')} side="right">
                 <button 
+                  id="tool-autolayout"
                   onClick={autoLayout}
                   className={NAV_BTN_STATIC}
+                  aria-label={t('nav.autoLayout')}
                 >
                   <Wand2 size={18} />
                 </button>
@@ -197,6 +210,7 @@ export const FloatingNavBar = () => {
 
               <SimpleTooltip content={t('nav.addNote')} side="right">
                 <button 
+                  id="tool-note"
                   ref={noteButtonRef}
                   onClick={() => {
                     // Dispatch event with button rect — GryfCanvas handles flow coordinate conversion
@@ -219,6 +233,7 @@ export const FloatingNavBar = () => {
               {/* Utility */}
               <SimpleTooltip content={t('nav.tutorial')} side="right">
                 <button 
+                  id="tool-tutorial"
                   onClick={() => {
                     if (isTutorialActive) {
                       setTutorialActive(false);
@@ -239,7 +254,8 @@ export const FloatingNavBar = () => {
 
               <SimpleTooltip content={t('canvas.backToDashboard')} side="right">
                 <button 
-                  onClick={() => window.location.href = '/dashboard'}
+                  id="tool-dashboard"
+                  onClick={() => navigate('/dashboard')}
                   className={NAV_BTN_STATIC}
                 >
                   <LayoutGrid size={18} />
@@ -258,7 +274,7 @@ export const FloatingNavBar = () => {
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                 className="cursor-pointer flex items-center gap-1 text-muted-foreground hover:text-brand-gold transition-colors text-xs font-bold uppercase"
               >
-                <span>{localStorage.getItem('gryf-lang') === 'en' ? 'EN' : 'PL'}</span>
+                <span>{i18n.language === 'en' ? 'EN' : 'PL'}</span>
                 <ChevronDown size={14} className={`transition-transform duration-200 ${isLangMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -271,7 +287,7 @@ export const FloatingNavBar = () => {
                       i18n.changeLanguage('pl');
                       setIsLangMenuOpen(false);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${localStorage.getItem('gryf-lang') !== 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${i18n.language !== 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                   >
                     PL (Polski)
                   </button>
@@ -281,7 +297,7 @@ export const FloatingNavBar = () => {
                       i18n.changeLanguage('en');
                       setIsLangMenuOpen(false);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${localStorage.getItem('gryf-lang') === 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${i18n.language === 'en' ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                   >
                     EN (English)
                   </button>
@@ -323,7 +339,8 @@ export const FloatingNavBar = () => {
     <div className="fixed bottom-0 left-0 right-0 z-[120] md:hidden bg-surface-nav border-t border-border shadow-2xl">
       <div className="flex items-center justify-around px-2 py-2">
         <button
-          onClick={() => window.location.href = '/dashboard'}
+          onClick={() => navigate('/dashboard')}
+          aria-label={t('canvas.backToDashboard')}
           className="flex items-center justify-center p-2 rounded-xl transition-colors text-muted-foreground hover:bg-secondary"
         >
           <LayoutGrid size={22} />
@@ -331,6 +348,7 @@ export const FloatingNavBar = () => {
 
         <button
           onClick={() => handleToggle('search')}
+          aria-label={t('nav.search')}
           className={`flex items-center justify-center p-2 rounded-xl transition-colors ${isSearchPanelOpen ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground hover:bg-secondary'}`}
         >
           <Search size={22} />
@@ -339,6 +357,7 @@ export const FloatingNavBar = () => {
         {!isViewMode && (
           <button
             onClick={() => handleToggle('ai')}
+            aria-label={t('ai.title')}
             className={`flex items-center justify-center p-2 rounded-xl transition-colors ${isAiPanelOpen ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground hover:bg-secondary'}`}
           >
             <Sparkles size={22} />
@@ -348,6 +367,7 @@ export const FloatingNavBar = () => {
         {!isViewMode && (
           <button
             onClick={autoLayout}
+            aria-label={t('nav.autoLayout')}
             className="flex items-center justify-center p-2 rounded-xl transition-colors text-muted-foreground hover:bg-secondary"
           >
             <Wand2 size={22} />
@@ -408,7 +428,7 @@ export const FloatingNavBar = () => {
 
                 <button
                   onClick={() => {
-                    const newLang = localStorage.getItem('gryf-lang') === 'en' ? 'pl' : 'en';
+                    const newLang = i18n.language === 'en' ? 'pl' : 'en';
                     localStorage.setItem('gryf-lang', newLang);
                     i18n.changeLanguage(newLang);
                   }}
@@ -418,7 +438,7 @@ export const FloatingNavBar = () => {
                     <span className="font-bold text-xs">EN/PL</span>
                     {t('settings.language', 'Language')}
                   </span>
-                  <span className="text-brand-gold font-bold uppercase">{localStorage.getItem('gryf-lang') === 'en' ? 'EN' : 'PL'}</span>
+                  <span className="text-brand-gold font-bold uppercase">{i18n.language === 'en' ? 'EN' : 'PL'}</span>
                 </button>
 
                 <div className="mx-3 h-px bg-border my-1" />

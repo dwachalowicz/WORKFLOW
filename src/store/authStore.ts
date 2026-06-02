@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import i18n from '@/i18n/config';
 
 import { pb, type WorkflowUser } from '../lib/pocketbase';
-import { getTierLimits, getEffectiveTier, loadTierConfig } from '../lib/tierLimits';
+import { getTierLimits, getEffectiveTier, loadTierConfig, unloadTierConfig } from '../lib/tierLimits';
 import { sanitizeForFilter } from '../lib/parseUtils';
 import { useToastStore } from './toastStore';
 
@@ -94,6 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     pb.authStore.clear();
+    unloadTierConfig();
     set({ 
       user: null, 
       token: null, 
@@ -102,6 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       pendingInvitations: [],
       sentJoinRequests: [],
       pendingMembersCount: 0,
+      unreadNotificationsCount: 0,
       activeWorkspace: null
     });
   },
@@ -317,8 +319,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             console.error('Error bootstrapping default workspace:', bootstrapErr);
             useToastStore.getState().addToast({
               type: 'warning',
-              title: i18n.t('toast.warning') || 'Warning',
-              message: 'Failed to create the default workspace. You can create it manually in settings.'
+              title: i18n.t('toast.warning', { defaultValue: 'Warning' }),
+              message: i18n.t('authStore.defaultWorkspaceError', { defaultValue: 'Failed to create the default workspace. You can create it manually in settings.' })
             });
           }
         }
@@ -390,12 +392,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     try {
-      const unreadNotifs = await pb.collection('WORKFLOW_notifications').getFullList({
+      const result = await pb.collection('WORKFLOW_notifications').getList(1, 1, {
         filter: `user = "${sanitizeForFilter(userId)}" && isRead = false`,
         fields: 'id',
         requestKey: null,
       });
-      set({ unreadNotificationsCount: unreadNotifs.length });
+      set({ unreadNotificationsCount: result.totalItems });
     } catch {
       set({ unreadNotificationsCount: 0 });
     }
@@ -541,6 +543,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password: tempPassword,
         passwordConfirm: tempPassword,
         emailVisibility: true,
+        tier: 'FREE',
       });
     } catch {
       // If the user already exists, Pocketbase will throw a validation error (400), which we simply ignore.
@@ -552,7 +555,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   confirmOTP: async (otpId: string, code: string) => {
     await pb.collection('WORKFLOW_users').authWithOTP(otpId, code);
-    get().checkAuth();
+    await get().checkAuth();
   },
 
   getAccountDeletionInfo: async () => {
@@ -611,10 +614,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 /** Initialize auth state and listener. Called once at module load. */
 function initAuth(): void {
-  useAuthStore.getState().checkAuth();
-  pb.authStore.onChange(() => {
-    useAuthStore.getState().checkAuth(true);
-  });
+  try {
+    useAuthStore.getState().checkAuth();
+    pb.authStore.onChange(() => {
+      useAuthStore.getState().checkAuth(true);
+    });
+  } catch (err) {
+    console.error('[initAuth] Failed to initialize auth:', err);
+  }
 }
 
 initAuth();

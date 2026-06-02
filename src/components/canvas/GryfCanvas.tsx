@@ -117,6 +117,8 @@ export const GryfCanvas = () => {
     }
   }, [storeOnEdgesChange, isViewMode]);
 
+  const { screenToFlowPosition, deleteElements, setNodes, setEdges, zoomIn, zoomOut, fitView: rfFitView } = useReactFlow();
+
   // Global Keyboard Shortcuts
   useEffect(() => {
     if (isViewMode) return; // No keyboard shortcuts in view mode
@@ -136,17 +138,20 @@ export const GryfCanvas = () => {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         redo();
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        const selectedNodes = useCanvasStore.getState().nodes.filter(n => n.selected && n.data?.type !== 'start');
+        const selectedEdges = useCanvasStore.getState().edges.filter(e => e.selected);
+        if (selectedNodes.length > 0 || selectedEdges.length > 0) {
+          e.preventDefault();
+          deleteElements({ nodes: selectedNodes, edges: selectedEdges });
+        }
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, isViewMode]);
+  }, [undo, redo, isViewMode, deleteElements]);
 
-
-
-
-  const { screenToFlowPosition, deleteElements, setNodes, setEdges, zoomIn, zoomOut, fitView: rfFitView } = useReactFlow();
 
   // Listen for note creation from FloatingNavBar (outside ReactFlowProvider)
   useEffect(() => {
@@ -242,7 +247,7 @@ export const GryfCanvas = () => {
             id: newId,
             selected: true,
             position: spawnPosition,
-            data: { ...nodeToCopy.data, ...(copyLabel ? { label: copyLabel } : {}) }
+            data: { ...structuredClone(nodeToCopy.data), ...(copyLabel ? { label: copyLabel } : {}) }
           });
         }
         break;
@@ -311,10 +316,13 @@ export const GryfCanvas = () => {
   }, [menuConfig, addNode, screenToFlowPosition, deleteElements, getNextUniqueName, t]);
 
   const onReconnect = useCallback(
-    (oldEdge: Edge, newConnection: Connection) => setEdges((els) => {
-      return reconnectEdge(oldEdge, newConnection, els);
-    }),
-    [setEdges]
+    (oldEdge: Edge, newConnection: Connection) => {
+      // Validate the new connection before reconnecting
+      if (newConnection.source === newConnection.target) return;
+      if (!isValidConnection(newConnection)) return;
+      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+    },
+    [setEdges, isValidConnection]
   );
 
   const isValidConnection = useCallback((connection: Connection) => {
@@ -347,7 +355,7 @@ export const GryfCanvas = () => {
         connectionMode={ConnectionMode.Strict}
         nodesDraggable={!isViewMode}
         nodesConnectable={!isViewMode}
-        multiSelectionKeyCode={null}
+        multiSelectionKeyCode="Shift"
         selectionOnDrag={false}
         panOnDrag
         zoomOnPinch

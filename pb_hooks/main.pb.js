@@ -535,6 +535,11 @@ onRecordCreateRequest((e) => {
         newUser.set("name", "user");
     }
 
+    // Set default tier to FREE if not already set
+    if (!newUser.get("tier")) {
+        newUser.set("tier", "FREE");
+    }
+
     e.next();
 
     const email = newUser.get("email");
@@ -1625,6 +1630,39 @@ routerAdd("POST", "/api/process/lock", (e) => {
 });
 
 // =====================================================
+// ROUTE: POST /api/process/unlock — Atomic Lock Release
+// =====================================================
+routerAdd("POST", "/api/process/unlock", (e) => {
+    if (!e.auth) {
+        return e.json(401, { message: "Not authenticated" });
+    }
+
+    const data = e.requestInfo().body || {};
+    const processId = data.processId;
+    if (!processId) {
+        return e.json(400, { message: "processId is required" });
+    }
+
+    try {
+        e.app.runInTransaction((txApp) => {
+            const record = txApp.findRecordById("WORKFLOW_processes", processId);
+            const currentLocker = record.get("locked_by");
+
+            // Only clear the lock if the requesting user holds it
+            if (currentLocker === e.auth.id) {
+                record.set("locked_by", "");
+                record.set("locked_at", "");
+                txApp.save(record);
+            }
+        });
+
+        return e.json(200, { success: true });
+    } catch (err) {
+        return e.json(500, { message: err.message || "Internal server error" });
+    }
+});
+
+// =====================================================
 // ROUTE: POST /api/process/has-password
 // =====================================================
 routerAdd("POST", "/api/process/has-password", (e) => {
@@ -2167,6 +2205,96 @@ routerAdd("GET", "/api/locked-processes/{workspaceId}", (e) => {
 });
 
 // =====================================================
+// ROUTE: GET /api/process-links/{workspaceId}
+// MED-9: Server-side cross-workflow link extraction
+// Avoids downloading full nodes JSON to the client.
+// =====================================================
+routerAdd("GET", "/api/process-links/{workspaceId}", (e) => {
+    if (!e.auth) {
+        return e.json(401, { message: "Not authenticated" });
+    }
+
+    try {
+        var workspaceId = e.request.pathValue("workspaceId");
+        if (!workspaceId) {
+            return e.json(400, { message: "workspaceId is required" });
+        }
+
+        // Access check: user must be owner or active member
+        var ws;
+        try {
+            ws = e.app.findRecordById("WORKFLOW_workspaces", workspaceId);
+        } catch(err) {
+            return e.json(404, { message: "Workspace not found" });
+        }
+
+        var hasAccess = false;
+        if (ws.get("owner") === e.auth.id) {
+            hasAccess = true;
+        } else {
+            try {
+                var members = e.app.findRecordsByFilter(
+                    "WORKFLOW_workspace_members",
+                    "workspace = {:ws} && user = {:u} && status = 'active'",
+                    "", 1, 0,
+                    { ws: workspaceId, u: e.auth.id }
+                );
+                if (members && members.length > 0) hasAccess = true;
+            } catch(err) {}
+        }
+        if (!hasAccess) {
+            return e.json(403, { message: "No access to this workspace" });
+        }
+
+        // Fetch all processes in workspace (only id, name, nodes needed)
+        var processes = e.app.findRecordsByFilter(
+            "WORKFLOW_processes",
+            "workspace = {:ws}",
+            "", 0, 0,
+            { ws: workspaceId }
+        );
+
+        // Build name map and extract links
+        var nameMap = {};
+        for (var i = 0; i < processes.length; i++) {
+            nameMap[processes[i].id] = processes[i].get("name") || "Unnamed";
+        }
+
+        var links = [];
+        for (var p = 0; p < processes.length; p++) {
+            var proc = processes[p];
+            var nodesRaw = proc.get("nodes");
+            var nodes = [];
+            if (typeof nodesRaw === "string") {
+                try { nodes = JSON.parse(nodesRaw); } catch(parseErr) { continue; }
+            } else if (Array.isArray(nodesRaw)) {
+                nodes = nodesRaw;
+            }
+
+            for (var n = 0; n < nodes.length; n++) {
+                var node = nodes[n];
+                var data = node.data || {};
+                if (data.targetWorkflowId && data.targetWorkflowId !== proc.id) {
+                    links.push({
+                        sourceProcessId: proc.id,
+                        sourceProcessName: nameMap[proc.id],
+                        targetProcessId: data.targetWorkflowId,
+                        targetProcessName: nameMap[data.targetWorkflowId] || data.targetWorkflowName || "Unknown",
+                        targetNodeLabel: data.targetNodeLabel || "",
+                        linkType: node.type === "subworkflow" ? "subworkflow" : "handoff"
+                    });
+                }
+            }
+        }
+
+        return e.json(200, { links: links });
+
+    } catch (err) {
+        return e.json(500, { message: "Error extracting process links: " + String(err.message || err) });
+    }
+});
+
+// =====================================================
 // ROUTE: POST /api/workspaces/join-by-code
 // =====================================================
 routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
@@ -2605,6 +2733,39 @@ cronAdd("cleanUnverifiedUsers", "0 0 * * *", () => {
 });
 
 // =====================================================
+// CRON: Stale Process Lock Cleanup (every 5 minutes)
+// =====================================================
+cronAdd("cleanStaleLocks", "*/5 * * * *", () => {
+    try {
+        const app = $app;
+        // Find processes locked more than 5 minutes ago
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const dateString = fiveMinAgo.toISOString().replace("T", " ");
+
+        const staleProcs = app.findRecordsByFilter(
+            "WORKFLOW_processes",
+            "locked_by != '' && locked_at < {:date}",
+            "",
+            1000,
+            0,
+            { date: dateString }
+        );
+
+        for (let i = 0; i < staleProcs.length; i++) {
+            staleProcs[i].set("locked_by", "");
+            staleProcs[i].set("locked_at", "");
+            app.save(staleProcs[i]);
+        }
+
+        if (staleProcs.length > 0) {
+            console.log("Cleaned up " + staleProcs.length + " stale process lock(s).");
+        }
+    } catch (err) {
+        console.error("Cron cleanStaleLocks error:", err);
+    }
+});
+
+// =====================================================
 // HOOK: Notifications for Invitations & Roles
 // =====================================================
 onRecordCreateRequest((e) => {
@@ -2986,3 +3147,16 @@ onRecordCreateRequest(function(e) {
 }, "WORKFLOW_versions");
 
 
+// =====================================================
+// HOOK: MED-32 — Fix users with missing/unknown tier on bootstrap
+// =====================================================
+onAfterBootstrap((e) => {
+  try {
+    const users = $app.dao().findRecordsByFilter('WORKFLOW_users', "tier = '' || tier = 'UNKNOWN'", '', 0, 0);
+    for (const user of users) {
+      user.set('tier', 'FREE');
+      $app.dao().saveRecord(user);
+    }
+    if (users.length > 0) console.log(`[Bootstrap] Fixed ${users.length} users with missing tier → FREE`);
+  } catch(e) { /* collection may not exist yet */ }
+});

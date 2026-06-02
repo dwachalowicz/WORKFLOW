@@ -101,6 +101,28 @@ export function useProcessFileOperations() {
       try {
         const json = JSON.parse(event.target?.result as string);
         if (json.nodes && json.edges) {
+          // Validate structure
+          if (!Array.isArray(json.nodes) || !Array.isArray(json.edges)) {
+            showToast(t('canvas.invalidFile'), 'error');
+            return;
+          }
+          // Size limits to prevent DoS
+          if (json.nodes.length > 500) {
+            showToast(t('canvas.tooManyNodes', 'Plik zawiera zbyt wiele węzłów (max 500)'), 'error');
+            return;
+          }
+          if (json.edges.length > 1000) {
+            showToast(t('canvas.tooManyEdges', 'Plik zawiera zbyt wiele połączeń (max 1000)'), 'error');
+            return;
+          }
+          // Validate each node has required fields
+          const validNodes = json.nodes.every((n: Record<string, unknown>) => 
+            n && typeof n === 'object' && typeof n.id === 'string' && n.position && typeof n.position === 'object'
+          );
+          if (!validNodes) {
+            showToast(t('canvas.invalidFile'), 'error');
+            return;
+          }
           useCanvasStore.setState({
             nodes: json.nodes,
             edges: json.edges,

@@ -134,6 +134,7 @@ export const ProfileModal = () => {
         });
       } catch (aiErr) {
         console.warn('Could not save AI config (endpoint may not be deployed yet):', aiErr);
+        useToastStore.getState().showToast(t('profile.aiConfigSaveFail', 'Nie udało się zapisać ustawień AI'), 'error');
       }
 
       await pb.collection('WORKFLOW_users').update(user.id, formData);
@@ -234,7 +235,23 @@ export const ProfileModal = () => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    // Check for unsaved changes before closing
+    const hasNameChange = name !== (user?.name || '');
+    const hasAvatarChange = !!imageSrc || pendingDeleteAvatar;
+    const hasAiKeyChange = aiKey.trim().length > 0;
+    
+    if (hasNameChange || hasAvatarChange || hasAiKeyChange) {
+      const confirmed = await useConfirmStore.getState().confirm({
+        title: t('profile.unsavedChangesTitle', 'Niezapisane zmiany'),
+        message: t('profile.unsavedChangesMessage', 'Masz niezapisane zmiany. Czy na pewno chcesz zamknąć?'),
+        confirmLabel: t('common.close', 'Zamknij'),
+        cancelLabel: t('common.cancel'),
+        variant: 'default',
+      });
+      if (!confirmed) return;
+    }
+
     setProfileModalOpen(false);
     setImageSrc(null);
     setEmail(user?.email || '');

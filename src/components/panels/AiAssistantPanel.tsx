@@ -123,7 +123,7 @@ export const AiAssistantPanel = () => {
   const setOpen = useUiStore((s) => s.setAiPanelOpen);
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
-  const importProcess = useCanvasStore((s) => s.importProcess);
+  const applyAiChanges = useCanvasStore((s) => s.applyAiChanges);
   const isViewMode = useCanvasStore((s) => s.isViewMode);
   const { activeWorkspace, user, setProfileModalOpen } = useAuthStore();
   const tierLimits = getTierLimits(user?.tier);
@@ -306,7 +306,7 @@ export const AiAssistantPanel = () => {
         };
       });
       // Keep edges exactly as they are
-      importProcess(updatedNodes, edges);
+      applyAiChanges(updatedNodes, edges);
       useToastStore.getState().showToast(t('aiExt.changesApplied', 'Zmiany zostały pomyślnie zastosowane na płótnie.'), 'success');
     } catch (err) {
       console.error('Error applying update:', err);
@@ -580,7 +580,7 @@ export const AiAssistantPanel = () => {
         const key = `${startNode.id}->${ordered[0].id}`;
         if (!existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === startNode.id && e.target === ordered[0].id))
           // eslint-disable-next-line react-hooks/purity
-          finalNewEdges.push({ id: `ai-edge-start-${Date.now()}`, type: 'custom', source: startNode.id, target: ordered[0].id, sourceHandle: 'right', targetHandle: 'left' });
+          finalNewEdges.push({ id: `ai-edge-start-${crypto.randomUUID()}`, type: 'custom', source: startNode.id, target: ordered[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
       aiEdges.forEach(e => {
         const key = `${e.source}->${e.target}`;
@@ -592,7 +592,7 @@ export const AiAssistantPanel = () => {
         const key = `${lastNode.id}->${stopNodes[0].id}`;
         if (canConnect && !existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === lastNode.id && e.target === stopNodes[0].id))
           // eslint-disable-next-line react-hooks/purity
-          finalNewEdges.push({ id: `ai-edge-stop-${Date.now()}`, type: 'custom', source: lastNode.id, target: stopNodes[0].id, sourceHandle: 'right', targetHandle: 'left' });
+          finalNewEdges.push({ id: `ai-edge-stop-${crypto.randomUUID()}`, type: 'custom', source: lastNode.id, target: stopNodes[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
 
       // Move STOP node to the right of the last generated node
@@ -602,7 +602,7 @@ export const AiAssistantPanel = () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      importProcess([...updatedNodes, ...ordered] as any, [...baseEdges, ...finalNewEdges] as any);
+      applyAiChanges([...updatedNodes, ...ordered] as any, [...baseEdges, ...finalNewEdges] as any);
       setTimeout(() => {
         useCanvasStore.getState().autoLayout();
       }, 100);

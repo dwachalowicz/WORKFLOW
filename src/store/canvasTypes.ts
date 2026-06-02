@@ -47,6 +47,7 @@ export interface ProcessSlice {
   loadProcess: (id: string) => Promise<void>;
   createNewProcess: (groupId?: string | null) => void;
   importProcess: (nodes: Node[], edges: Edge[]) => void;
+  applyAiChanges: (nodes: Node[], edges: Edge[]) => void;
   setIsDirty: (dirty: boolean) => void;
   setViewMode: (viewMode: boolean) => void;
   setLockedReason: (reason: LockedReasonType) => void;
@@ -72,4 +73,11 @@ export interface MetadataSlice {
   fetchIncomingLinks: () => Promise<void>;
 }
 
-export interface CanvasState extends GraphSlice, ProcessSlice, VersionSlice, MetadataSlice {}
+export interface SearchSlice {
+  searchQuery: string;
+  searchSelectedUsers: string[];
+  setSearchQuery: (query: string) => void;
+  setSearchSelectedUsers: (users: string[]) => void;
+}
+
+export interface CanvasState extends GraphSlice, ProcessSlice, VersionSlice, MetadataSlice, SearchSlice {}

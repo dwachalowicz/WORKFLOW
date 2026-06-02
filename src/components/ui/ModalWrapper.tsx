@@ -71,6 +71,8 @@ export const ModalContainer = ({
   className,
 }: ModalContainerProps) => (
   <div
+    role="dialog"
+    aria-modal="true"
     className={cn(
       "bg-card w-full rounded-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200 shadow-2xl flex flex-col max-h-[90vh]",
       SIZE_MAP[size],
@@ -121,7 +123,7 @@ export const ModalHeader = ({
         {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
       </div>
     </div>
-    <Button variant="iconGhost" size="icon" onClick={onClose} className="shrink-0 ml-2">
+    <Button variant="iconGhost" size="icon" onClick={onClose} aria-label="Close" className="shrink-0 ml-2">
       <X size={18} />
     </Button>
   </div>

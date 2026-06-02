@@ -102,22 +102,37 @@ export async function acquireLock(processId: string): Promise<boolean> {
  */
 export async function releaseLock(processId: string, userId: string): Promise<void> {
   try {
-    // Only release if the current user holds the lock
-    const record = await pb.collection('WORKFLOW_processes').getOne(processId, {
-      fields: 'locked_by',
+    // Try atomic server-side unlock endpoint first
+    await pb.send('/api/process/unlock', {
+      method: 'POST',
+      body: { processId },
       requestKey: null,
     });
+  } catch (unlockErr) {
+    const unlockError = unlockErr as { status?: number; isAbort?: boolean };
+    // If the endpoint doesn't exist (404/405), fall back to conditional SDK update
+    if (unlockError?.status === 404 || unlockError?.status === 405) {
+      try {
+        const record = await pb.collection('WORKFLOW_processes').getOne(processId, {
+          fields: 'locked_by',
+          requestKey: null,
+        });
 
-    if (record.locked_by === userId) {
-      await pb.collection('WORKFLOW_processes').update(processId, {
-        locked_by: null,
-        locked_at: null,
-      }, { requestKey: null });
-    }
-  } catch (err) {
-    const error = err as { status?: number; isAbort?: boolean };
-    if (error?.status !== 0 && error?.isAbort !== true) {
-      console.error('Error releasing lock:', err);
+        // Only release if the lock is still held by this user
+        if (record.locked_by === userId) {
+          await pb.collection('WORKFLOW_processes').update(processId, {
+            locked_by: null,
+            locked_at: null,
+          }, { requestKey: null });
+        }
+      } catch (err) {
+        const error = err as { status?: number; isAbort?: boolean };
+        if (error?.status !== 0 && error?.isAbort !== true) {
+          console.error('Error releasing lock (fallback):', err);
+        }
+      }
+    } else if (unlockError?.status !== 0 && unlockError?.isAbort !== true) {
+      console.error('Error releasing lock:', unlockErr);
     }
   }
 }

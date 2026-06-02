@@ -89,12 +89,31 @@ export const SharedProcessPage = () => {
     }
   }, [id, verifyAndLoad]);
 
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || isLocked) return;
     setIsLoading(true);
-    await verifyAndLoad(id, password);
+    const success = await verifyAndLoad(id, password);
     setIsLoading(false);
+
+    if (!success && password) {
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+
+      // Apply cooldown: 30s after 5 failures, 3s otherwise
+      const cooldownMs = newAttempts >= 5 ? 30_000 : 3_000;
+      const until = Date.now() + cooldownMs;
+      setLockedUntil(until);
+
+      setTimeout(() => {
+        setLockedUntil((prev) => (prev === until ? null : prev));
+      }, cooldownMs);
+    }
   };
 
   if (isLoading) {
@@ -148,8 +167,9 @@ export const SharedProcessPage = () => {
             <Button 
               type="submit"
               className="w-full"
+              disabled={isLoading || isLocked}
             >
-              {t('share.unlock')}
+              {isLocked ? t('share.tryAgainLater', 'Poczekaj...') : t('share.unlock')}
             </Button>
           </form>
         </div>

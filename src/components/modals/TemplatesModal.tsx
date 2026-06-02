@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect, react-hooks/static-components */
 import { useState, useEffect, lazy, Suspense, type ComponentType, useCallback } from 'react';
 import { pb, type WorkflowTemplate } from '@/lib/pocketbase';
 import { useAuthStore } from '@/store/authStore';
@@ -11,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ModalOverlay, ModalContainer, ModalHeader, ModalBody } from '@/components/ui/ModalWrapper';
 import { useToastStore } from '@/store/toastStore';
+import type { UserTier } from '@/lib/tierLimits';
 
 type Template = WorkflowTemplate;
 
@@ -35,6 +35,7 @@ const getIconComponent = (name?: string): ComponentType<LucideProps> => {
 };
 
 /** Resolve a Lucide icon name (e.g. "Users", "DollarSign") to a lazy component. */
+// eslint-disable-next-line react-hooks/static-components
 const DynamicIcon = ({ name, ...props }: { name?: string } & LucideProps) => {
   const IconComponent = getIconComponent(name);
 
@@ -75,6 +76,7 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
     }
   }, [t]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isOpen) fetchTemplates();
   }, [isOpen, fetchTemplates]);
@@ -82,14 +84,36 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
   const handleUseTemplate = async (template: Template) => {
     if (!user || !activeWorkspace) return;
 
+    // Tier check: compare user tier against template requirement
+    const TIER_ORDER: Record<string, number> = { FREE: 0, MEDIUM: 1, PRO: 2 };
+    const userTierLevel = TIER_ORDER[(user.tier || 'FREE').toUpperCase()] ?? 0;
+    const requiredTierLevel = TIER_ORDER[(template.tier_required || 'FREE').toUpperCase()] ?? 0;
+    if (userTierLevel < requiredTierLevel) {
+      useToastStore.getState().showToast(
+        t('tierLimits.templateTierRequired', {
+          tier: template.tier_required,
+          defaultValue: `Ten szablon wymaga planu ${template.tier_required}. Zaktualizuj swój plan, aby go użyć. / This template requires ${template.tier_required} plan. Upgrade to use it.`
+        }),
+        'error'
+      );
+      return;
+    }
+
     try {
       // Create a new process from this template
-      const nodes = typeof template.nodes_data === 'string' 
-        ? JSON.parse(template.nodes_data) 
-        : template.nodes_data;
-      const edges = typeof template.edges_data === 'string' 
-        ? JSON.parse(template.edges_data) 
-        : template.edges_data;
+      let nodes: unknown;
+      let edges: unknown;
+      try {
+        nodes = typeof template.nodes_data === 'string' 
+          ? JSON.parse(template.nodes_data) 
+          : template.nodes_data;
+        edges = typeof template.edges_data === 'string' 
+          ? JSON.parse(template.edges_data) 
+          : template.edges_data;
+      } catch {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+        return;
+      }
 
       const record = await pb.collection('WORKFLOW_processes').create({
         name: template.name,
@@ -187,8 +211,12 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
                       <Sparkles size={12} className="text-brand-gold" />
                       <span className="text-[11px] text-muted-foreground">
                         {(() => {
-                          const nodes = typeof template.nodes_data === 'string' ? JSON.parse(template.nodes_data) : template.nodes_data;
-                          return `${nodes?.length || 0} ${t('versionsExt.nodesCount')}`;
+                          try {
+                            const nodes = typeof template.nodes_data === 'string' ? JSON.parse(template.nodes_data) : template.nodes_data;
+                            return `${nodes?.length || 0} ${t('versionsExt.nodesCount')}`;
+                          } catch {
+                            return `0 ${t('versionsExt.nodesCount')}`;
+                          }
                         })()}
                       </span>
                     </div>

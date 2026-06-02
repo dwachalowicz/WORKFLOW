@@ -311,12 +311,22 @@ export async function importGlobalBackup(file: File, userId: string) {
         // We don't export avatar files for processes, so we must remove the string filename to prevent PocketBase 400 Bad Request
         delete r.avatar;
 
+        // Filter out orphaned edges whose source or target doesn't exist in the node set
+        let edges = r.edges;
+        if (edges && Array.isArray(edges) && nodes && Array.isArray(nodes)) {
+          const nodeIds = new Set(nodes.map((n: { id: string }) => n.id));
+          edges = edges.filter((e: { source?: string; target?: string }) => 
+            e.source && e.target && nodeIds.has(e.source) && nodeIds.has(e.target)
+          );
+        }
+
         return {
           ...r,
           owner: userId, // Ensure new owner gets the processes
           workspace: newWsId,
           group: mappedGroup || '',
-          nodes: nodes
+          nodes: nodes,
+          edges: edges
         };
       });
 

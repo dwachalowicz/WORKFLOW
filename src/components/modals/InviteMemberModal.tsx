@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, Mail, Users, Shield, Pencil, Eye, CheckCircle, UserPlus } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -31,11 +31,23 @@ export const InviteMemberModal = ({ isOpen, onClose, workspaceId }: InviteMember
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setEmail('');
+      setRole('editor');
+      setError(null);
+      setSuccessMessage(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !email.includes('@')) return;
+    if (!email.trim() || !isValidEmail(email.trim())) return;
 
     setIsLoading(true);
     setError(null);
@@ -154,7 +166,7 @@ export const InviteMemberModal = ({ isOpen, onClose, workspaceId }: InviteMember
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading || !email.trim() || !email.includes('@')}
+                  disabled={isLoading || !email.trim() || !isValidEmail(email.trim())}
                   className="flex-1 flex gap-2"
                 >
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}

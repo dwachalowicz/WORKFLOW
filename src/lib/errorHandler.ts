@@ -1,4 +1,5 @@
 import { useToastStore } from '@/store/toastStore';
+import i18n from '@/i18n/config';
 
 /**
  * Centralized error handler — replaces the repetitive try/catch → console.error → showToast pattern.
@@ -42,7 +43,10 @@ export async function tryCatchToast<T>(
       console.error(`[tryCatchToast] ${errorKey || 'unknown'}:`, err);
     }
     if (errorKey) {
-      useToastStore.getState().showToast(errorKey, 'error');
+      const translated = i18n.t(errorKey);
+      // If i18n returns the key itself (missing translation), show generic error
+      const message = translated !== errorKey ? translated : i18n.t('common.error', 'Wystąpił błąd');
+      useToastStore.getState().showToast(message, 'error');
     }
     onError?.(err);
     return fallback as T | undefined;
