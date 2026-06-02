@@ -579,7 +579,7 @@ export const AiAssistantPanel = () => {
       if (startNode && ordered.length > 0) {
         const key = `${startNode.id}->${ordered[0].id}`;
         if (!existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === startNode.id && e.target === ordered[0].id))
-          // eslint-disable-next-line react-hooks/purity
+      
           finalNewEdges.push({ id: `ai-edge-start-${crypto.randomUUID()}`, type: 'custom', source: startNode.id, target: ordered[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
       aiEdges.forEach(e => {
@@ -591,7 +591,7 @@ export const AiAssistantPanel = () => {
         const canConnect = lastNode.type === 'simple' || lastNode.type === 'subworkflow' || (lastNode.type === 'startstop' && (lastNode.data as Record<string, unknown>)?.type === 'start');
         const key = `${lastNode.id}->${stopNodes[0].id}`;
         if (canConnect && !existingEdgeKeys.has(key) && !aiEdges.some(e => e.source === lastNode.id && e.target === stopNodes[0].id))
-          // eslint-disable-next-line react-hooks/purity
+      
           finalNewEdges.push({ id: `ai-edge-stop-${crypto.randomUUID()}`, type: 'custom', source: lastNode.id, target: stopNodes[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
 

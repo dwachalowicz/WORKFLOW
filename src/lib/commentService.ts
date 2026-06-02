@@ -77,7 +77,7 @@ export async function addComment(processId: string, nodeId: string, authorId: st
     throw new Error(i18n.t('tierLimits.commentLimitReached', { limit: limits.maxCommentsPerProcess }));
   }
 
-  const data: any = {
+  const data: Record<string, unknown> = {
     process: processId,
     node_id: nodeId,
     author: authorId,

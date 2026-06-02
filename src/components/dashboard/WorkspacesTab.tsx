@@ -148,7 +148,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
     }
   }, [workspaces]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+
   useEffect(() => {
     fetchEnrichedWorkspaces();
   }, [fetchEnrichedWorkspaces]);

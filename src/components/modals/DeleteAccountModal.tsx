@@ -32,14 +32,20 @@ export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps)
   const [info, setInfo] = useState({ processCount: 0, workspaceCount: 0, membershipCount: 0, versionCount: 0, commentCount: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setStep('info');
       setConfirmText('');
       setError('');
       setIsDeleting(false);
       setIsLoading(true);
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
       getAccountDeletionInfo().then(data => {
         setInfo(data);
         setIsLoading(false);

@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ModalOverlay, ModalContainer, ModalHeader, ModalBody } from '@/components/ui/ModalWrapper';
 import { useToastStore } from '@/store/toastStore';
-import type { UserTier } from '@/lib/tierLimits';
 
 type Template = WorkflowTemplate;
 
@@ -35,12 +34,12 @@ const getIconComponent = (name?: string): ComponentType<LucideProps> => {
 };
 
 /** Resolve a Lucide icon name (e.g. "Users", "DollarSign") to a lazy component. */
-// eslint-disable-next-line react-hooks/static-components
 const DynamicIcon = ({ name, ...props }: { name?: string } & LucideProps) => {
-  const IconComponent = getIconComponent(name);
+  const IconComponent = useMemo(() => getIconComponent(name), [name]);
 
   return (
     <Suspense fallback={<FileText {...props} />}>
+      {/* eslint-disable-next-line react-hooks/static-components */}
       <IconComponent {...props} />
     </Suspense>
   );
@@ -76,9 +75,11 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
     }
   }, [t]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (isOpen) fetchTemplates();
+    if (isOpen) {
+      const timer = setTimeout(() => fetchTemplates(), 0);
+      return () => clearTimeout(timer);
+    }
   }, [isOpen, fetchTemplates]);
 
   const handleUseTemplate = async (template: Template) => {

@@ -53,13 +53,15 @@ export const GroupPickerDropdown = ({ onSelect, excludeIds = [], trigger }: Grou
   });
 
   // Load groups when opened
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isOpen && activeWorkspace) {
-      setIsLoading(true);
-      fetchGroups(activeWorkspace.id)
-        .then(setGroups)
-        .finally(() => setIsLoading(false));
+      const timer = setTimeout(() => {
+        setIsLoading(true);
+        fetchGroups(activeWorkspace.id)
+          .then(setGroups)
+          .finally(() => setIsLoading(false));
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, activeWorkspace]);
 
@@ -138,7 +140,6 @@ export const GroupPickerDropdown = ({ onSelect, excludeIds = [], trigger }: Grou
     setIsOpen(true);
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!isOpen) return;
     const updatePosition = () => {

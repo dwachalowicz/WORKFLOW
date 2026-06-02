@@ -33,15 +33,16 @@ export const InviteMemberModal = ({ isOpen, onClose, workspaceId }: InviteMember
 
   const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  // Reset state when modal opens
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setEmail('');
       setRole('editor');
       setError(null);
       setSuccessMessage(null);
     }
-  }, [isOpen]);
+  }
 
   if (!isOpen) return null;
 

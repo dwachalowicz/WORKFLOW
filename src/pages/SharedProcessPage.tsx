@@ -92,7 +92,20 @@ export const SharedProcessPage = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
-  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => setNow(Date.now()), 0);
+    if (lockedUntil) {
+      const interval = setInterval(() => setNow(Date.now()), 1000);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(interval);
+      };
+    }
+    return () => clearTimeout(timer);
+  }, [lockedUntil]);
+
+  const isLocked = lockedUntil !== null && now !== null && now < lockedUntil;
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

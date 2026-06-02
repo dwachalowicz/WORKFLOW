@@ -58,9 +58,9 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
     }
   }, [activeWorkspace, user, currentProcessId, t]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    fetchProcesses();
+    const timer = setTimeout(() => fetchProcesses(), 0);
+    return () => clearTimeout(timer);
   }, [fetchProcesses]);
 
   // Load target process nodes when a process is selected
@@ -96,13 +96,14 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
   }, [t]);
 
   // When targetWorkflowId changes, load its nodes
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const twId = activeNode?.data?.targetWorkflowId;
     if (twId) {
-      fetchTargetNodes(twId);
+      const timer = setTimeout(() => fetchTargetNodes(twId), 0);
+      return () => clearTimeout(timer);
     } else {
-      setTargetNodes([]);
+      const timer = setTimeout(() => setTargetNodes([]), 0);
+      return () => clearTimeout(timer);
     }
   }, [activeNode?.data?.targetWorkflowId, fetchTargetNodes]);
 

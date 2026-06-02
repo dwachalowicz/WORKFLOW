@@ -220,7 +220,6 @@ export const Tutorial = () => {
   const TOTAL_STEPS = steps.length;
 
   // Auto-start for new users
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const isCompleted = localStorage.getItem('gryf-tutorial-completed');
     if (!isCompleted && !isTutorialActive) {
@@ -249,13 +248,14 @@ export const Tutorial = () => {
   }, [isTutorialActive, currentStep]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    updatePosition();
+    const timer0 = setTimeout(() => updatePosition(), 0);
     // Small delay for the second render, when tooltipRef has measured height or target is rendered
     const timer1 = setTimeout(updatePosition, 50);
     const timer2 = setTimeout(updatePosition, 200);
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
     return () => {
+      clearTimeout(timer0);
       clearTimeout(timer1);
       clearTimeout(timer2);
       window.removeEventListener('resize', updatePosition);
@@ -264,10 +264,10 @@ export const Tutorial = () => {
   }, [updatePosition]);
 
   // Reset step when tutorial restarts
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isTutorialActive) {
-      setCurrentStep(0);
+      const timer = setTimeout(() => setCurrentStep(0), 0);
+      return () => clearTimeout(timer);
     }
   }, [isTutorialActive]);
 

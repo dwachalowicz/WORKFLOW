@@ -27,7 +27,7 @@ const TabLoader = () => {
       const timer = setTimeout(() => setShow(true), 300);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isFirstDashboardMount]);
 
   if (isFirstDashboardMount) {
     return (

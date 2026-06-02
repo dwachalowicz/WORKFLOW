@@ -31,7 +31,8 @@ const selectEdgesByNode = (state: { edges: Edge[] }): Map<string, Edge[]> => {
 export const useHandleActive = (id: string, selected: boolean) => {
   const edges = useCanvasStore(state => state.edges);
   const edgesByNode = useCanvasStore(selectEdgesByNode);
-  const nodeEdges = edgesByNode.get(id) ?? [];
+  const EMPTY_EDGES: Edge[] = useMemo(() => [], []);
+  const nodeEdges = edgesByNode.get(id) ?? EMPTY_EDGES;
 
   const isHandleActive = useCallback((handleId: string | null | undefined, type: 'source' | 'target') => {
     if (selected) return true;

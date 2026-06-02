@@ -16,14 +16,16 @@ interface NodeCommentsProps {
   nodeId: string;
 }
 
-const formatCommentDate = (dateStr: string | undefined, t: any) =>
+import type { TFunction } from 'i18next';
+
+const formatCommentDate = (dateStr: string | undefined, t: TFunction) =>
   formatDate(dateStr, { relative: true, t, noDateKey: 'comments.noDate' });
 
 // --- Wydzielony komponent pojedynczego komentarza (wzorzec projektowy) ---
 interface CommentItemProps {
   comment: Comment;
   isViewMode: boolean;
-  user: any;
+  user: { id?: string } | null;
   onResolve: (c: Comment) => void;
   onDelete: (id: string) => void;
   onReply: (parentId: string) => void;
@@ -34,7 +36,7 @@ const CommentItem = ({ comment, isViewMode, user, onResolve, onDelete, onReply, 
   const { t } = useTranslation();
   const author = comment.expand?.author;
   const isOwn = author?.id === user?.id;
-  const dateStr = comment.created || comment.updated || (comment as any).createdAt || (comment as any).created_at || (comment as any).createdat;
+  const dateStr = comment.created || comment.updated || (comment as Record<string, unknown>).createdAt || (comment as Record<string, unknown>).created_at || (comment as Record<string, unknown>).createdat;
   const dateText = formatCommentDate(dateStr, t);
   const parentIdForReply = isChild ? (comment.parent_id || comment.id) : comment.id;
 

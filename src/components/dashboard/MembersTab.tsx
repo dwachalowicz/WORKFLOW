@@ -124,7 +124,8 @@ export const MembersTab = () => {
 
   useEffect(() => {
     if (activeWorkspace && user) {
-      fetchMembers();
+      const timer = setTimeout(() => fetchMembers(), 0);
+      return () => clearTimeout(timer);
     }
   }, [activeWorkspace, user, fetchMembers]);
 
