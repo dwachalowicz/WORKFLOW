@@ -25,6 +25,7 @@ const ProfileModal = lazy(() => import('./components/modals/ProfileModal').then(
 const LandingPage = lazy(() => import('./landingpage/index').then(m => ({ default: m.LandingPage })));
 const FaqPage = lazy(() => import('./pages/FaqPage').then(m => ({ default: m.FaqPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 let isAppInitialized = false;
 
@@ -133,6 +134,7 @@ function App() {
               <Route path="/faq" element={<FaqPage />} />
               <Route path="/kontakt" element={<ContactPage />} />
               <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <AuthenticatedProfileModal />
           </Suspense>

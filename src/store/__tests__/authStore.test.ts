@@ -124,3 +124,105 @@ describe('authStore — setProfileModalOpen', () => {
     expect(useAuthStore.getState().isProfileModalOpen).toBe(false);
   });
 });
+
+import { pb } from '@/lib/pocketbase';
+
+describe('authStore — checkAuth', () => {
+  beforeEach(() => {
+    useAuthStore.getState().logout();
+  });
+
+  it('sets unauthenticated when authStore is invalid', async () => {
+    pb.authStore.isValid = false;
+    await useAuthStore.getState().checkAuth();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it('refreshes auth data if valid', async () => {
+    pb.authStore.isValid = true;
+    pb.authStore.model = mockUser as any;
+    pb.authStore.token = 'test-token';
+    
+    const mockAuthRefresh = vi.fn().mockResolvedValue({ record: mockUser });
+    vi.mocked(pb.collection).mockReturnValue({
+      authRefresh: mockAuthRefresh,
+      getFullList: vi.fn().mockResolvedValue([]),
+    } as any);
+
+    await useAuthStore.getState().checkAuth();
+    
+    expect(mockAuthRefresh).toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(useAuthStore.getState().user?.email).toBe('test@test.com');
+  });
+});
+
+describe('authStore — createWorkspace', () => {
+  beforeEach(() => {
+    useAuthStore.getState().login('token123', mockUser, mockWorkspaces);
+  });
+
+  it('creates workspace successfully', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 'new-ws' });
+    vi.mocked(pb.collection).mockReturnValue({
+      create: mockCreate,
+      getFullList: vi.fn().mockResolvedValue([]),
+    } as any);
+
+    await useAuthStore.getState().createWorkspace('New WS');
+    expect(mockCreate).toHaveBeenCalledWith({ name: 'New WS', owner: 'user1' });
+  });
+
+  it('throws error if limit reached', async () => {
+    // mockUser has tier FREE, limit is maxWorkspaces
+    const limitsMock = await import('@/lib/tierLimits');
+    vi.mocked(limitsMock.getTierLimits).mockReturnValue({ maxWorkspaces: 1, maxNodes: 25, maxMembersPerWorkspace: 2 } as any);
+    
+    // User already has 'ws1' as admin (which counts as 1)
+    await expect(useAuthStore.getState().createWorkspace('New WS')).rejects.toThrow();
+  });
+});
+
+describe('authStore — OTP', () => {
+  it('requests OTP by creating temp user and calling requestOTP', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({});
+    const mockRequestOTP = vi.fn().mockResolvedValue({ otpId: 'otp-123' });
+    vi.mocked(pb.collection).mockReturnValue({
+      create: mockCreate,
+      requestOTP: mockRequestOTP,
+    } as any);
+
+    const otpId = await useAuthStore.getState().requestOTP('test@otp.com');
+    expect(mockCreate).toHaveBeenCalled();
+    expect(mockRequestOTP).toHaveBeenCalledWith('test@otp.com');
+    expect(otpId).toBe('otp-123');
+  });
+
+  it('confirms OTP successfully', async () => {
+    const mockAuthWithOTP = vi.fn().mockResolvedValue({});
+    vi.mocked(pb.collection).mockReturnValue({
+      authWithOTP: mockAuthWithOTP,
+      authRefresh: vi.fn().mockResolvedValue({ record: mockUser }),
+      getFullList: vi.fn().mockResolvedValue([]),
+    } as any);
+
+    await useAuthStore.getState().confirmOTP('otp-123', '000000');
+    expect(mockAuthWithOTP).toHaveBeenCalledWith('otp-123', '000000');
+  });
+});
+
+describe('authStore — deleteAccount', () => {
+  beforeEach(() => {
+    useAuthStore.getState().login('token123', mockUser, mockWorkspaces);
+  });
+
+  it('deletes account via custom endpoint', async () => {
+    const mockSend = vi.fn().mockResolvedValue({ success: true });
+    pb.send = mockSend;
+
+    await useAuthStore.getState().deleteAccount();
+    
+    expect(mockSend).toHaveBeenCalledWith('/api/ai/delete-account', { method: 'POST' });
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+});

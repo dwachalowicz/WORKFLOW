@@ -39,6 +39,13 @@ export const pl = {
     loadMoreProcesses: 'Załaduj więcej procesów',
   },
 
+  notFound: {
+    title: '404',
+    subtitle: 'Nie znaleziono strony',
+    desc: 'Strona, której szukasz nie istnieje, została usunięta lub zmieniono jej adres.',
+    backToHome: 'Wróć na stronę główną',
+  },
+
   // Auth / Login
   auth: {
     login: 'Zaloguj się',

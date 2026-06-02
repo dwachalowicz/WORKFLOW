@@ -37,6 +37,12 @@ export const en = {
     loadMore: 'Load more',
     loadMoreProcesses: 'Load more processes',
   },
+  notFound: {
+    title: '404',
+    subtitle: 'Page not found',
+    desc: 'The page you are looking for does not exist, has been removed or had its name changed.',
+    backToHome: 'Back to home page',
+  },
   auth: {
     login: 'Log in',
     logout: 'Log out',
