@@ -1179,10 +1179,64 @@ onRecordDeleteRequest((e) => {
             return;
         }
 
-        // --- SCENARIO 3: Admin removes an active member ---
+        // --- SCENARIO 3: Active member leaves or is removed ---
         if (status === "active") {
-            if (e.auth && e.auth.id === userId) return; // user left voluntarily
 
+            // 3a. User left voluntarily → notify owner + admins
+            if (e.auth && e.auth.id === userId) {
+                try {
+                    let leavingUserName = "Użytkownik / User";
+                    try {
+                        let u = e.app.findRecordById("WORKFLOW_users", userId);
+                        leavingUserName = u.get("name") || u.get("email") || leavingUserName;
+                    } catch(err) {}
+
+                    // Find owner + admins to notify
+                    let notifyIds = [];
+                    try {
+                        let ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+                        let ownerId = ws.get("owner");
+                        if (ownerId) notifyIds.push(ownerId);
+                    } catch(err) {}
+
+                    try {
+                        let admins = e.app.findRecordsByFilter(
+                            "WORKFLOW_workspace_members",
+                            "workspace = {:ws} && role = 'admin' && status = 'active' && user != {:leaving}",
+                            "", 100, 0,
+                            { ws: wsId, leaving: userId }
+                        );
+                        if (admins) {
+                            for (let i = 0; i < admins.length; i++) {
+                                let adminUserId = admins[i].get("user");
+                                if (adminUserId && notifyIds.indexOf(adminUserId) === -1) {
+                                    notifyIds.push(adminUserId);
+                                }
+                            }
+                        }
+                    } catch(err) {}
+
+                    const title = "Członek opuścił workspace / Member left workspace";
+                    const message = `${leavingUserName} opuścił obszar roboczy „${wsName}". / ${leavingUserName} left the workspace "${wsName}".`;
+
+                    for (let i = 0; i < notifyIds.length; i++) {
+                        try {
+                            const notifRecord = new Record(notifCollection);
+                            notifRecord.set("user", notifyIds[i]);
+                            notifRecord.set("title", title);
+                            notifRecord.set("message", message);
+                            notifRecord.set("type", "info");
+                            notifRecord.set("isRead", false);
+                            e.app.save(notifRecord);
+                        } catch(err) {}
+                    }
+                } catch(err) {
+                    console.log("Error creating voluntary leave notif: " + String(err.message || err));
+                }
+                return;
+            }
+
+            // 3b. Admin removed the member → notify the removed user + send email
             const title = "Usunięto z obszaru roboczego / Removed from workspace";
             const message = `Zostałeś usunięty z obszaru roboczego „${wsName}". / You have been removed from the workspace "${wsName}".`;
 
