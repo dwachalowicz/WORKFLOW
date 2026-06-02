@@ -2250,7 +2250,7 @@ routerAdd("GET", "/api/process-links/{workspaceId}", (e) => {
         var processes = e.app.findRecordsByFilter(
             "WORKFLOW_processes",
             "workspace = {:ws}",
-            "", 0, 0,
+            "", 99999, 0,
             { ws: workspaceId }
         );
 
@@ -3152,10 +3152,10 @@ onRecordCreateRequest(function(e) {
 // =====================================================
 onAfterBootstrap((e) => {
   try {
-    const users = $app.dao().findRecordsByFilter('WORKFLOW_users', "tier = '' || tier = 'UNKNOWN'", '', 0, 0);
+    const users = $app.findRecordsByFilter('WORKFLOW_users', "tier = '' || tier = 'UNKNOWN'", '', 99999, 0);
     for (const user of users) {
       user.set('tier', 'FREE');
-      $app.dao().saveRecord(user);
+      $app.save(user);
     }
     if (users.length > 0) console.log(`[Bootstrap] Fixed ${users.length} users with missing tier → FREE`);
   } catch(e) { /* collection may not exist yet */ }

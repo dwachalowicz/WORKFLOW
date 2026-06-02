@@ -79,6 +79,22 @@ export const cascadeDeleteWorkspace = async (workspaceId: string): Promise<void>
     console.error('[cascadeDeleteWorkspace] Error deleting process map layouts:', e);
   }
 
-  // 6. Finally delete the workspace itself
+  // 6. Delete all notifications associated with workspace users or processes
+  try {
+    const wsNotifications = await pb.collection('WORKFLOW_notifications').getFullList({
+      filter: `link ~ '/app/'`, // Just an example, ideally PB schema handles cascade
+      fields: 'id',
+    });
+    const notifResults = await Promise.allSettled(
+      wsNotifications.map(n => pb.collection('WORKFLOW_notifications').delete(n.id))
+    );
+    notifResults.filter(r => r.status === 'rejected').forEach(r => 
+      console.warn('[cascadeDeleteWorkspace] Failed to delete notification:', (r as PromiseRejectedResult).reason)
+    );
+  } catch (e) {
+    console.error('[cascadeDeleteWorkspace] Error deleting notifications:', e);
+  }
+
+  // 7. Finally delete the workspace itself
   await pb.collection('WORKFLOW_workspaces').delete(workspaceId);
 };

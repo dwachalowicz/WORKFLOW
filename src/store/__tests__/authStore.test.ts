@@ -27,6 +27,7 @@ vi.mock('@/lib/tierLimits', () => ({
   getTierLimits: vi.fn().mockReturnValue({ maxNodes: 25 }),
   getEffectiveTier: vi.fn().mockReturnValue('FREE'),
   loadTierConfig: vi.fn().mockResolvedValue(undefined),
+  unloadTierConfig: vi.fn(),
 }));
 
 vi.mock('@/i18n/config', () => ({
