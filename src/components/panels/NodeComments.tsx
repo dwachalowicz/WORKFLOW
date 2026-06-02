@@ -26,16 +26,18 @@ interface CommentItemProps {
   comment: Comment;
   isViewMode: boolean;
   user: { id?: string } | null;
+  isAdminOrOwner: boolean;
   onResolve: (c: Comment) => void;
   onDelete: (id: string) => void;
   onReply: (parentId: string) => void;
   isChild?: boolean;
 }
 
-const CommentItem = ({ comment, isViewMode, user, onResolve, onDelete, onReply, isChild }: CommentItemProps) => {
+const CommentItem = ({ comment, isViewMode, user, isAdminOrOwner, onResolve, onDelete, onReply, isChild }: CommentItemProps) => {
   const { t } = useTranslation();
   const author = comment.expand?.author;
   const isOwn = author?.id === user?.id;
+  const canDelete = isOwn || isAdminOrOwner;
   const dateStr = comment.created || comment.updated || (comment as Record<string, unknown>).createdAt || (comment as Record<string, unknown>).created_at || (comment as Record<string, unknown>).createdat;
   const dateText = formatCommentDate(dateStr, t);
   const parentIdForReply = isChild ? (comment.parent_id || comment.id) : comment.id;
@@ -100,7 +102,7 @@ const CommentItem = ({ comment, isViewMode, user, onResolve, onDelete, onReply, 
                 )}
               </button>
             </SimpleTooltip>
-            {isOwn && (
+            {canDelete && (
               <SimpleTooltip content={t('comments.deleteComment', 'Usuń komentarz')}>
                 <button
                   onClick={() => onDelete(comment.id)}
@@ -119,7 +121,8 @@ const CommentItem = ({ comment, isViewMode, user, onResolve, onDelete, onReply, 
 
 export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const { user, activeWorkspace } = useAuthStore();
+  const isAdminOrOwner = (activeWorkspace?.owner === user?.id) || activeWorkspace?.role === 'admin';
   const processId = useCanvasStore((s) => s.currentProcessId);
   const refreshCommentCounts = useCanvasStore((s) => s.refreshCommentCounts);
   const isViewMode = useCanvasStore((s) => s.isViewMode);
@@ -313,6 +316,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                         comment={parent}
                         isViewMode={isViewMode}
                         user={user}
+                        isAdminOrOwner={isAdminOrOwner}
                         onResolve={handleToggleResolve}
                         onDelete={handleDelete}
                         onReply={handleReplyClick}
@@ -331,6 +335,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                             comment={child}
                             isViewMode={isViewMode}
                             user={user}
+                            isAdminOrOwner={isAdminOrOwner}
                             onResolve={handleToggleResolve}
                             onDelete={handleDelete}
                             onReply={handleReplyClick}

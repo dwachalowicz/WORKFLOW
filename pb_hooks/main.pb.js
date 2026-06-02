@@ -597,7 +597,7 @@ onRecordAuthRequest((e) => {
     return e.next();
 }, "WORKFLOW_users");
 // =====================================================
-// HOOK: Clean up required relations before User delete
+// HOOK: Clean up required relations after User delete
 // =====================================================
 onRecordDeleteRequest((e) => {
     e.next();
@@ -626,7 +626,7 @@ onRecordDeleteRequest((e) => {
         db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE invited_by = {:userId} AND status = 'pending'").bind({ userId: userId }).execute();
 
     } catch (err) {
-        console.error("Cleanup before user delete failed:", err);
+        console.error("Cleanup after user delete failed:", err);
     }
 }, "WORKFLOW_users");
 
@@ -2576,6 +2576,57 @@ onRecordDeleteRequest((e) => {
 }, "WORKFLOW_processes");
 
 // =====================================================
+// HOOK: Cleanup orphaned comments when nodes are removed
+// =====================================================
+onRecordUpdateRequest((e) => {
+    // Capture old node IDs BEFORE save (DB still has previous data)
+    const processId = e.record.id;
+    const oldNodeIds = {};
+    try {
+        const oldRecord = e.app.findRecordById("WORKFLOW_processes", processId);
+        let oldNodesRaw = oldRecord.get("nodes");
+        let oldNodes = [];
+        try { oldNodes = typeof oldNodesRaw === "string" ? JSON.parse(oldNodesRaw) : (oldNodesRaw || []); } catch(pe) {}
+        for (let i = 0; i < oldNodes.length; i++) {
+            if (oldNodes[i] && oldNodes[i].id) oldNodeIds[oldNodes[i].id] = true;
+        }
+    } catch(err) {}
+
+    e.next();
+
+    // Get new node IDs AFTER save
+    const newNodeIds = {};
+    try {
+        let newNodesRaw = e.record.get("nodes");
+        let newNodes = [];
+        try { newNodes = typeof newNodesRaw === "string" ? JSON.parse(newNodesRaw) : (newNodesRaw || []); } catch(pe) {}
+        for (let i = 0; i < newNodes.length; i++) {
+            if (newNodes[i] && newNodes[i].id) newNodeIds[newNodes[i].id] = true;
+        }
+    } catch(err) {}
+
+    // Find removed node IDs and delete their orphaned comments
+    const removedIds = [];
+    for (const id in oldNodeIds) {
+        if (!newNodeIds[id]) removedIds.push(id);
+    }
+
+    if (removedIds.length > 0) {
+        try {
+            const db = e.app.db();
+            for (let i = 0; i < removedIds.length; i++) {
+                db.newQuery("DELETE FROM WORKFLOW_comments WHERE process = {:processId} AND node_id = {:nodeId}")
+                    .bind({ processId: processId, nodeId: removedIds[i] })
+                    .execute();
+            }
+            console.log("Cleaned up orphaned comments for " + removedIds.length + " removed node(s) in process " + processId);
+        } catch(err) {
+            console.error("Error cleaning orphaned node comments: " + err);
+        }
+    }
+}, "WORKFLOW_processes");
+
+// =====================================================
 // HOOK: Propagate Node Labels on WORKFLOW_processes Save
 // =====================================================
 onRecordUpdateRequest((e) => {
@@ -2658,75 +2709,37 @@ routerAdd("POST", "/api/ai/delete-account", (e) => {
         }
         
         const userId = authRecord.get("id");
-        const app = e.app;
+        const db = e.app.db();
         
-        // 1. Delete user's comments
-        const comments = app.findRecordsByFilter("WORKFLOW_comments", "author = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < comments.length; i++) app.delete(comments[i]);
+        // 1. Delete user's comments and versions
+        db.newQuery("DELETE FROM WORKFLOW_comments WHERE author = {:userId}").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_versions WHERE created_by = {:userId}").bind({ userId: userId }).execute();
 
-        // 2. Delete user's versions
-        const versions = app.findRecordsByFilter("WORKFLOW_versions", "created_by = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < versions.length; i++) app.delete(versions[i]);
+        // 2. Clear locked_by & lastEditedBy
+        db.newQuery("UPDATE WORKFLOW_processes SET locked_by = '', locked_at = '' WHERE locked_by = {:userId}").bind({ userId: userId }).execute();
+        db.newQuery("UPDATE WORKFLOW_processes SET lastEditedBy = '' WHERE lastEditedBy = {:userId}").bind({ userId: userId }).execute();
 
-        // 3. Clear locked_by & lastEditedBy
-        const lockedProcs = app.findRecordsByFilter("WORKFLOW_processes", "locked_by = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < lockedProcs.length; i++) {
-            lockedProcs[i].set("locked_by", "");
-            lockedProcs[i].set("locked_at", "");
-            app.save(lockedProcs[i]);
-        }
-        const editedProcs = app.findRecordsByFilter("WORKFLOW_processes", "lastEditedBy = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < editedProcs.length; i++) {
-            editedProcs[i].set("lastEditedBy", "");
-            app.save(editedProcs[i]);
-        }
+        // 3. Transfer orphaned processes
+        db.newQuery(`
+            UPDATE WORKFLOW_processes 
+            SET owner = (SELECT owner FROM WORKFLOW_workspaces WHERE id = WORKFLOW_processes.workspace)
+            WHERE owner = {:userId}
+        `).bind({ userId: userId }).execute();
 
-        // 4. Transfer orphaned processes
-        const orphaned = app.findRecordsByFilter("WORKFLOW_processes", "owner = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < orphaned.length; i++) {
-            try {
-                const wsId = orphaned[i].get("workspace");
-                const ws = app.findRecordById("WORKFLOW_workspaces", wsId);
-                const wsOwner = ws.get("owner");
-                if (wsOwner) {
-                    orphaned[i].set("owner", wsOwner);
-                    app.save(orphaned[i]);
-                }
-            } catch(ex) {}
-        }
+        // 4. Delete memberships
+        db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE user = {:userId}").bind({ userId: userId }).execute();
 
-        // 5. Delete memberships
-        const memberships = app.findRecordsByFilter("WORKFLOW_workspace_members", "user = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < memberships.length; i++) app.delete(memberships[i]);
+        // 5. Delete workspaces and all their related records
+        db.newQuery("DELETE FROM WORKFLOW_versions WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_comments WHERE process IN (SELECT id FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId}))").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_processes WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_process_map_layouts WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_process_groups WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE workspace IN (SELECT id FROM WORKFLOW_workspaces WHERE owner = {:userId})").bind({ userId: userId }).execute();
+        db.newQuery("DELETE FROM WORKFLOW_workspaces WHERE owner = {:userId}").bind({ userId: userId }).execute();
 
-        // 6. Delete workspaces
-        const workspaces = app.findRecordsByFilter("WORKFLOW_workspaces", "owner = {:userId}", "", 10000, 0, { userId: userId });
-        for (let i = 0; i < workspaces.length; i++) {
-            const wsId = workspaces[i].id;
-            
-            const layouts = app.findRecordsByFilter("WORKFLOW_process_map_layouts", "workspace = {:wsId}", "", 10000, 0, { wsId: wsId });
-            for (let j = 0; j < layouts.length; j++) app.delete(layouts[j]);
-
-            const groups = app.findRecordsByFilter("WORKFLOW_process_groups", "workspace = {:wsId}", "", 10000, 0, { wsId: wsId });
-            for (let j = 0; j < groups.length; j++) app.delete(groups[j]);
-            
-            const procs = app.findRecordsByFilter("WORKFLOW_processes", "workspace = {:wsId}", "", 10000, 0, { wsId: wsId });
-            for (let j = 0; j < procs.length; j++) {
-                const pId = procs[j].id;
-                const pVersions = app.findRecordsByFilter("WORKFLOW_versions", "process = {:pId}", "", 10000, 0, { pId: pId });
-                for (let k = 0; k < pVersions.length; k++) app.delete(pVersions[k]);
-                
-                const pComments = app.findRecordsByFilter("WORKFLOW_comments", "process = {:pId}", "", 10000, 0, { pId: pId });
-                for (let k = 0; k < pComments.length; k++) app.delete(pComments[k]);
-                
-                app.delete(procs[j]);
-            }
-            
-            app.delete(workspaces[i]);
-        }
-
-        // 7. Finally delete the user
-        app.delete(authRecord);
+        // 6. Finally delete the user
+        e.app.delete(authRecord);
 
         return e.json(200, { success: true });
     } catch (err) {
@@ -2764,33 +2777,17 @@ cronAdd("cleanUnverifiedUsers", "0 0 * * *", () => {
 });
 
 // =====================================================
-// CRON: Stale Process Lock Cleanup (every 5 minutes)
+// CRON: cleanStaleLocks
 // =====================================================
 cronAdd("cleanStaleLocks", "*/5 * * * *", () => {
     try {
-        const app = $app;
-        // Find processes locked more than 5 minutes ago
         const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
         const dateString = fiveMinAgo.toISOString().replace("T", " ");
 
-        const staleProcs = app.findRecordsByFilter(
-            "WORKFLOW_processes",
-            "locked_by != '' && locked_at < {:date}",
-            "",
-            1000,
-            0,
-            { date: dateString }
-        );
-
-        for (let i = 0; i < staleProcs.length; i++) {
-            staleProcs[i].set("locked_by", "");
-            staleProcs[i].set("locked_at", "");
-            app.save(staleProcs[i]);
-        }
-
-        if (staleProcs.length > 0) {
-            console.log("Cleaned up " + staleProcs.length + " stale process lock(s).");
-        }
+        $app.db().newQuery("UPDATE WORKFLOW_processes SET locked_by = '', locked_at = '' WHERE locked_by != '' AND locked_at < {:date}")
+            .bind({ date: dateString })
+            .execute();
+            
     } catch (err) {
         console.error("Cron cleanStaleLocks error:", err);
     }
@@ -3025,6 +3022,41 @@ onRecordUpdateRequest((e) => {
 }, "WORKFLOW_users");
 
 // =====================================================
+// HOOK: Strip sensitive fields from WORKFLOW_users
+// Prevents User A from reading User B's ai_api_key etc.
+// Keeps expand (comment authors, lock info) working.
+// =====================================================
+var SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
+
+function stripSensitiveFields(record, authId) {
+    if (!record || record.id === authId) return;
+    for (var i = 0; i < SENSITIVE_USER_FIELDS.length; i++) {
+        record.set(SENSITIVE_USER_FIELDS[i], "");
+    }
+}
+
+onRecordViewRequest((e) => {
+    e.next();
+    try {
+        var authId = e.auth ? e.auth.id : "";
+        stripSensitiveFields(e.record, authId);
+    } catch(err) {}
+}, "WORKFLOW_users");
+
+onRecordListRequest((e) => {
+    e.next();
+    try {
+        var authId = e.auth ? e.auth.id : "";
+        if (e.records && e.records.length) {
+            for (var i = 0; i < e.records.length; i++) {
+                stripSensitiveFields(e.records[i], authId);
+            }
+        }
+    } catch(err) {}
+}, "WORKFLOW_users");
+
+
+// =====================================================
 // HOOK: Enforce Workspace Tier Limits (Added to seal the loophole)
 // =====================================================
 onRecordCreateRequest(function(e) {
@@ -3148,24 +3180,56 @@ onRecordCreateRequest(function(e) {
 // =====================================================
 // HOOK: Notifications for new comments
 // =====================================================
-onRecordAfterCreateRequest((e) => {
+onRecordCreateRequest((e) => {
+    e.next();
+    
     try {
         const comment = e.record;
         const authorId = comment.get("author");
         const processId = comment.get("process");
         const parentId = comment.get("parent_id");
+        const nodeId = comment.get("node_id");
         
         let processName = "Proces";
+        let nodeName = "";
         let proc = null;
         try {
             proc = e.app.findRecordById("WORKFLOW_processes", processId);
             processName = proc.get("name") || processName;
+            
+            // Pobierz nazwę węzła z JSON-a nodes
+            if (nodeId) {
+                let nodes = proc.get("nodes");
+                if (typeof nodes === "string") {
+                    try { nodes = JSON.parse(nodes); } catch(pe) { nodes = []; }
+                }
+                if (Array.isArray(nodes)) {
+                    for (let n = 0; n < nodes.length; n++) {
+                        if (nodes[n].id === nodeId && nodes[n].data && nodes[n].data.label) {
+                            nodeName = nodes[n].data.label;
+                            break;
+                        }
+                    }
+                }
+            }
         } catch(err) {}
+        
+        // Buduj czytelny opis lokalizacji komentarza
+        let locationPl = "w procesie \"" + processName + "\"";
+        let locationEn = "in process \"" + processName + "\"";
+        if (nodeName) {
+            locationPl = "na wezle \"" + nodeName + "\" w procesie \"" + processName + "\"";
+            locationEn = "on node \"" + nodeName + "\" in process \"" + processName + "\"";
+        }
+        
+        // Link do procesu z parametrem węzła
+        var notifLink = "/app/" + processId;
+        if (nodeId) notifLink += "?node=" + nodeId;
         
         const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
 
         if (!parentId) {
-            // Główny komentarz
+            // Główny komentarz - powiadom członków workspace
             let wsId = null;
             if (proc) wsId = proc.get("workspace");
             
@@ -3181,6 +3245,15 @@ onRecordAfterCreateRequest((e) => {
                     );
                     userIdsToNotify = members.map(m => m.get("user")).filter(id => id && id !== authorId);
                 } catch(err) {}
+                
+                // Dodaj też właściciela workspace jeśli nie jest autorem komentarza
+                try {
+                    const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+                    const wsOwner = ws.get("owner");
+                    if (wsOwner && wsOwner !== authorId && userIdsToNotify.indexOf(wsOwner) === -1) {
+                        userIdsToNotify.push(wsOwner);
+                    }
+                } catch(err) {}
             } else if (proc) {
                 const procOwner = proc.get("owner");
                 if (procOwner && procOwner !== authorId) {
@@ -3193,16 +3266,16 @@ onRecordAfterCreateRequest((e) => {
                     const notifRecord = new Record(notifCollection);
                     notifRecord.set("user", userIdsToNotify[i]);
                     notifRecord.set("title", "Nowy komentarz / New Comment");
-                    notifRecord.set("message", `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"`);
+                    notifRecord.set("message", "Dodano komentarz " + locationPl + " / A comment was added " + locationEn);
                     notifRecord.set("type", "info");
                     notifRecord.set("isRead", false);
-                    notifRecord.set("link", `/app/${processId}`);
+                    notifRecord.set("link", notifLink);
                     e.app.save(notifRecord);
                 } catch(err) {}
             }
             
         } else {
-            // Odpowiedź
+            // Odpowiedź na komentarz - powiadom autora oryginalnego komentarza
             try {
                 const parentComment = e.app.findRecordById("WORKFLOW_comments", parentId);
                 const parentAuthor = parentComment.get("author");
@@ -3210,11 +3283,11 @@ onRecordAfterCreateRequest((e) => {
                 if (parentAuthor && parentAuthor !== authorId) {
                     const notifRecord = new Record(notifCollection);
                     notifRecord.set("user", parentAuthor);
-                    notifRecord.set("title", "Nowa odpowiedź / New Reply");
-                    notifRecord.set("message", `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"`);
+                    notifRecord.set("title", "Nowa odpowiedz / New Reply");
+                    notifRecord.set("message", "Odpowiedziano na Twoj komentarz " + locationPl + " / Someone replied to your comment " + locationEn);
                     notifRecord.set("type", "info");
                     notifRecord.set("isRead", false);
-                    notifRecord.set("link", `/app/${processId}`);
+                    notifRecord.set("link", notifLink);
                     e.app.save(notifRecord);
                 }
             } catch(err) {}
@@ -3223,3 +3296,4 @@ onRecordAfterCreateRequest((e) => {
         console.error("Error sending comment notifications: " + err);
     }
 }, "WORKFLOW_comments");
+

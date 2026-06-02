@@ -7,7 +7,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { Save, Download, Upload, Share2, Lock, FileText } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { SimpleTooltip } from '@/components/ui/tooltip';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ShareModal } from '@/components/modals/ShareModal';
 import { useTranslation } from 'react-i18next';
 import { useToastStore } from '@/store/toastStore';
@@ -27,6 +27,7 @@ const VersionHistoryPanel = lazy(() => import('@/components/panels/VersionHistor
 export const AppPage = () => {
   const { processId: urlProcessId } = useParams<{ processId?: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const addNode = useCanvasStore((state) => state.addNode);
   const processName = useCanvasStore((state) => state.processName);
   const setProcessName = useCanvasStore((state) => state.setProcessName);
@@ -111,6 +112,28 @@ export const AppPage = () => {
       if (urlProcessId && urlProcessId !== storeState.currentProcessId) {
         try {
           await storeState.loadProcess(urlProcessId);
+          
+          // Auto-select node from ?node= parameter (e.g. from notification link)
+          const targetNodeId = searchParams.get('node');
+          if (targetNodeId) {
+            // Small delay to let ReactFlow render the nodes
+            setTimeout(() => {
+              const currentNodes = useCanvasStore.getState().nodes;
+              const targetNode = currentNodes.find(n => n.id === targetNodeId);
+              if (targetNode) {
+                // Select the target node and deselect others
+                useCanvasStore.getState().onNodesChange(
+                  currentNodes.map(n => ({
+                    type: 'select' as const,
+                    id: n.id,
+                    selected: n.id === targetNodeId,
+                  }))
+                );
+              }
+              // Clean up the ?node= param from URL
+              setSearchParams({}, { replace: true });
+            }, 500);
+          }
         } catch (err) {
           console.error("Error loading process from URL:", err);
           showToast(t('canvas.importError'), 'error');
@@ -125,7 +148,7 @@ export const AppPage = () => {
     };
 
     initProcess();
-  }, [urlProcessId, navigate, addNode, t, showToast]);
+  }, [urlProcessId, navigate, addNode, t, showToast, searchParams, setSearchParams]);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground relative">
