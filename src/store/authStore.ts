@@ -241,6 +241,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           }
         });
 
+        // --- Fetch Pending Invitations Workspace Names ---
+        if (pendingInvites.length > 0) {
+          try {
+            const pendingNames = await pb.send(`/api/workspaces/pending-invitations?t=${Date.now()}`, { method: 'GET' });
+            if (Array.isArray(pendingNames)) {
+              pendingNames.forEach((n: { id: string, workspaceName: string }) => {
+                const inv = pendingInvites.find(p => p.id === n.id);
+                if (inv && n.workspaceName && n.workspaceName !== 'Workspace') {
+                  inv.workspaceName = n.workspaceName;
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching pending invitation workspace names", err);
+          }
+        }
+
         let wsList = Array.from(workspaceMap.values());
 
         // --- Fetch Locked Workspaces ---
