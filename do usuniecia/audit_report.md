@@ -1,0 +1,98 @@
+# Database Audit Report
+
+## Collections Summary
+- **WORKFLOW_users**: auth
+  - Total records (approx): 3
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system, authRule, manageRule, authAlert, oauth2, passwordAuth, mfa, otp, authToken, passwordResetToken, emailChangeToken, verificationToken, fileToken, verificationTemplate, resetPasswordTemplate, confirmEmailChangeTemplate
+- **WORKFLOW_processes**: base
+  - Total records (approx): 2
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_workspaces**: base
+  - Total records (approx): 3
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_workspace_members**: base
+  - Total records (approx): 1
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_process_groups**: base
+  - Total records (approx): 3
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_versions**: base
+  - Total records (approx): 4
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_prompts**: base
+  - Total records (approx): 1
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_quick_prompts**: base
+  - Total records (approx): 5
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_comments**: base
+  - Total records (approx): 1
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_site_settings**: base
+  - Total records (approx): 1
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_groups**: base
+  - Total records (approx): 0
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_templates**: base
+  - Total records (approx): 5
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_pages**: base
+  - Total records (approx): 2
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_process_map_layouts**: base
+  - Total records (approx): 0
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_platform_settings**: base
+  - Total records (approx): 1
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_tier_config**: base
+  - Total records (approx): 3
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_ai_models**: base
+  - Total records (approx): 13
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_contact_messages**: base
+  - Total records (approx): 24
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_faq**: base
+  - Total records (approx): 28
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_process_cases**: base
+  - Total records (approx): 6
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_ai_services**: base
+  - Total records (approx): 6
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_pricing**: base
+  - Total records (approx): 3
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+- **WORKFLOW_notifications**: base
+  - Total records (approx): 9
+  - Fields: 
+  - Raw col structure keys: id, listRule, viewRule, createRule, updateRule, deleteRule, name, type, fields, indexes, created, updated, system
+
+## Orphaned Records Analysis
+- Orphaned Workspaces: 0

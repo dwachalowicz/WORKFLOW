@@ -18,6 +18,7 @@ interface UiState {
   isStatsPanelOpen: boolean;
   isAiPanelOpen: boolean;
   isChecklistPanelOpen: boolean;
+  isFirstDashboardMount: boolean;
 
   setRadialMenuConfig: (config: RadialMenuConfig) => void;
   setPropertiesPanelCollapsed: (collapsed: boolean) => void;
@@ -30,6 +31,7 @@ interface UiState {
   setStatsPanelOpen: (isOpen: boolean) => void;
   setAiPanelOpen: (isOpen: boolean) => void;
   setChecklistPanelOpen: (isOpen: boolean) => void;
+  setFirstDashboardMount: (isFirst: boolean) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -44,6 +46,7 @@ export const useUiStore = create<UiState>((set) => ({
   isStatsPanelOpen: false,
   isAiPanelOpen: false,
   isChecklistPanelOpen: false,
+  isFirstDashboardMount: true,
 
   setRadialMenuConfig: (config) => set({ radialMenuConfig: config }),
   setPropertiesPanelCollapsed: (collapsed) => set({ isPropertiesPanelCollapsed: collapsed }),
@@ -56,4 +59,5 @@ export const useUiStore = create<UiState>((set) => ({
   setStatsPanelOpen: (isOpen) => set({ isStatsPanelOpen: isOpen }),
   setAiPanelOpen: (isOpen) => set({ isAiPanelOpen: isOpen }),
   setChecklistPanelOpen: (isOpen) => set({ isChecklistPanelOpen: isOpen }),
+  setFirstDashboardMount: (isFirst) => set({ isFirstDashboardMount: isFirst }),
 }));

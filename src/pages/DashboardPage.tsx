@@ -16,9 +16,10 @@ const SettingsTab = lazy(() => import('@/components/dashboard/SettingsTab').then
 const ProcessMapTab = lazy(() => import('@/components/dashboard/ProcessMapTab').then(m => ({ default: m.ProcessMapTab })));
 const NotificationsTab = lazy(() => import('@/components/dashboard/NotificationsTab').then(m => ({ default: m.NotificationsTab })));
 
-let isFirstDashboardMount = true;
+import { useUiStore } from '@/store/uiStore';
 
 const TabLoader = () => {
+  const isFirstDashboardMount = useUiStore(state => state.isFirstDashboardMount);
   const [show, setShow] = useState(!isFirstDashboardMount);
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export const DashboardPage = () => {
   useEffect(() => {
     // Mark initial loading as complete after Dashboard renders.
     // Subsequent tab loads will use a small, delayed loader.
-    isFirstDashboardMount = false;
+    useUiStore.getState().setFirstDashboardMount(false);
 
     // Refresh workspace data (including roles) on every Dashboard visit.
     // This catches external role changes (e.g. owner changed user from editor→viewer)

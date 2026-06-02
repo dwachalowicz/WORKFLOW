@@ -227,8 +227,8 @@ export const GryfCanvas = () => {
     // Convert screen click coordinates to flow coordinates
     const flowPosition = screenToFlowPosition({ x: menuConfig.x, y: menuConfig.y });
     
-    // Add offset so the node doesn't spawn exactly under the cursor
-    const spawnPosition = { x: flowPosition.x, y: flowPosition.y - 60 };
+    // Add offset so the node doesn't spawn exactly under the cursor, adjusted to avoid overlap
+    const spawnPosition = { x: flowPosition.x + 40, y: flowPosition.y - 80 };
 
     switch(action) {
       case 'copy': {
