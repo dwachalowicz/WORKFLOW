@@ -2765,41 +2765,6 @@ cronAdd("cleanStaleLocks", "*/5 * * * *", () => {
     }
 });
 
-// =====================================================
-// HOOK: Notifications for Invitations & Roles
-// =====================================================
-onRecordCreateRequest((e) => {
-    e.next();
-    const record = e.record;
-    if (record.get("status") !== "pending") return;
-    
-    const userId = record.get("user");
-    const wsId = record.get("workspace");
-    if (!userId || !wsId) return;
-    
-    try {
-        let wsName = "Workspace";
-        try {
-            let ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
-            wsName = ws.get("name") || wsName;
-        } catch(err) {}
-
-        const title = "Nowe zaproszenie / New invitation";
-        const message = `Otrzymałeś zaproszenie do obszaru roboczego "${wsName}". / You received an invitation to workspace "${wsName}".`;
-
-        const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
-        const notifRecord = new Record(notifCollection);
-        notifRecord.set("user", userId);
-        notifRecord.set("title", title);
-        notifRecord.set("message", message);
-        notifRecord.set("type", "info");
-        notifRecord.set("isRead", false);
-        e.app.save(notifRecord);
-    } catch(err) {
-        console.log("Error creating invitation notif: " + err);
-    }
-}, "WORKFLOW_workspace_members");
-
 onRecordUpdateRequest((e) => {
     e.next();
     const record = e.record;

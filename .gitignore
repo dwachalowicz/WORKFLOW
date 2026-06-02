@@ -32,13 +32,4 @@ test-results/
 playwright-report/
 
 # Dev artifacts
-do_usuniecia/
-PLIKI_WSTEPNE/
-lint_output*.txt
-compile_errors.txt
-*.json.bak
-
-# Audit & Check files
-audit*.json
-depcheck*.json
-outdated*.json
+*.json.bak

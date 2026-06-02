@@ -9,7 +9,7 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
   const heartbeatCleanupRef = useRef<(() => void) | null>(null);
   const recheckIntervalRef = useRef<number | null>(null);
 
-  const evaluateLock = useCallback(async () => {
+  const evaluateLock = useCallback(async function evaluateLockFn() {
     if (!urlProcessId || !userId) return;
 
     const existing = await checkLock(urlProcessId, userId);
@@ -40,7 +40,7 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
         // Start an interval to re-evaluate the lock periodically in case it expired on the server
         if (!recheckIntervalRef.current) {
           recheckIntervalRef.current = window.setInterval(() => {
-            evaluateLock().catch(console.error);
+            evaluateLockFn().catch(console.error);
           }, 30000); // Check every 30 seconds
         }
       }
