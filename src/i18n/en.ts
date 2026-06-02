@@ -1456,7 +1456,7 @@ export const en = {
       "text13": "Resolve",
       "text14": "2h ago",
       "text15": "10m ago",
-      "text16": "TODO"
+      "text16": "DONE"
     },
     "radialmenusection": {
       "text1": "Discover the",

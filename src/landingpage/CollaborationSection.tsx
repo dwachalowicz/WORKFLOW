@@ -28,7 +28,7 @@ export const CollaborationSection: React.FC = () => {
                      <MessageSquare size={14} className="text-brand-gold" />
                      {t('landing.collaborationsection.text8')}
                   </div>
-                  <div className="text-[11px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-bold uppercase">
+                  <div className="text-[11px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold uppercase">
                      {t('landing.collaborationsection.text16')}
                   </div>
                </div>

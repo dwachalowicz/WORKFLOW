@@ -1539,7 +1539,7 @@ export const pl = {
       text13: "Rozwiąż",
       text14: "2h temu",
       text15: "10 min temu",
-      text16: "DO ZROBIENIA"
+      text16: "GOTOWE"
     },
     radialmenusection: {
       text1: "Odkryj",
