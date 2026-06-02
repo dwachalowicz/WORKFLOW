@@ -789,8 +789,24 @@ onRecordCreateRequest((e) => {
 
         e.app.newMailClient().send(message);
 
+        // Powiadomienie w aplikacji (tylko jeśli użytkownik istnieje w systemie)
+        if (status === "pending" && record.get("user")) {
+            try {
+                const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
+                const notifRecord = new Record(notifCollection);
+                notifRecord.set("user", record.get("user"));
+                notifRecord.set("title", "Nowe zaproszenie / New invitation");
+                notifRecord.set("message", `Masz nowe zaproszenie do obszaru roboczego "${wsName}" od ${inviterName}. Przejdź do zakładki Zaproszenia. / You have a new invitation to workspace "${wsName}" from ${inviterName}. Go to Invitations tab.`);
+                notifRecord.set("type", "info");
+                notifRecord.set("isRead", false);
+                e.app.save(notifRecord);
+            } catch(notifErr) {
+                console.log("Error creating invitation in-app notif: " + String(notifErr.message || notifErr));
+            }
+        }
+
     } catch (err) {
-        console.log("Invitation email error: " + String(err.message || err));
+        console.log("Invitation notification error: " + String(err.message || err));
     }
 }, "WORKFLOW_workspace_members");
 
@@ -2294,16 +2310,41 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                     e.app.newMailClient().send(message);
                 }
 
-                // Powiadomienie w aplikacji
+                // Powiadomienie w aplikacji dla ownera i wszystkich adminów
                 try {
                     const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
-                    const notifRecord = new Record(notifCollection);
-                    notifRecord.set("user", ownerId);
-                    notifRecord.set("title", "Prośba o dołączenie / Join request");
-                    notifRecord.set("message", `Użytkownik ${joinedName} prosi o dołączenie do obszaru roboczego "${wsName}". Zaakceptuj go w zakładce Członkowie. / User ${joinedName} requested to join workspace "${wsName}". Approve in Members tab.`);
-                    notifRecord.set("type", "info");
-                    notifRecord.set("isRead", false);
-                    e.app.save(notifRecord);
+                    const title = "Prośba o dołączenie / Join request";
+                    const message = `Użytkownik ${joinedName} prosi o dołączenie do obszaru roboczego "${wsName}". Zaakceptuj go w zakładce Członkowie. / User ${joinedName} requested to join workspace "${wsName}". Approve in Members tab.`;
+                    
+                    let notifyIds = [ownerId];
+                    try {
+                        let admins = e.app.findRecordsByFilter(
+                            "WORKFLOW_workspace_members",
+                            "workspace = {:ws} && role = 'admin' && status = 'active'",
+                            "", 100, 0,
+                            { ws: wsId }
+                        );
+                        if (admins) {
+                            for (let i = 0; i < admins.length; i++) {
+                                let adminUserId = admins[i].get("user");
+                                if (adminUserId && notifyIds.indexOf(adminUserId) === -1) {
+                                    notifyIds.push(adminUserId);
+                                }
+                            }
+                        }
+                    } catch(err) {}
+
+                    for (let i = 0; i < notifyIds.length; i++) {
+                        try {
+                            const notifRecord = new Record(notifCollection);
+                            notifRecord.set("user", notifyIds[i]);
+                            notifRecord.set("title", title);
+                            notifRecord.set("message", message);
+                            notifRecord.set("type", "info");
+                            notifRecord.set("isRead", false);
+                            e.app.save(notifRecord);
+                        } catch(err) {}
+                    }
                 } catch(notifErr) {
                     console.log("Error creating join request in-app notif: " + notifErr);
                 }
