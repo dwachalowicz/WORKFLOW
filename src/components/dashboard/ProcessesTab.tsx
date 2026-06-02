@@ -438,7 +438,10 @@ export const ProcessesTab = () => {
         name: trimmedName,
         workspace: activeWorkspace.id
       });
-      setGroups(prev => [...prev, record as Group]);
+      setGroups(prev => {
+        if (prev.some(g => g.id === record.id)) return prev;
+        return [...prev, record as Group].sort((a, b) => a.name.localeCompare(b.name));
+      });
       setNewGroupName('');
       setIsCreatingGroup(false);
     } catch (err) {
