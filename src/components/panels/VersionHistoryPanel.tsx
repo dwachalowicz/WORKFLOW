@@ -32,9 +32,7 @@ export const VersionHistoryPanel = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [diffResult, setDiffResult] = useState<DiffResult | null>(null);
-
-  const nodes = useCanvasStore((s) => s.nodes);
-  const edges = useCanvasStore((s) => s.edges);
+  const [isComparingId, setIsComparingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && currentProcessId) {
@@ -79,37 +77,59 @@ export const VersionHistoryPanel = () => {
     }
   };
 
-  const handleCompare = (version: Record<string, unknown>) => {
+  const handleCompare = async (version: Record<string, unknown>) => {
+    if (isComparingId) return;
+    setIsComparingId(version.id as string);
     try {
-      const vNodesRaw = version.nodes_data || [];
-      const vEdgesRaw = version.edges_data || [];
+      // Pobieramy zawsze najświeższy stan bezpośrednio ze store, żeby uniknąć problemów z closure
+      const currentNodes = useCanvasStore.getState().nodes as Record<string, unknown>[];
+      const currentEdges = useCanvasStore.getState().edges as Record<string, unknown>[];
+
+      let vNodesRaw = version.nodes_data;
+      let vEdgesRaw = version.edges_data;
+
+      if (!vNodesRaw || !vEdgesRaw) {
+        const record = await import('@/lib/pocketbase').then(m => m.pb.collection('WORKFLOW_versions').getOne(version.id as string, {
+          fields: 'nodes_data,edges_data'
+        }));
+        vNodesRaw = record.nodes_data;
+        vEdgesRaw = record.edges_data;
+        
+        // Cache it for subsequent clicks
+        version.nodes_data = vNodesRaw;
+        version.edges_data = vEdgesRaw;
+      }
+
+      vNodesRaw = vNodesRaw || [];
+      vEdgesRaw = vEdgesRaw || [];
+      
       const vNodes: Record<string, unknown>[] = typeof vNodesRaw === 'string' ? JSON.parse(vNodesRaw) : vNodesRaw;
       const vEdges: Record<string, unknown>[] = typeof vEdgesRaw === 'string' ? JSON.parse(vEdgesRaw) : vEdgesRaw;
 
-      const currentNodeIds = new Set(nodes.map((n: Record<string, unknown>) => n.id));
-      const versionNodeIds = new Set(vNodes.map((n: Record<string, unknown>) => n.id));
-      const versionNodeMap = new Map(vNodes.map((n: Record<string, unknown>) => [n.id, n]));
+      const currentNodeIds = new Set(currentNodes.map(n => n.id));
+      const versionNodeIds = new Set(vNodes.map(n => n.id));
+      const versionNodeMap = new Map(vNodes.map(n => [n.id, n]));
 
       const nodesAdded: string[] = [];
       const nodesRemoved: string[] = [];
       const nodesChanged: NodeChange[] = [];
 
       // Nodes added (in current but not in version)
-      for (const n of nodes as Record<string, unknown>[]) {
-        if (!versionNodeIds.has(n.id)) {
+      for (const n of currentNodes) {
+        if (!versionNodeIds.has(n.id as string)) {
           const nData = n.data as Record<string, unknown> | undefined;
           nodesAdded.push(nData?.label as string || n.id as string);
         }
       }
       // Nodes removed (in version but not current)
       for (const n of vNodes) {
-        if (!currentNodeIds.has(n.id)) {
+        if (!currentNodeIds.has(n.id as string)) {
           const nData = n.data as Record<string, unknown> | undefined;
           nodesRemoved.push(nData?.label as string || n.id as string);
         }
       }
       // Nodes in both → deep compare every property
-      for (const n of nodes as Record<string, unknown>[]) {
+      for (const n of currentNodes) {
         const vn = versionNodeMap.get(n.id);
         if (vn) {
           const details = deepCompareNode(n, vn, t);
@@ -121,25 +141,25 @@ export const VersionHistoryPanel = () => {
       }
 
       // Edges
-      const currentEdgeIds = new Set(edges.map((e: Record<string, unknown>) => e.id));
-      const versionEdgeIds = new Set(vEdges.map((e: Record<string, unknown>) => e.id));
-      const versionEdgeMap = new Map(vEdges.map((e: Record<string, unknown>) => [e.id, e]));
+      const currentEdgeIds = new Set(currentEdges.map(e => e.id));
+      const versionEdgeIds = new Set(vEdges.map(e => e.id));
+      const versionEdgeMap = new Map(vEdges.map(e => [e.id, e]));
 
       const edgesAdded: string[] = [];
       const edgesRemoved: string[] = [];
       const edgesChanged: EdgeChange[] = [];
 
-      for (const e of edges as Record<string, unknown>[]) {
-        if (!versionEdgeIds.has(e.id)) {
-          const srcNode = (nodes as Record<string, unknown>[]).find(n => n.id === e.source);
-          const tgtNode = (nodes as Record<string, unknown>[]).find(n => n.id === e.target);
+      for (const e of currentEdges) {
+        if (!versionEdgeIds.has(e.id as string)) {
+          const srcNode = currentNodes.find(n => n.id === e.source);
+          const tgtNode = currentNodes.find(n => n.id === e.target);
           const srcData = srcNode?.data as Record<string, unknown> | undefined;
           const tgtData = tgtNode?.data as Record<string, unknown> | undefined;
           edgesAdded.push(`${srcData?.label || e.source} → ${tgtData?.label || e.target}`);
         }
       }
       for (const e of vEdges) {
-        if (!currentEdgeIds.has(e.id)) {
+        if (!currentEdgeIds.has(e.id as string)) {
           const srcNode = vNodes.find(n => n.id === e.source);
           const tgtNode = vNodes.find(n => n.id === e.target);
           const srcData = srcNode?.data as Record<string, unknown> | undefined;
@@ -148,13 +168,13 @@ export const VersionHistoryPanel = () => {
         }
       }
       // Edges in both → deep compare
-      for (const e of edges as Record<string, unknown>[]) {
+      for (const e of currentEdges) {
         const ve = versionEdgeMap.get(e.id);
         if (ve) {
-          const details = deepCompareEdge(e, ve, nodes as Record<string, unknown>[], vNodes, t);
+          const details = deepCompareEdge(e, ve, currentNodes, vNodes, t);
           if (details.length > 0) {
-            const srcNode = (nodes as Record<string, unknown>[]).find(n => n.id === e.source);
-            const tgtNode = (nodes as Record<string, unknown>[]).find(n => n.id === e.target);
+            const srcNode = currentNodes.find(n => n.id === e.source);
+            const tgtNode = currentNodes.find(n => n.id === e.target);
             const srcData = srcNode?.data as Record<string, unknown> | undefined;
             const tgtData = tgtNode?.data as Record<string, unknown> | undefined;
             edgesChanged.push({
@@ -176,6 +196,8 @@ export const VersionHistoryPanel = () => {
       });
     } catch (err) {
       console.error('Diff error:', err);
+    } finally {
+      setIsComparingId(null);
     }
   };
 
@@ -336,9 +358,10 @@ export const VersionHistoryPanel = () => {
                               variant="iconGhost"
                               size="iconSm"
                               onClick={() => handleCompare(v as Record<string, unknown>)}
+                              disabled={isComparingId === v.id}
                               className="text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10"
                             >
-                              <GitCompare size={14} />
+                              {isComparingId === v.id ? <Loader2 size={14} className="animate-spin" /> : <GitCompare size={14} />}
                             </Button>
                           </SimpleTooltip>
 

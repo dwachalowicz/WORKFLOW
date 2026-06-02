@@ -3043,7 +3043,7 @@ onRecordViewRequest((e) => {
     } catch(err) {}
 }, "WORKFLOW_users");
 
-onRecordListRequest((e) => {
+onRecordsListRequest((e) => {
     e.next();
     try {
         var authId = e.auth ? e.auth.id : "";
@@ -3197,22 +3197,38 @@ onRecordCreateRequest((e) => {
             proc = e.app.findRecordById("WORKFLOW_processes", processId);
             processName = proc.get("name") || processName;
             
-            // Pobierz nazwę węzła z JSON-a nodes
+            // Pobierz nazwę węzła z JSON-a nodes (wzorzec z Propagate Node Labels hook)
             if (nodeId) {
-                let nodes = proc.get("nodes");
-                if (typeof nodes === "string") {
-                    try { nodes = JSON.parse(nodes); } catch(pe) { nodes = []; }
+                let nodesRaw = proc.get("nodes");
+                let nodes = [];
+                try {
+                    // Wymuszamy konwersję na czysty JS string niezależnie od typu Go
+                    let nodesStr = "" + nodesRaw;
+                    nodes = JSON.parse(nodesStr);
+                    // Podwójnie zakodowany JSON
+                    while (typeof nodes === "string") {
+                        nodes = JSON.parse(nodes);
+                    }
+                } catch(pe) {
+                    console.error("COMMENT NOTIF v4: parse error:", pe);
+                    nodes = [];
                 }
-                if (Array.isArray(nodes)) {
+                
+                if (nodes && nodes.length) {
                     for (let n = 0; n < nodes.length; n++) {
-                        if (nodes[n].id === nodeId && nodes[n].data && nodes[n].data.label) {
-                            nodeName = nodes[n].data.label;
+                        let nd = nodes[n];
+                        if (nd && nd.id === nodeId) {
+                            var d = nd.data || {};
+                            nodeName = d.label || d.title || nd.type || d.type || nodeId;
                             break;
                         }
                     }
                 }
+                console.log("COMMENT NOTIF v4: nodeId=" + nodeId + " nodeName=" + nodeName + " nodesLen=" + nodes.length + " typeofRaw=" + typeof nodesRaw);
             }
-        } catch(err) {}
+        } catch(err) {
+            console.error("COMMENT NOTIF: Error fetching process/node info:", err);
+        }
         
         // Buduj czytelny opis lokalizacji komentarza
         let locationPl = "w procesie \"" + processName + "\"";
@@ -3266,7 +3282,13 @@ onRecordCreateRequest((e) => {
                     const notifRecord = new Record(notifCollection);
                     notifRecord.set("user", userIdsToNotify[i]);
                     notifRecord.set("title", "Nowy komentarz / New Comment");
-                    notifRecord.set("message", "Dodano komentarz " + locationPl + " / A comment was added " + locationEn);
+                    let commentMsgPl = "Dodano komentarz w procesie <strong>" + processName + "</strong>";
+                    let commentMsgEn = "A comment was added in process <strong>" + processName + "</strong>";
+                    if (nodeName) {
+                        commentMsgPl = "Dodano komentarz na węźle <strong>" + nodeName + "</strong> w procesie <strong>" + processName + "</strong>";
+                        commentMsgEn = "A comment was added on node <strong>" + nodeName + "</strong> in process <strong>" + processName + "</strong>";
+                    }
+                    notifRecord.set("message", commentMsgPl + " / " + commentMsgEn);
                     notifRecord.set("type", "info");
                     notifRecord.set("isRead", false);
                     notifRecord.set("link", notifLink);
@@ -3284,7 +3306,13 @@ onRecordCreateRequest((e) => {
                     const notifRecord = new Record(notifCollection);
                     notifRecord.set("user", parentAuthor);
                     notifRecord.set("title", "Nowa odpowiedz / New Reply");
-                    notifRecord.set("message", "Odpowiedziano na Twoj komentarz " + locationPl + " / Someone replied to your comment " + locationEn);
+                    let replyMsgPl = "Odpowiedziano na Twój komentarz w procesie <strong>" + processName + "</strong>";
+                    let replyMsgEn = "Someone replied to your comment in process <strong>" + processName + "</strong>";
+                    if (nodeName) {
+                        replyMsgPl = "Odpowiedziano na Twój komentarz na węźle <strong>" + nodeName + "</strong> w procesie <strong>" + processName + "</strong>";
+                        replyMsgEn = "Someone replied to your comment on node <strong>" + nodeName + "</strong> in process <strong>" + processName + "</strong>";
+                    }
+                    notifRecord.set("message", replyMsgPl + " / " + replyMsgEn);
                     notifRecord.set("type", "info");
                     notifRecord.set("isRead", false);
                     notifRecord.set("link", notifLink);

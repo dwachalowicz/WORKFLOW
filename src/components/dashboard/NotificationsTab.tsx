@@ -211,9 +211,10 @@ export const NotificationsTab = () => {
                           {new Date(n.created).toLocaleString()}
                         </span>
                       </div>
-                      <p className={`text-sm ${!n.isRead ? 'text-foreground/80' : 'text-muted-foreground/80'}`}>
-                        {parseBilingualText(n.message, i18n.language)}
-                      </p>
+                      <p 
+                        className={`text-sm ${!n.isRead ? 'text-foreground/80' : 'text-muted-foreground/80'}`}
+                        dangerouslySetInnerHTML={{ __html: parseBilingualText(n.message, i18n.language) }}
+                      />
                     </div>
                     <div className="flex flex-col gap-2 shrink-0 ml-4">
                       {!n.isRead && (

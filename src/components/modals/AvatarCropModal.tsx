@@ -11,6 +11,8 @@ import { tryCatchToast } from '@/lib/errorHandler';
 import { cn } from '@/lib/utils';
 import { getCroppedImg } from '@/lib/imageUtils';
 
+import { ICON_MAP } from '@/lib/iconMap';
+
 interface AvatarCropModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,14 +34,7 @@ interface AvatarCropModalProps {
   targetSize?: number;
 }
 
-const ALL_ICONS = Object.keys(LucideIcons).filter(name => {
-  return name[0] === name[0].toUpperCase() && 
-         name !== 'Icon' && 
-         name !== 'LucideProps' && 
-         !name.endsWith('Icon') && 
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-         (typeof (LucideIcons as any)[name] === 'function' || typeof (LucideIcons as any)[name] === 'object');
-});
+const ALL_ICONS = Object.keys(ICON_MAP).sort();
 
 export const AvatarCropModal = ({ 
   isOpen, 

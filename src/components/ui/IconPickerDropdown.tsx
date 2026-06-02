@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as LucideIcons from 'lucide-react';
 import { useClickOutside } from '@/hooks/useClickOutside';
+import { ICON_MAP } from '@/lib/iconMap';
 
 interface IconPickerDropdownProps {
   value?: string;
@@ -9,14 +10,7 @@ interface IconPickerDropdownProps {
   disabled?: boolean;
 }
 
-const ALL_ICONS = Object.keys(LucideIcons).filter(name => {
-  return name[0] === name[0].toUpperCase() && 
-         name !== 'Icon' && 
-         name !== 'LucideProps' && 
-         !name.endsWith('Icon') && 
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-         (typeof (LucideIcons as any)[name] === 'function' || typeof (LucideIcons as any)[name] === 'object');
-});
+const ALL_ICONS = Object.keys(ICON_MAP).sort();
 
 export const IconPickerDropdown = ({ value, onChange, disabled }: IconPickerDropdownProps) => {
   const { t } = useTranslation();

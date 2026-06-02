@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { useToastStore } from '@/store/toastStore';
 import { useUiStore } from "@/store/uiStore";
 import { useCanvasStore } from "@/store/canvasStore";
+import type { Node, Edge } from '@xyflow/react';
 
 const UserAvatar = ({ user, className }: { user: WorkflowUser | null, className?: string }) => {
   const [error, setError] = useState(false);
@@ -38,6 +39,7 @@ const UserAvatar = ({ user, className }: { user: WorkflowUser | null, className?
 interface ChatMsg {
   role: 'user' | 'assistant';
   content: string;
+  displayContent?: string;
   toolNames?: string[];
   workflowJson?: { nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] };
   workflowUpdate?: { updates: { id: string; data: Record<string, unknown> }[] };
@@ -221,10 +223,14 @@ export const AiAssistantPanel = () => {
         let jsonStr = block.slice(startIdx, endIdx + 1);
         // Fix common JSON errors: trailing commas
         jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+        // Fix unquoted keys (e.g. { nodes: [] } -> { "nodes": [] })
+        jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+        // Fix single-quoted keys (e.g. { 'nodes': [] } -> { "nodes": [] })
+        jsonStr = jsonStr.replace(/([{,]\s*)'([^']+)'\s*:/g, '$1"$2":');
         return JSON.parse(jsonStr);
       }
     } catch (e) {
-      console.error('[AI JSON Parse Error]', e);
+      console.error('[AI] parse error object:', e);
     }
     return null;
   };
@@ -288,6 +294,17 @@ export const AiAssistantPanel = () => {
           }
           if (key === 'koszt' || key === 'koszty' || key === 'costs') mappedKey = 'cost';
 
+          if (mappedKey === 'icon' && typeof value === 'string') {
+            let iconName = value.replace(/^lucide[-_]?/i, '');
+            if (iconName.includes('-') || iconName.includes('_')) {
+              iconName = iconName.split(/[-_]/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join('');
+            } else {
+              iconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+            }
+            filteredData[mappedKey] = iconName;
+            continue;
+          }
+
           if (!SAFE_UPDATE_KEYS.has(mappedKey)) {
             console.warn(`[AI Security] Blocked disallowed update key: "${mappedKey}"`);
             continue;
@@ -316,7 +333,7 @@ export const AiAssistantPanel = () => {
 
 
 
-  const handleSend = async (text?: string, includeTools: boolean = false) => {
+  const handleSend = async (text?: string, includeTools: boolean = false, displayMsg?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading) return;
 
@@ -324,7 +341,7 @@ export const AiAssistantPanel = () => {
 
     setInput('');
     setMessages(prev => {
-      const updated = [...prev, { role: 'user', content: msg }];
+      const updated = [...prev, { role: 'user', content: msg, displayContent: displayMsg }];
       // Cap message history to prevent memory leaks
       if (updated.length > 200) {
         return updated.slice(-200).map((m, i) =>
@@ -498,6 +515,16 @@ export const AiAssistantPanel = () => {
           if (mappedData.koszty !== undefined) { mappedData.cost = mappedData.koszty; delete mappedData.koszty; }
           if (mappedData.costs !== undefined) { mappedData.cost = mappedData.costs; delete mappedData.costs; }
 
+          if (typeof mappedData.icon === 'string') {
+            let iconName = mappedData.icon.replace(/^lucide[-_]?/i, '');
+            if (iconName.includes('-') || iconName.includes('_')) {
+              iconName = iconName.split(/[-_]/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join('');
+            } else {
+              iconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+            }
+            mappedData.icon = iconName;
+          }
+
           return {
             ...n,
             type: n.type || 'simple',
@@ -582,9 +609,20 @@ export const AiAssistantPanel = () => {
       
           finalNewEdges.push({ id: `ai-edge-start-${crypto.randomUUID()}`, type: 'custom', source: startNode.id, target: ordered[0].id, sourceHandle: 'right', targetHandle: 'left' });
       }
+      const allNodesContext = [...baseNodes, ...newNodes];
       aiEdges.forEach(e => {
         const key = `${e.source}->${e.target}`;
-        if (!existingEdgeKeys.has(key)) { finalNewEdges.push({ ...e, type: e.type || 'custom', sourceHandle: e.sourceHandle || 'right', targetHandle: e.targetHandle || 'left' }); existingEdgeKeys.add(key); }
+        if (!existingEdgeKeys.has(key)) {
+          const targetNode = allNodesContext.find(n => n.id === e.target);
+          const isDbTarget = targetNode?.type === 'database';
+          finalNewEdges.push({ 
+            ...e, 
+            type: e.type || 'custom', 
+            sourceHandle: isDbTarget ? 'db' : 'right', 
+            targetHandle: isDbTarget ? 'db' : 'left' 
+          }); 
+          existingEdgeKeys.add(key); 
+        }
       });
       if (stopNodes.length > 0 && ordered.length > 0) {
         const lastNode = ordered[ordered.length - 1];
@@ -601,8 +639,7 @@ export const AiAssistantPanel = () => {
         return n;
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      applyAiChanges([...updatedNodes, ...ordered] as any, [...baseEdges, ...finalNewEdges] as any);
+      applyAiChanges([...updatedNodes, ...ordered] as Node[], [...baseEdges, ...finalNewEdges] as Edge[]);
       setTimeout(() => {
         useCanvasStore.getState().autoLayout();
       }, 100);
@@ -761,7 +798,7 @@ export const AiAssistantPanel = () => {
                   <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-bold pl-10">{t('ai.quickActions')}</p>
                   <div className="flex flex-wrap gap-2 pl-10">
                     {activePrompts.map((qp, i) => (
-                      <button key={i} onClick={() => handleSend(qp.prompt, !!qp.includeTools)} className="text-[12px] font-semibold text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated px-4 py-2 rounded-full transition-all">
+                      <button key={i} onClick={() => handleSend(qp.prompt, !!qp.includeTools, qp.label)} className="text-[12px] font-semibold text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated px-4 py-2 rounded-full transition-all">
                         {qp.label}
                       </button>
                     ))}
@@ -786,7 +823,7 @@ export const AiAssistantPanel = () => {
                 <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground"
                    dangerouslySetInnerHTML={{
                      __html: DOMPurify.sanitize(
-                       msg.content
+                       (msg.displayContent || msg.content)
                          .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground">$1</strong>')
                          .replace(/\n/g, '<br/>')
                      )

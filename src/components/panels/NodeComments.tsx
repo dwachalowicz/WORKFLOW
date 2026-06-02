@@ -190,8 +190,17 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
       inputRef.current?.focus();
       refreshCommentCounts();
     } catch (err) {
-      console.error('Error adding comment:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      if (err instanceof Error) {
+        // PocketBase errors often have the message inside the response data
+        const pbErr = err as Error & { response?: { message?: string } };
+        if (pbErr.response && pbErr.response.message) {
+          useToastStore.getState().showToast(pbErr.response.message, 'error');
+        } else {
+          useToastStore.getState().showToast(err.message, 'error');
+        }
+      } else {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+      }
     } finally {
       setIsSending(false);
     }
@@ -210,8 +219,17 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
       setReplyingToId(null);
       refreshCommentCounts();
     } catch (err) {
-      console.error('Error adding reply:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      if (err instanceof Error) {
+        // PocketBase errors often have the message inside the response data
+        const pbErr = err as Error & { response?: { message?: string } };
+        if (pbErr.response && pbErr.response.message) {
+          useToastStore.getState().showToast(pbErr.response.message, 'error');
+        } else {
+          useToastStore.getState().showToast(err.message, 'error');
+        }
+      } else {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+      }
     } finally {
       setIsSending(false);
     }
