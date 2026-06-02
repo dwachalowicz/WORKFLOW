@@ -3143,19 +3143,7 @@ onRecordCreateRequest(function(e) {
 }, "WORKFLOW_versions");
 
 
-// =====================================================
-// HOOK: MED-32 — Fix users with missing/unknown tier on bootstrap
-// =====================================================
-onAfterBootstrap((e) => {
-  try {
-    const users = $app.findRecordsByFilter('WORKFLOW_users', "tier = '' || tier = 'UNKNOWN'", '', 99999, 0);
-    for (const user of users) {
-      user.set('tier', 'FREE');
-      $app.save(user);
-    }
-    if (users.length > 0) console.log(`[Bootstrap] Fixed ${users.length} users with missing tier → FREE`);
-  } catch(e) { /* collection may not exist yet */ }
-});
+// Removed onAfterBootstrap hook as it was causing a ReferenceError in this version of PocketBase.
 
 // =====================================================
 // HOOK: Notifications for new comments

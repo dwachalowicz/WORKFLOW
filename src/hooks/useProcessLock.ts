@@ -67,7 +67,6 @@ export function useProcessLock(urlProcessId: string | undefined, userId: string 
   useEffect(() => {
     if (!urlProcessId || !userId) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     evaluateLock().catch(console.error);
 
     const handleVisibilityChange = () => {
