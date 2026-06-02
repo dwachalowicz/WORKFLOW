@@ -14,7 +14,7 @@ globalThis.escapeHtml = function(str) {
 
 
 // =====================================================
-// ROUTE: POST /api/ai/chat â€” AI Chat Proxy
+// ROUTE: POST /api/ai/chat — AI Chat Proxy
 // =====================================================
 routerAdd("POST", "/api/ai/chat", (e) => {
     // INLINED HELPERS FOR GOJA
@@ -208,14 +208,14 @@ routerAdd("POST", "/api/ai/chat", (e) => {
                 let label = (n.data && n.data.label) ? n.data.label : n.id;
                 let nType = n.type === 'startstop' ? (n.data.type === 'start' ? 'START' : 'STOP') 
                   : n.type === 'database' ? 'DATABASE' : n.type === 'subworkflow' ? 'SUBPROCESS' : 'STAGE';
-                let desc = (n.data && n.data.description) ? " â€” " + n.data.description : "";
+                let desc = (n.data && n.data.description) ? " — " + n.data.description : "";
                 let sla = (n.data && n.data.maxDuration) ? " [SLA: " + n.data.maxDuration + "]" : "";
                 let cost = (n.data && n.data.cost) ? " [Cost: " + n.data.cost + " PLN]" : "";
                 let checklistStr = "";
                 if (n.data && Array.isArray(n.data.checklist) && n.data.checklist.length > 0) {
                     checklistStr = " [Checklist: " + n.data.checklist.map(c => c.label).join('; ') + "]";
                 }
-                nodeDescsArr.push("  â€˘ [id=\"" + n.id + "\"] " + nType + ": \"" + label + "\"" + desc + sla + cost + checklistStr);
+                nodeDescsArr.push("  • [id=\"" + n.id + "\"] " + nType + ": \"" + label + "\"" + desc + sla + cost + checklistStr);
             }
         }
         let nodeDescs = nodeDescsArr.join('\n');
@@ -247,7 +247,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         } catch(err) {}
 
         if (!template) {
-            template = lang === 'pl' ? "Jesteś Gryf â€” asystent AI platformy Gryf.ai. Pomagasz w procesach biznesowych. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}" : "You are Gryf â€” the AI assistant of Gryf.ai platform. You help with business processes. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}";
+            template = lang === 'pl' ? "Jesteś Gryf — asystent AI platformy Gryf.ai. Pomagasz w procesach biznesowych. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}" : "You are Gryf — the AI assistant of Gryf.ai platform. You help with business processes. {{LANG_INSTRUCTION}} {{START_INFO}} {{STOP_INFO}} {{TOOLS_SECTION}} Workflow: {{NODE_DESCRIPTIONS}} {{FLOW}}";
         } else if (lang === 'en') {
             template = template.replace(/Odpowiadaj po polsku/gi, 'Respond in English');
         }
@@ -709,7 +709,7 @@ onRecordCreateRequest((e) => {
             inviterEmail = e.auth.get("email") || "";
         }
 
-        let subject = "Zaproszenie / Invitation â€” Workspace \"" + wsName + "\"";
+        let subject = "Zaproszenie / Invitation — Workspace \"" + wsName + "\"";
 
         let ctaText = isNewUser
             ? "Zarejestruj się / Sign up"
@@ -767,7 +767,7 @@ onRecordCreateRequest((e) => {
                 + escapeHtml(ctaText) + '</a>'
                 + '</td></tr>'
                 + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
-                + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai â€” Projektowanie Procesów Biznesowych / Business Process Design</p>'
+                + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
                 + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. Nie musisz na niego odpowiadać.<br/>This email was sent automatically. You do not need to reply.</p>'
                 + '</td></tr>'
                 + '</table>'
@@ -893,7 +893,7 @@ onRecordUpdateRequest(function(e) {
 }, "WORKFLOW_processes");
 
 // =====================================================
-// HOOK: Secure Workspace Members â€” Create
+// HOOK: Secure Workspace Members — Create
 // =====================================================
 onRecordCreateRequest(function(e) {
     const record = e.record;
@@ -969,7 +969,7 @@ onRecordCreateRequest(function(e) {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Workspace Members â€” Update
+// HOOK: Secure Workspace Members — Update
 // =====================================================
 onRecordUpdateRequest(function(e) {
     const record = e.record;
@@ -1064,7 +1064,7 @@ onRecordUpdateRequest(function(e) {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Workspace Members â€” Delete
+// HOOK: Secure Workspace Members — Delete
 // =====================================================
 onRecordDeleteRequest((e) => {
     const record = e.record;
@@ -1098,7 +1098,7 @@ onRecordDeleteRequest((e) => {
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Notify User on Workspace Removal
+// HOOK: Notify on Workspace Member Deletion (removal, rejection, invitation decline)
 // =====================================================
 onRecordDeleteRequest((e) => {
     e.next();
@@ -1107,11 +1107,10 @@ onRecordDeleteRequest((e) => {
     try {
         const userId = record.get("user");
         const wsId = record.get("workspace");
-        // Only trigger if user and workspace are set, meaning it's an actual linked user
         if (!userId || !wsId) return;
 
-        // Don't notify if the user left the workspace themselves
-        if (e.auth && e.auth.id === userId) return;
+        const status = record.get("status");
+        const invitedBy = record.get("invited_by");
 
         let wsName = "Workspace";
         try {
@@ -1119,12 +1118,16 @@ onRecordDeleteRequest((e) => {
             wsName = ws.get("name") || wsName;
         } catch(err) {}
 
-        const title = "Usunięto z obszaru roboczego / Removed from workspace";
-        const message = `Zostałeś usunięty z obszaru roboczego "${wsName}". / You have been removed from the workspace "${wsName}".`;
+        const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
 
-        // 1. Create System Notification
-        try {
-            const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
+        // --- SCENARIO 1: Admin rejects a join-by-code request (pending, no invited_by) ---
+        if (status === "pending" && !invitedBy) {
+            // The admin deleted the pending request → notify the user who requested
+            if (e.auth && e.auth.id === userId) return; // user cancelled their own request
+
+            const title = "Prośba odrzucona / Join request rejected";
+            const message = `Twoja prośba o dołączenie do „${wsName}" została odrzucona. / Your request to join "${wsName}" has been rejected.`;
+
             const notifRecord = new Record(notifCollection);
             notifRecord.set("user", userId);
             notifRecord.set("title", title);
@@ -1132,57 +1135,120 @@ onRecordDeleteRequest((e) => {
             notifRecord.set("type", "warning");
             notifRecord.set("isRead", false);
             e.app.save(notifRecord);
-        } catch(err) {
-            console.log("Error creating notification: " + String(err.message || err));
+            return;
         }
 
-        // 2. Send Email Notification
-        try {
-            let user = e.app.findRecordById("WORKFLOW_users", userId);
-            let recipientEmail = user.get("email");
-            
-            if (recipientEmail) {
-                function escapeHtml(str) {
-                    if (!str) return '';
-                    return String(str)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
+        // --- SCENARIO 2: User rejects an email invitation (pending, has invited_by) ---
+        if ((status === "pending" || status === "pending_registration") && invitedBy) {
+            // The invited user rejected the invitation → notify the inviter
+            if (e.auth && e.auth.id === userId) {
+                // The user themselves rejected — notify the person who invited
+                try {
+                    let invitedUserName = "Użytkownik / User";
+                    try {
+                        let u = e.app.findRecordById("WORKFLOW_users", userId);
+                        invitedUserName = u.get("name") || u.get("email") || invitedUserName;
+                    } catch(err) {}
+
+                    const title = "Zaproszenie odrzucone / Invitation rejected";
+                    const message = `${invitedUserName} odrzucił zaproszenie do „${wsName}". / ${invitedUserName} rejected the invitation to "${wsName}".`;
+
+                    const notifRecord = new Record(notifCollection);
+                    notifRecord.set("user", invitedBy);
+                    notifRecord.set("title", title);
+                    notifRecord.set("message", message);
+                    notifRecord.set("type", "info");
+                    notifRecord.set("isRead", false);
+                    e.app.save(notifRecord);
+                } catch(err) {
+                    console.log("Error creating invite rejection notif: " + String(err.message || err));
                 }
-
-                let html = '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
-                + '<body style="font-family:sans-serif; background:#f4f4f5; padding:40px;">'
-                + '<div style="background:#fff; padding:20px; border-radius:10px; max-width:600px; margin:0 auto;">'
-                + '<h2 style="color:#1a1a1a;">Powiadomienie z obszaru roboczego / Workspace Notification</h2>'
-                + '<p style="color:#666;">Zostałeś usunięty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
-                + '<p style="color:#666; font-size:14px;">You have been removed from the workspace <strong>' + escapeHtml(wsName) + '</strong>.</p>'
-                + '<hr style="border:0; border-top:1px solid #eee; margin:20px 0;" />'
-                + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. Nie musisz na niego odpowiadać.<br/>This email was sent automatically. You do not need to reply.</p>'
-                + '</div></body></html>';
-
-                let mailMsg = new MailerMessage({
-                    from: {
-                        address: e.app.settings().meta.senderAddress,
-                        name: e.app.settings().meta.senderName || "Gryf.ai"
-                    },
-                    to: [{ address: recipientEmail }],
-                    subject: "Gryf.ai - " + title,
-                    html: html,
-                });
-                e.app.newMailClient().send(mailMsg);
+                return;
             }
-        } catch(err) {
-            console.log("Error sending removal email: " + String(err.message || err));
+            // Admin deleted the pending invitation → notify the invited user
+            const title = "Zaproszenie anulowane / Invitation cancelled";
+            const message = `Twoje zaproszenie do „${wsName}" zostało anulowane. / Your invitation to "${wsName}" has been cancelled.`;
+
+            const notifRecord = new Record(notifCollection);
+            notifRecord.set("user", userId);
+            notifRecord.set("title", title);
+            notifRecord.set("message", message);
+            notifRecord.set("type", "warning");
+            notifRecord.set("isRead", false);
+            e.app.save(notifRecord);
+            return;
+        }
+
+        // --- SCENARIO 3: Admin removes an active member ---
+        if (status === "active") {
+            if (e.auth && e.auth.id === userId) return; // user left voluntarily
+
+            const title = "Usunięto z obszaru roboczego / Removed from workspace";
+            const message = `Zostałeś usunięty z obszaru roboczego „${wsName}". / You have been removed from the workspace "${wsName}".`;
+
+            // 1. Create System Notification
+            try {
+                const notifRecord = new Record(notifCollection);
+                notifRecord.set("user", userId);
+                notifRecord.set("title", title);
+                notifRecord.set("message", message);
+                notifRecord.set("type", "warning");
+                notifRecord.set("isRead", false);
+                e.app.save(notifRecord);
+            } catch(err) {
+                console.log("Error creating removal notification: " + String(err.message || err));
+            }
+
+            // 2. Send Email Notification
+            try {
+                let user = e.app.findRecordById("WORKFLOW_users", userId);
+                let recipientEmail = user.get("email");
+                
+                if (recipientEmail) {
+                    let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
+                    + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
+                    + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
+                    + '<tr><td align="center">'
+                    + '<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;">'
+                    + '<tr><td style="padding:36px 36px 20px;text-align:center;border-bottom:1px solid #f0f0f0;">'
+                    + '<img src="https://gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
+                    + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">Powiadomienie z Workspace</h1>'
+                    + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Notification</p>'
+                    + '</td></tr>'
+                    + '<tr><td style="padding:28px 36px;">'
+                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
+                    + '</td></tr>'
+                    + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
+                    + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
+                    + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. Nie musisz na niego odpowiadać.<br/>This email was sent automatically. You do not need to reply.</p>'
+                    + '</td></tr>'
+                    + '</table>'
+                    + '</td></tr></table>'
+                    + '</body></html>';
+
+                    let mailMsg = new MailerMessage({
+                        from: {
+                            address: e.app.settings().meta.senderAddress,
+                            name: e.app.settings().meta.senderName || "Gryf.ai"
+                        },
+                        to: [{ address: recipientEmail }],
+                        subject: "Gryf.ai — " + title,
+                        html: html,
+                    });
+                    e.app.newMailClient().send(mailMsg);
+                }
+            } catch(err) {
+                console.log("Error sending removal email: " + String(err.message || err));
+            }
         }
     } catch(err) {
-        console.log("Error in onRecordAfterDeleteRequest (Workspace Member Removal): " + String(err.message || err));
+        console.log("Error in workspace member deletion notification hook: " + String(err.message || err));
     }
 }, "WORKFLOW_workspace_members");
 
 // =====================================================
-// HOOK: Secure Notifications â€” Update
+// HOOK: Secure Notifications — Update
 // =====================================================
 onRecordUpdateRequest((e) => {
     const record = e.record;
@@ -1414,7 +1480,7 @@ onRecordUpdateRequest(function(e) {
 }, "WORKFLOW_processes");
 
 // =====================================================
-// ROUTE: POST /api/process/lock â€” Atomic Process Locking
+// ROUTE: POST /api/process/lock — Atomic Process Locking
 // =====================================================
 routerAdd("POST", "/api/process/lock", (e) => {
     if (!e.auth) {
@@ -2106,7 +2172,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
             console.log("Error checking member limit in join-by-code: " + err);
         }
 
-        // Utworz prosbe o dolaczenie (jako pending â€” wymaga zatwierdzenia przez ownera/admina)
+        // Utworz prosbe o dolaczenie (jako pending — wymaga zatwierdzenia przez ownera/admina)
         const collection = e.app.findCollectionByNameOrId("WORKFLOW_workspace_members");
         const newRecord = new Record(collection);
         newRecord.set("workspace", wsId);
@@ -2115,7 +2181,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
         newRecord.set("status", "pending");
         e.app.save(newRecord);
 
-        // Powiadomienie mailowe dla wlasciciela â€” prośba o zatwierdzenie
+        // Powiadomienie mailowe dla wlasciciela — prośba o zatwierdzenie
         try {
             const ownerId = ws.get("owner");
             if (ownerId && ownerId !== userId) {
@@ -2167,7 +2233,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                             name: e.app.settings().meta.senderName || "Gryf.ai"
                         },
                         to: [{ address: ownerEmail }],
-                        subject: "Prośba o dołączenie / Join request â€” " + wsName,
+                        subject: "Prośba o dołączenie / Join request — " + wsName,
                         html: html,
                     });
 

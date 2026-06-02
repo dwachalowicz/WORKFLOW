@@ -582,7 +582,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       // Use the new fast server-side bulk deletion endpoint
-      const response = await pb.send('/api/account/delete', {
+      const response = await pb.send('/api/ai/delete-account', {
         method: 'POST'
       });
 

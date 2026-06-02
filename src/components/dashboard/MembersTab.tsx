@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { pb, getAvatarUrl, type WorkflowUser } from '@/lib/pocketbase';
-import { Users, Mail, Loader2 } from 'lucide-react';
+import { Users, Mail, Loader2, LogOut } from 'lucide-react';
 import { InviteMemberModal } from '@/components/modals/InviteMemberModal';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +26,7 @@ interface MemberRecord {
 
 export const MembersTab = () => {
   const { t } = useTranslation();
-  const { activeWorkspace, user } = useAuthStore();
+  const { activeWorkspace, user, leaveWorkspace, fetchWorkspaces } = useAuthStore();
   const isAdminOrOwner = activeWorkspace?.role === 'owner' || activeWorkspace?.role === 'admin';
 
   const [members, setMembers] = useState<MemberRecord[]>([]);
@@ -175,6 +175,23 @@ export const MembersTab = () => {
     }
   };
 
+  const handleLeaveWorkspace = async () => {
+    if (!activeWorkspace) return;
+    const confirmed = await useConfirmStore.getState().confirm({
+      title: t('workspaces.leaveConfirm', { defaultValue: 'Czy na pewno chcesz opuścić ten workspace? / Are you sure you want to leave this workspace?' }),
+      message: `"${activeWorkspace.name}"`,
+      confirmLabel: t('workspaces.leaveWorkspace', { defaultValue: 'Opuść / Leave' }),
+      cancelLabel: t('common.cancel'),
+    });
+    if (!confirmed) return;
+    try {
+      await leaveWorkspace(activeWorkspace.id);
+      await fetchWorkspaces();
+    } catch (err) {
+      useToastStore.getState().showToast(err instanceof Error ? err.message : String(err), 'error');
+    }
+  };
+
   return (
     <DashboardPageLayout maxWidth="max-w-[1200px]">
       <DashboardHeader
@@ -297,6 +314,17 @@ export const MembersTab = () => {
                           className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         >
                           {t('settingsTab.removeMemberBtn')}
+                        </Button>
+                      )}
+                      {m.expand?.user?.id === user?.id && m.role !== 'owner' && (
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleLeaveWorkspace}
+                          className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <LogOut size={12} className="mr-1" />
+                          {t('workspaces.leaveWorkspace')}
                         </Button>
                       )}
                     </td>
