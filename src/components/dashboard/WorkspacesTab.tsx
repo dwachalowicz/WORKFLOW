@@ -22,7 +22,8 @@ import {
   Copy,
   KeyRound,
   RefreshCw,
-  PowerOff
+  PowerOff,
+  Lock
 } from 'lucide-react';
 import { getIcon } from '@/lib/iconMap';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
@@ -48,6 +49,7 @@ interface WorkspaceInfo {
   processCount?: number;
   memberCount?: number;
   folderCount?: number;
+  isLocked?: boolean;
 }
 
 interface WorkspacesTabProps {
@@ -124,6 +126,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
       memberCount: undefined,
       folderCount: undefined,
       joinCode: ws.joinCode,
+      isLocked: ws.isLocked,
     })));
 
     // 2. Fetch all stats in a single optimized DB query via custom endpoint
@@ -139,6 +142,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
         memberCount: stats[ws.id]?.memberCount ?? 0,
         folderCount: stats[ws.id]?.folderCount ?? 0,
         joinCode: stats[ws.id]?.joinCode || ws.joinCode,
+        isLocked: workspaces.find(w => w.id === ws.id)?.isLocked || ws.isLocked,
       })));
       
     } catch (err) {
@@ -469,11 +473,20 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                           </h3>
                         )}
 
-                        {/* Role badge */}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full mt-1.5 flex items-center gap-1 ${getRoleBadgeClass(ws.role)}`}>
-                          {getRoleIcon(ws.role)}
-                          {getRoleLabel(ws.role)}
-                        </span>
+                        {/* Role & Locked badges */}
+                        <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${getRoleBadgeClass(ws.role)}`}>
+                            {getRoleIcon(ws.role)}
+                            {getRoleLabel(ws.role)}
+                          </span>
+
+                          {ws.isLocked && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 bg-red-500/10 text-red-500 ring-1 ring-red-500/20">
+                              <Lock size={10} />
+                              {t('workspaces.lockedByLimit')}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Stats footer */}

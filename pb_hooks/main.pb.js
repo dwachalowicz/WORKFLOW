@@ -1956,8 +1956,8 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
 
         // 1. Get all workspaces the user has access to (owner or active member)
         const db = e.app.db();
-        const myWorkspaces = arrayOf(new DynamicModel({ id: "", owner: "" }));
-        db.newQuery("SELECT id, owner FROM WORKFLOW_workspaces WHERE owner = {:user} OR id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:user} AND status = 'active')")
+        const myWorkspaces = arrayOf(new DynamicModel({ id: "", owner: "", created: "" }));
+        db.newQuery("SELECT id, owner, created FROM WORKFLOW_workspaces WHERE owner = {:user} OR id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:user} AND status = 'active')")
             .bind({ user: userId })
             .all(myWorkspaces);
 
@@ -1975,13 +1975,12 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
         });
         const uniqueOwners = Array.from(ownersSet);
 
-        const lockedWorkspaceIds = [];
+        const lockedWorkspaceIds = new Set();
 
-        // 3. For each owner, calculate locked workspaces
+        // 3. Check Owner limits first
         for (let i = 0; i < uniqueOwners.length; i++) {
             const ownerId = uniqueOwners[i];
             
-            // a) Get owner's tier
             let ownerTier = "FREE";
             try {
                 const owner = e.app.findRecordById("WORKFLOW_users", ownerId);
@@ -1994,16 +1993,14 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
                 }
             } catch(err) {}
 
-            // b) Get owner's maxWorkspaces limit
-            let maxWorkspaces = 1;
+            let ownerMaxWorkspaces = 1;
             try {
                 const configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: ownerTier });
                 if (configs && configs.length > 0) {
-                    maxWorkspaces = Number(configs[0].get("max_workspaces")) || 1;
+                    ownerMaxWorkspaces = Number(configs[0].get("max_workspaces")) || 1;
                 }
             } catch(err) {}
 
-            // c) Get all workspaces for this owner, sorted by created ASC
             const ownerWorkspaces = e.app.findRecordsByFilter(
                 "WORKFLOW_workspaces",
                 "owner = {:owner}",
@@ -2014,17 +2011,51 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
             let ownerWsArray = [];
             try { ownerWsArray = Array.from(ownerWorkspaces); } catch(err) { ownerWsArray = ownerWorkspaces || []; }
 
-            // d) Any workspace at index >= maxWorkspaces is locked
             for (let j = 0; j < ownerWsArray.length; j++) {
-                if (j >= maxWorkspaces) {
-                    lockedWorkspaceIds.push(ownerWsArray[j].id);
+                if (j >= ownerMaxWorkspaces) {
+                    lockedWorkspaceIds.add(ownerWsArray[j].id);
                 }
             }
         }
 
-        // 4. Return the intersection (only return locked ids that the current user actually cares about)
+        // 4. Check Current User's global limits
+        let userTier = "FREE";
+        const rawTier = e.auth.get("tier") || "FREE";
+        const tierExpiry = e.auth.get("tier_expires_at");
+        if (rawTier !== "FREE" && tierExpiry && new Date(tierExpiry).getTime() <= Date.now()) {
+            userTier = "FREE";
+        } else {
+            userTier = rawTier.toUpperCase();
+        }
+
+        let maxWorkspaces = 1;
+        try {
+            const configs = e.app.findRecordsByFilter("WORKFLOW_tier_config", "tier = {:tier}", "", 1, 0, { tier: userTier });
+            if (configs && configs.length > 0) {
+                maxWorkspaces = Number(configs[0].get("max_workspaces")) || 1;
+            }
+        } catch(err) {}
+
+        // Sort user's workspaces: owned first, then joined, then by created ASC
+        myWsArray.sort((a, b) => {
+            const aOwned = a.owner === userId ? 1 : 0;
+            const bOwned = b.owner === userId ? 1 : 0;
+            if (aOwned !== bOwned) return bOwned - aOwned;
+            if (a.created < b.created) return -1;
+            if (a.created > b.created) return 1;
+            return 0;
+        });
+
+        // Add to locked set if beyond personal limit
+        for (let j = 0; j < myWsArray.length; j++) {
+            if (j >= maxWorkspaces) {
+                lockedWorkspaceIds.add(myWsArray[j].id);
+            }
+        }
+
+        // 5. Return the intersection
         const userWsIds = new Set(myWsArray.map(ws => ws.id));
-        const filteredLockedIds = lockedWorkspaceIds.filter(id => userWsIds.has(id));
+        const filteredLockedIds = Array.from(lockedWorkspaceIds).filter(id => userWsIds.has(id));
 
         return e.json(200, filteredLockedIds);
 
@@ -3017,7 +3048,7 @@ onRecordCreateRequest(function(e) {
         try {
             var db = e.app.db();
             var wRows = arrayOf(new DynamicModel({ cnt: 0 }));
-            db.newQuery('SELECT COUNT(*) as cnt FROM WORKFLOW_workspaces WHERE owner = {:owner}').bind({ owner: ownerId }).all(wRows);
+            db.newQuery("SELECT COUNT(DISTINCT id) as cnt FROM WORKFLOW_workspaces WHERE owner = {:owner} OR id IN (SELECT workspace FROM WORKFLOW_workspace_members WHERE user = {:owner} AND status = 'active')").bind({ owner: ownerId }).all(wRows);
             var currentCount = wRows.length > 0 ? wRows[0].cnt : 0;
             if (currentCount >= maxWorkspaces) {
                 throw new BadRequestError('Limit obszarów roboczych (' + maxWorkspaces + ') został osiągnięty. / Workspace limit (' + maxWorkspaces + ') reached.');
@@ -3125,3 +3156,82 @@ onAfterBootstrap((e) => {
     if (users.length > 0) console.log(`[Bootstrap] Fixed ${users.length} users with missing tier → FREE`);
   } catch(e) { /* collection may not exist yet */ }
 });
+
+// =====================================================
+// HOOK: Notifications for new comments
+// =====================================================
+onRecordAfterCreateRequest((e) => {
+    try {
+        const comment = e.record;
+        const authorId = comment.get("author");
+        const processId = comment.get("process");
+        const parentId = comment.get("parent_id");
+        
+        let processName = "Proces";
+        let proc = null;
+        try {
+            proc = e.app.findRecordById("WORKFLOW_processes", processId);
+            processName = proc.get("name") || processName;
+        } catch(err) {}
+        
+        const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
+
+        if (!parentId) {
+            // Główny komentarz
+            let wsId = null;
+            if (proc) wsId = proc.get("workspace");
+            
+            let userIdsToNotify = [];
+            
+            if (wsId) {
+                try {
+                    const members = e.app.findRecordsByFilter(
+                        "WORKFLOW_workspace_members",
+                        "workspace = {:wsId} && status = 'active'",
+                        "", 5000, 0,
+                        { wsId: wsId }
+                    );
+                    userIdsToNotify = members.map(m => m.get("user")).filter(id => id && id !== authorId);
+                } catch(err) {}
+            } else if (proc) {
+                const procOwner = proc.get("owner");
+                if (procOwner && procOwner !== authorId) {
+                    userIdsToNotify.push(procOwner);
+                }
+            }
+            
+            for (let i = 0; i < userIdsToNotify.length; i++) {
+                try {
+                    const notifRecord = new Record(notifCollection);
+                    notifRecord.set("user", userIdsToNotify[i]);
+                    notifRecord.set("title", "Nowy komentarz / New Comment");
+                    notifRecord.set("message", `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"`);
+                    notifRecord.set("type", "info");
+                    notifRecord.set("isRead", false);
+                    notifRecord.set("link", `/app/${processId}`);
+                    e.app.save(notifRecord);
+                } catch(err) {}
+            }
+            
+        } else {
+            // Odpowiedź
+            try {
+                const parentComment = e.app.findRecordById("WORKFLOW_comments", parentId);
+                const parentAuthor = parentComment.get("author");
+                
+                if (parentAuthor && parentAuthor !== authorId) {
+                    const notifRecord = new Record(notifCollection);
+                    notifRecord.set("user", parentAuthor);
+                    notifRecord.set("title", "Nowa odpowiedź / New Reply");
+                    notifRecord.set("message", `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"`);
+                    notifRecord.set("type", "info");
+                    notifRecord.set("isRead", false);
+                    notifRecord.set("link", `/app/${processId}`);
+                    e.app.save(notifRecord);
+                }
+            } catch(err) {}
+        }
+    } catch (err) {
+        console.error("Error sending comment notifications: " + err);
+    }
+}, "WORKFLOW_comments");

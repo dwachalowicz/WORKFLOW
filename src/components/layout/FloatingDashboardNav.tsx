@@ -104,6 +104,17 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
             </button>
           </SimpleTooltip>
 
+          <SimpleTooltip content={t('dashboard.groups')} side="right">
+            <button 
+              id="nav-groups"
+              onClick={() => setActiveTab('groups')}
+              className={navBtnClass(activeTab === 'groups')}
+              aria-label={t('dashboard.groups')}
+            >
+              <Contact size={18} />
+            </button>
+          </SimpleTooltip>
+
           <NavDivider />
 
           {/* Team & People */}
@@ -123,17 +134,6 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
                 </div>
               )}
             </div>
-          </SimpleTooltip>
-
-          <SimpleTooltip content={t('dashboard.groups')} side="right">
-            <button 
-              id="nav-groups"
-              onClick={() => setActiveTab('groups')}
-              className={navBtnClass(activeTab === 'groups')}
-              aria-label={t('dashboard.groups')}
-            >
-              <Contact size={18} />
-            </button>
           </SimpleTooltip>
 
           <SimpleTooltip content={t('dashboard.invitations')} side="right">
@@ -263,6 +263,9 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
             {!limits.canUseProcessMap && <Lock size={14} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
           </div>
         </button>
+        <button onClick={() => setActiveTab('groups')} aria-label={t('dashboard.groups')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'groups' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
+          <Contact size={22} />
+        </button>
         <button onClick={() => setActiveTab('members')} aria-label={t('dashboard.members')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors relative ${activeTab === 'members' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <Users size={22} />
           {pendingMembersCount > 0 && (
@@ -286,9 +289,6 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
               {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
             </div>
           )}
-        </button>
-        <button onClick={() => setActiveTab('groups')} aria-label={t('dashboard.groups')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'groups' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
-          <Contact size={22} />
         </button>
         <button onClick={() => setActiveTab('settings')} aria-label={t('dashboard.settings')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'settings' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           <Settings size={22} />

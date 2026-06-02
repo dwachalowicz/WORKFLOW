@@ -243,6 +243,7 @@ export const pl = {
     title: 'Workspaces',
     subtitle: 'Zarządzaj swoimi przestrzeniami',
     sharedWorkspace: 'Udostępnione dla Ciebie',
+    lockedByLimit: 'Obszar zablokowany (limit)',
     createWorkspace: 'Utwórz Workspace',
     newWorkspace: 'Nowy Workspace',
     workspaceName: 'Nazwa workspace...',

@@ -409,8 +409,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     // Check tier limit
     const limits = getTierLimits(user.tier);
-    const ownedWorkspaces = get().workspaces.filter(w => w.role === 'admin');
-    if (ownedWorkspaces.length >= limits.maxWorkspaces) {
+    const allWorkspaces = get().workspaces;
+    if (allWorkspaces.length >= limits.maxWorkspaces) {
       throw new Error(i18n.t('authStore.workspaceLimit', { tier: user.tier || 'FREE', limit: limits.maxWorkspaces }));
     }
     

@@ -309,8 +309,11 @@ export const GroupPickerDropdown = ({ onSelect, excludeIds = [], trigger }: Grou
                   {GROUP_COLORS.map(color => (
                     <button
                       key={color}
+                      type="button"
                       onClick={() => setNewGroupColor(color)}
-                      className={`w-5 h-5 rounded-full transition-all ${newGroupColor === color ? 'ring-2 ring-offset-1 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
+                      onDoubleClick={handleCreateGroup}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setNewGroupColor(color); handleCreateGroup(); } }}
+                      className={`w-7 h-7 rounded-full transition-all ${newGroupColor === color ? 'ring-2 ring-offset-1 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
                       style={{ backgroundColor: color === '#bc9b59' ? 'hsl(var(--brand-color))' : color }}
                     />
                   ))}

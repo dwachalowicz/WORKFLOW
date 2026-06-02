@@ -231,8 +231,9 @@ export const en = {
   },
   workspaces: {
     title: 'Workspaces',
-    subtitle: 'Manage your workspaces',
+    subtitle: 'Manage your spaces',
     sharedWorkspace: 'Shared with you',
+    lockedByLimit: 'Workspace locked (limit)',
     createWorkspace: 'Create Workspace',
     newWorkspace: 'New Workspace',
     workspaceName: 'Workspace name...',

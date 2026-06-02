@@ -322,7 +322,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                       <div className="space-y-2 relative">
                         {/* Linia łącząca odpowiedzi */}
                         {getChildren(parent.id).length > 0 && (
-                          <div className="absolute left-3 top-0 bottom-4 w-px bg-border/30 -z-10"></div>
+                          <div className="absolute left-4 top-0 bottom-4 w-px bg-border/50 z-0"></div>
                         )}
 
                         {getChildren(parent.id).map(child => (

@@ -2,6 +2,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useAuthStore } from '../authStore';
 
+
+vi.mock('../toastStore', () => ({
+  useToastStore: {
+    getState: vi.fn().mockReturnValue({ addToast: vi.fn() }),
+  },
+}));
+
 // Mock PocketBase
 vi.mock('@/lib/pocketbase', () => ({
   pb: {
@@ -32,7 +39,10 @@ vi.mock('@/lib/tierLimits', () => ({
 }));
 
 vi.mock('@/i18n/config', () => ({
-  default: { language: 'en' },
+  default: { 
+    language: 'en',
+    t: (key: string) => key
+  },
 }));
 
 const mockUser = {
@@ -148,6 +158,7 @@ describe('authStore — checkAuth', () => {
     vi.mocked(pb.collection).mockReturnValue({
       authRefresh: mockAuthRefresh,
       getFullList: vi.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({}),
     } as any);
 
     await useAuthStore.getState().checkAuth();
@@ -205,6 +216,7 @@ describe('authStore — OTP', () => {
       authWithOTP: mockAuthWithOTP,
       authRefresh: vi.fn().mockResolvedValue({ record: mockUser }),
       getFullList: vi.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({}),
     } as any);
 
     await useAuthStore.getState().confirmOTP('otp-123', '000000');

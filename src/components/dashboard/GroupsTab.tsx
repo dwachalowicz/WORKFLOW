@@ -207,34 +207,35 @@ export const GroupsTab = () => {
                   className="text-[10px] text-muted-foreground hover:text-destructive text-center mt-0.5 transition-colors">{t('common.delete')}</button>
               )}
             </div>
-            {/* Fields */}
-            <div className="flex-1 space-y-4">
+            <form className="flex-1 space-y-4" onSubmit={e => { e.preventDefault(); handleCreate(); }}>
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground font-medium">{t('groups.groupName')}</label>
                 <Input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder={t('groups.namePlaceholder')}
-                  autoFocus onKeyDown={e => e.key === 'Enter' && handleCreate()} />
+                  autoFocus />
               </div>
               {!newAvatarPreview && (
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground font-medium">{t('groups.color')}</label>
                 <div className="flex gap-2 flex-wrap">
                   {GROUP_COLORS.map(color => (
-                    <button key={color} onClick={() => setNewColor(color)}
-                      className={`w-7 h-7 rounded-full transition-all ${newColor === color ? 'ring-2 ring-offset-2 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
+                    <button key={color} type="button" onClick={() => setNewColor(color)}
+                      onDoubleClick={handleCreate}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); setNewColor(color); handleCreate(); } }}
+                      className={`w-9 h-9 rounded-full transition-all ${newColor === color ? 'ring-2 ring-offset-2 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
                       style={{ backgroundColor: color }} />
                   ))}
                 </div>
               </div>
               )}
               <div className="flex gap-2 pt-1">
-                <Button onClick={handleCreate} disabled={!newName.trim() || isCreating} size="sm">
+                <Button type="submit" disabled={!newName.trim() || isCreating} size="sm">
                   {isCreating ? t('common.creating') : t('groups.createGroup')}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={resetCreate}>
+                <Button type="button" variant="ghost" size="sm" onClick={resetCreate}>
                   {t('common.cancel')}
                 </Button>
               </div>
-            </div>
+            </form>
           </div>
         </Card>
       )}
@@ -314,47 +315,51 @@ const GroupCard = ({ group, isEditing, isDeleting,
 
   if (isEditing) {
     return (
-      <Card className="border-brand-gold/50 p-4 space-y-3 animate-in fade-in duration-150">
-        <input ref={editFileRef} type="file" accept="image/*" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) onEditAvatarFileSelected(f); e.target.value = ''; }} />
-        <div className="flex items-center gap-3">
-          <div className="relative group cursor-pointer shrink-0" onClick={() => editFileRef.current?.click()}>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-dashed border-border group-hover:border-brand-gold transition-colors">
-              {editAvatarPreview ? (
-                <img loading="lazy" src={editAvatarPreview} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-foreground" style={{ backgroundColor: editColor || '#bc9b59' }}>
-                  {editName.charAt(0).toUpperCase() || '?'}
-                </div>
-              )}
+      <Card className="border-brand-gold/50 p-4 animate-in fade-in duration-150">
+        <form onSubmit={e => { e.preventDefault(); onSaveEdit(); }} className="space-y-3">
+          <input ref={editFileRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) onEditAvatarFileSelected(f); e.target.value = ''; }} />
+          <div className="flex items-center gap-3">
+            <div className="relative group cursor-pointer shrink-0" onClick={() => editFileRef.current?.click()}>
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-dashed border-border group-hover:border-brand-gold transition-colors">
+                {editAvatarPreview ? (
+                  <img loading="lazy" src={editAvatarPreview} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm font-bold text-foreground" style={{ backgroundColor: editColor || '#bc9b59' }}>
+                    {editName.charAt(0).toUpperCase() || '?'}
+                  </div>
+                )}
+              </div>
+              <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <Camera className="w-3 h-3 text-foreground" />
+              </div>
             </div>
-            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-              <Camera className="w-3 h-3 text-foreground" />
-            </div>
+            <Input type="text" value={editName} onChange={e => onEditNameChange(e.target.value)} className="flex-1 h-8 text-sm"
+              autoFocus />
           </div>
-          <Input type="text" value={editName} onChange={e => onEditNameChange(e.target.value)} className="flex-1 h-8 text-sm"
-            autoFocus onKeyDown={e => e.key === 'Enter' && onSaveEdit()} />
-        </div>
-        {!editAvatarPreview && (
-        <div className="flex gap-1.5 flex-wrap">
-          {GROUP_COLORS.map(color => (
-            <button key={color} onClick={() => onEditColorChange(color)}
-              className={`w-5 h-5 rounded-full transition-all ${editColor === color ? 'ring-2 ring-offset-1 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
-              style={{ backgroundColor: color }} />
-          ))}
-        </div>
-        )}
-        {editAvatarPreview && (
-          <button onClick={onRemoveEditAvatar} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">
-            {t('processes.removeAvatar')}
-          </button>
-        )}
-        <div className="flex gap-2">
-          <Button onClick={onSaveEdit} disabled={!editName.trim() || isSaving} size="sm" className="flex items-center gap-1.5">
-            <Check size={12} /> {isSaving ? t('common.saving') : t('common.save')}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onCancelEdit}>{t('common.cancel')}</Button>
-        </div>
+          {!editAvatarPreview && (
+          <div className="flex gap-1.5 flex-wrap">
+            {GROUP_COLORS.map(color => (
+              <button key={color} type="button" onClick={() => onEditColorChange(color)}
+                onDoubleClick={onSaveEdit}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEditColorChange(color); onSaveEdit(); } }}
+                className={`w-7 h-7 rounded-full transition-all ${editColor === color ? 'ring-2 ring-offset-1 ring-offset-card ring-brand-gold scale-110' : 'hover:scale-105'}`}
+                style={{ backgroundColor: color }} />
+            ))}
+          </div>
+          )}
+          {editAvatarPreview && (
+            <button type="button" onClick={onRemoveEditAvatar} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">
+              {t('processes.removeAvatar')}
+            </button>
+          )}
+          <div className="flex gap-2">
+            <Button type="submit" disabled={!editName.trim() || isSaving} size="sm" className="flex items-center gap-1.5">
+              <Check size={12} /> {isSaving ? t('common.saving') : t('common.save')}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={onCancelEdit}>{t('common.cancel')}</Button>
+          </div>
+        </form>
       </Card>
     );
   }

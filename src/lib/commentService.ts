@@ -94,64 +94,6 @@ export async function addComment(processId: string, nodeId: string, authorId: st
     expand: 'author',
   });
 
-  // --- Powiadomienia ---
-  try {
-    const process = await pb.collection('WORKFLOW_processes').getOne(processId, { requestKey: null });
-    const processName = process.name || i18n.t('defaults.unknownProcess', { defaultValue: 'Unknown process' });
-    
-    if (!parentId) {
-      // Główny komentarz: do wszystkich w workspace lub do właściciela
-      const title = i18n.t('comments.newCommentNotifTitle', { defaultValue: 'Nowy komentarz / New Comment' });
-      const message = i18n.t('comments.newCommentNotifMessage', { processName, defaultValue: `Dodano komentarz do procesu "${processName}" / A comment was added to process "${processName}"` });
-      
-      if (process.workspace) {
-        const members = await pb.collection('WORKFLOW_workspace_members').getFullList({
-          filter: `workspace = "${process.workspace}"`,
-          requestKey: null,
-        });
-        
-        for (const member of members) {
-          if (member.user && member.user !== authorId) {
-            await pb.collection('WORKFLOW_notifications').create({
-              user: member.user,
-              title,
-              message,
-              type: 'info',
-              isRead: false,
-              link: `/app/${processId}`
-            });
-          }
-        }
-      } else {
-        if (process.owner && process.owner !== authorId) {
-          await pb.collection('WORKFLOW_notifications').create({
-            user: process.owner,
-            title,
-            message,
-            type: 'info',
-            isRead: false,
-            link: `/app/${processId}`
-          });
-        }
-      }
-    } else {
-      // Odpowiedź: do autora głównego komentarza
-      const parentComment = await pb.collection('WORKFLOW_comments').getOne(parentId, { requestKey: null });
-      if (parentComment.author && parentComment.author !== authorId) {
-        await pb.collection('WORKFLOW_notifications').create({
-          user: parentComment.author,
-          title: i18n.t('comments.newReplyNotifTitle', { defaultValue: 'Nowa odpowiedź / New Reply' }),
-          message: i18n.t('comments.newReplyNotifMessage', { processName, defaultValue: `Odpowiedziano na Twój komentarz w procesie "${processName}" / Someone replied to your comment in process "${processName}"` }),
-          type: 'info',
-          isRead: false,
-          link: `/app/${processId}`
-        });
-      }
-    }
-  } catch (notifErr) {
-    console.error('Failed to create comment notifications:', notifErr);
-  }
-
   return expanded as Comment;
 }
 
