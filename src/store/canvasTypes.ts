@@ -10,7 +10,7 @@ import type {
 export interface ProcessVariable {
   id: string;
   name: string;
-  type: 'text' | 'number' | 'date' | 'boolean';
+  type: 'text' | 'number' | 'date' | 'boolean' | 'file';
   required: boolean;
 }
 

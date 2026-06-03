@@ -540,7 +540,7 @@ export const AiAssistantPanel = () => {
         if (currentConditionType === 'rule') {
           const currentRules = (Array.isArray(edData.rules) ? edData.rules : []) as Record<string, unknown>[];
           if (currentRules.length > 0) {
-            const parts = currentRules.map((r: Record<string, unknown>) => r.variable ? `${r.variable} ${r.operator || '=='} ${r.value || ''}` : t('props.incomplete', 'Niekompletna'));
+            const parts = currentRules.map((r: Record<string, unknown>) => r.variable ? (r.operator === 'notEmpty' ? `${r.variable} ≠ ∅` : `${r.variable} ${r.operator || '=='} ${r.value || ''}`) : t('props.incomplete', 'Niekompletna'));
             const joiner = edData.ruleCombinator === 'OR' ? t('props.orJoiner', ' LUB ') : t('props.andJoiner', ' ORAZ ');
             newLabel = parts.join(joiner);
           } else {

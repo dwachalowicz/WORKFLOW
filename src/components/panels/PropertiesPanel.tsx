@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useReactFlow } from '@xyflow/react';
 import { useState, useEffect } from 'react';
-import { Trash2, Settings, UserPlus, Plus, ChevronRight, ChevronLeft, ChevronDown, Type, Hash, Calendar, ToggleLeft, MousePointerClick, Mail, Webhook, Clock, Network, MoreHorizontal } from 'lucide-react';
+import { Trash2, Settings, UserPlus, Plus, ChevronRight, ChevronLeft, ChevronDown, Type, Hash, Calendar, ToggleLeft, Paperclip, MousePointerClick, Mail, Webhook, Clock, Network, MoreHorizontal } from 'lucide-react';
 import { CollapsibleSection } from './properties/CollapsibleSection';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { NodeComments } from '@/components/panels/NodeComments';
@@ -639,6 +639,7 @@ export const PropertiesPanel = () => {
                 { value: 'number', icon: Hash, label: t('props.varNumber') },
                 { value: 'date', icon: Calendar, label: t('props.varDate') },
                 { value: 'boolean', icon: ToggleLeft, label: t('props.varBoolean') },
+                { value: 'file', icon: Paperclip, label: t('props.varFile') },
               ];
               return (
               <div key={v.id || idx} className="flex items-center gap-1.5 bg-secondary px-2 py-1.5 rounded-lg border border-border group relative">

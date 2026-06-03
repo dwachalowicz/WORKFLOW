@@ -70,7 +70,7 @@ export const EdgePropertiesPanel = ({
         if (currentConditionType === 'rule') {
           const currentRules = newData.rules || [];
           if (currentRules.length > 0) {
-            const parts = currentRules.map((r: { variable?: string; operator?: string; value?: string }) => r.variable ? `${r.variable} ${r.operator} ${r.value}` : t('props.incomplete'));
+            const parts = currentRules.map((r: { variable?: string; operator?: string; value?: string }) => r.variable ? (r.operator === 'notEmpty' ? `${r.variable} ≠ ∅` : `${r.variable} ${r.operator} ${r.value}`) : t('props.incomplete'));
             const joiner = newData.ruleCombinator === 'OR' ? t('props.orJoiner') : t('props.andJoiner');
             newLabel = parts.join(joiner);
           } else {
@@ -320,6 +320,7 @@ export const EdgePropertiesPanel = ({
                                     <option value=">=">&gt;=</option>
                                     <option value="<=">&lt;=</option>
                                     <option value="zawiera">{t('props.containsLabel')}</option>
+                                    <option value="notEmpty">{t('props.notEmptyLabel')}</option>
                                   </select>
                                 </div>
                               </TooltipTrigger>
@@ -332,10 +333,12 @@ export const EdgePropertiesPanel = ({
                                   <p><strong className="text-brand-gold">&gt;=</strong> : {t('props.opGreaterEq')}</p>
                                   <p><strong className="text-brand-gold">&lt;=</strong> : {t('props.opLessEq')}</p>
                                   <p><strong className="text-brand-gold">{t('props.containsLabel')}</strong> : {t('props.opContains')}</p>
+                                  <p><strong className="text-brand-gold">{t('props.notEmptyLabel')}</strong> : {t('props.opNotEmpty')}</p>
                                 </div>
                               </TooltipContent>
                             </Tooltip>
                            </div>
+                           {rule.operator !== 'notEmpty' && (
                            <div className="flex-[4]">
                             <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block mb-1">{t('props.value')}</label>
                             <input 
@@ -346,6 +349,7 @@ export const EdgePropertiesPanel = ({
                               readOnly={isViewMode}
                             />
                            </div>
+                           )}
                          </div>
                       </div>
                     ))}
