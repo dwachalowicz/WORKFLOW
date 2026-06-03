@@ -14,7 +14,21 @@ export const CasesSection: React.FC = () => {
   const scrollLeftRef = useRef(0);
 
   const [casesData, setCasesData] = useState<ProcessCase[]>([]);
-  const [modalUrl, setModalUrl] = useState<string | null>(null);
+  const [rawModalUrl, setModalUrl] = useState<string | null>(null);
+
+  // Normalize the URL to use the current origin so iframes don't hit CSP issues
+  // when the page is on www.gryf.ai but the DB stores gryf.ai links (or vice versa)
+  const modalUrl = React.useMemo(() => {
+    if (!rawModalUrl) return null;
+    try {
+      const parsed = new URL(rawModalUrl);
+      // If it's a gryf.ai domain, replace origin with current page origin
+      if (parsed.hostname.endsWith('gryf.ai')) {
+        return `${window.location.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+    } catch { /* not a full URL, use as-is */ }
+    return rawModalUrl;
+  }, [rawModalUrl]);
 
   useEffect(() => {
     const fetchCases = async () => {
