@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, type ComponentType, useCallback } from 'react';
+import { useState, useEffect, lazy, Suspense, type ComponentType, useCallback, useMemo } from 'react';
 import { pb, type WorkflowTemplate } from '@/lib/pocketbase';
 import { useAuthStore } from '@/store/authStore';
 import { Sparkles, FileText, LayoutTemplate, type LucideProps } from 'lucide-react';
