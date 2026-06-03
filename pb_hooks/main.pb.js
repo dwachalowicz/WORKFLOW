@@ -12,6 +12,19 @@ globalThis.escapeHtml = function(str) {
         .replace(/'/g, '&#039;');
 };
 
+// =====================================================
+// HELPER: Check if request is from PocketBase Superuser
+// (main admin panel, NOT app-level admin role)
+// PB 0.23+ stores superusers in _superusers collection
+// =====================================================
+globalThis.isSuperuser = function(e) {
+    try {
+        if (e.hasSuperuserAuth && e.hasSuperuserAuth()) return true;
+        if (e.auth && e.auth.collection && e.auth.collection().name === "_superusers") return true;
+    } catch(err) {}
+    return false;
+};
+
 
 // =====================================================
 // ROUTE: POST /api/ai/chat — AI Chat Proxy
@@ -943,6 +956,7 @@ onRecordUpdateRequest(function(e) {
 // HOOK: Secure Workspace Members — Create
 // =====================================================
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const record = e.record;
     const authRecord = e.auth;
 
@@ -1019,6 +1033,7 @@ onRecordCreateRequest(function(e) {
 // HOOK: Secure Workspace Members — Update
 // =====================================================
 onRecordUpdateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const record = e.record;
     const authRecord = e.auth;
 
@@ -1114,6 +1129,7 @@ onRecordUpdateRequest(function(e) {
 // HOOK: Secure Workspace Members — Delete
 // =====================================================
 onRecordDeleteRequest((e) => {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const record = e.record;
     const authRecord = e.auth;
 
@@ -1352,6 +1368,7 @@ onRecordDeleteRequest((e) => {
 // HOOK: Secure Notifications — Update
 // =====================================================
 onRecordUpdateRequest((e) => {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const record = e.record;
     const authRecord = e.auth;
 
@@ -1376,6 +1393,7 @@ onRecordUpdateRequest((e) => {
 
 // --- CREATE: Enforce tier limits ---
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var authRecord = e.auth;
     if (!authRecord) return e.next();
 
@@ -1482,6 +1500,7 @@ onRecordCreateRequest(function(e) {
 
 // --- UPDATE: Enforce tier limits ---
 onRecordUpdateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var authRecord = e.auth;
     if (!authRecord) return e.next();
 
@@ -3080,6 +3099,7 @@ onRecordDeleteRequest((e) => {
 // HOOK: Secure WORKFLOW_groups (Update & Delete)
 // =====================================================
 onRecordUpdateRequest((e) => {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const wsId = e.record.get("workspace");
     if (!wsId || !e.auth) throw new Error("Unauthorized");
     try {
@@ -3097,6 +3117,7 @@ onRecordUpdateRequest((e) => {
 }, "WORKFLOW_groups");
 
 onRecordDeleteRequest((e) => {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const wsId = e.record.get("workspace");
     if (!wsId || !e.auth) throw new BadRequestError("Unauthorized");
     try {
@@ -3117,6 +3138,7 @@ onRecordDeleteRequest((e) => {
 // HOOK: Secure WORKFLOW_users (Prevent self-upgrade)
 // =====================================================
 onRecordUpdateRequest((e) => {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     const original = e.app.findRecordById(e.record.collection().name, e.record.id);
     const record = e.record;
     
@@ -3169,6 +3191,7 @@ onRecordsListRequest((e) => {
 // HOOK: Enforce Workspace Tier Limits (Added to seal the loophole)
 // =====================================================
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var authRecord = e.auth;
     if (!authRecord) return e.next();
     var ownerId = e.record.get('owner');
@@ -3202,6 +3225,7 @@ onRecordCreateRequest(function(e) {
 // HOOK: Enforce Folder Tier Limits
 // =====================================================
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var wsId = e.record.get("workspace");
     if (!wsId) return e.next();
     try {
@@ -3229,6 +3253,7 @@ onRecordCreateRequest(function(e) {
 // HOOK: Enforce Comments Tier Limits
 // =====================================================
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var processId = e.record.get("process");
     if (!processId) return e.next();
     try {
@@ -3258,6 +3283,7 @@ onRecordCreateRequest(function(e) {
 // HOOK: Enforce Versions Tier Limits
 // =====================================================
 onRecordCreateRequest(function(e) {
+    if (isSuperuser(e)) return e.next(); // PB Superuser bypass
     var processId = e.record.get("process");
     if (!processId) return e.next();
     try {
