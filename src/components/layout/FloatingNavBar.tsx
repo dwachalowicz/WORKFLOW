@@ -129,20 +129,20 @@ export const FloatingNavBar = () => {
             </button>
           </SimpleTooltip>
 
+          {/* Checklist — available in view mode too */}
+          <SimpleTooltip content={t('nav.checklist')} side="right">
+            <button 
+              id="tool-checklist"
+              onClick={() => handleToggle('checklist')}
+              className={navBtnClass(isChecklistPanelOpen)}
+              aria-label={t('nav.checklist')}
+            >
+              <CheckSquare size={18} />
+            </button>
+          </SimpleTooltip>
+
           {!isViewMode && (
             <>
-              {/* Primary workflow tools */}
-              <SimpleTooltip content={t('nav.checklist')} side="right">
-                <button 
-                  id="tool-checklist"
-                  onClick={() => handleToggle('checklist')}
-                  className={navBtnClass(isChecklistPanelOpen)}
-                  aria-label={t('nav.checklist')}
-                >
-                  <CheckSquare size={18} />
-                </button>
-              </SimpleTooltip>
-
               {/* Analytics & history */}
               <SimpleTooltip content={limits.canUseAdvancedStats ? t('nav.stats') : t('tierLimits.statsLocked')} side="right">
                 <button 
@@ -249,9 +249,6 @@ export const FloatingNavBar = () => {
                 </button>
               </SimpleTooltip>
 
-              <ThemeToggleButton />
-
-
               <SimpleTooltip content={t('canvas.backToDashboard')} side="right">
                 <button 
                   id="tool-dashboard"
@@ -263,6 +260,9 @@ export const FloatingNavBar = () => {
               </SimpleTooltip>
             </>
           )}
+
+          {/* Theme toggle — available in view mode too */}
+          <ThemeToggleButton />
         </div>
 
         {/* User Profile - Fixed at bottom, outside scrollable area */}
@@ -389,15 +389,13 @@ export const FloatingNavBar = () => {
               {/* Backdrop */}
               <div className="fixed inset-0 z-[90]" onClick={() => setIsMobileMoreOpen(false)} />
               <div className="absolute bottom-full right-0 mb-2 bg-card border border-border rounded-2xl shadow-2xl py-2 min-w-[200px] z-modal animate-in fade-in slide-in-from-bottom-2 duration-150">
-                {!isViewMode && (
-                  <button
-                    onClick={() => { handleToggle('checklist'); setIsMobileMoreOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${isChecklistPanelOpen ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
-                  >
-                    <CheckSquare size={16} />
-                    {t('nav.checklist')}
-                  </button>
-                )}
+                <button
+                  onClick={() => { handleToggle('checklist'); setIsMobileMoreOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${isChecklistPanelOpen ? 'text-brand-gold' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                >
+                  <CheckSquare size={16} />
+                  {t('nav.checklist')}
+                </button>
 
                   <button
                     onClick={() => { if (limits.canUseAdvancedStats) { handleToggle('stats'); setIsMobileMoreOpen(false); } }}

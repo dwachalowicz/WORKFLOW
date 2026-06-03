@@ -3,7 +3,6 @@ import { GlobalChecklist } from '@/components/panels/GlobalChecklist';
 import { X, CheckSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUiStore } from "@/store/uiStore";
-import { useCanvasStore } from "@/store/canvasStore";
 import { SidePanel } from '@/components/ui/side-panel';
 
 const MotionSidePanel = motion.create(SidePanel);
@@ -12,9 +11,8 @@ export const ChecklistPanel = () => {
   const { t } = useTranslation();
   const isOpen = useUiStore(s => s.isChecklistPanelOpen);
   const setOpen = useUiStore(s => s.setChecklistPanelOpen);
-  const isViewMode = useCanvasStore(s => s.isViewMode);
 
-  if (!isOpen || isViewMode) return null;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
