@@ -52,7 +52,10 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
       setProcesses(filtered as WorkspaceProcess[]);
     } catch (err) {
       console.error('Error fetching workspace processes:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      const status = (err as { status?: number })?.status;
+      if (status !== 401 && status !== 403 && status !== 404) {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,6 +68,7 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
 
   // Load target process nodes when a process is selected
   const fetchTargetNodes = useCallback(async (processId: string) => {
+    if (!user) return;
     setIsLoadingNodes(true);
     try {
       const record = await pb.collection('WORKFLOW_processes').getOne(processId, {
@@ -88,12 +92,15 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
       setTargetNodes(relevant);
     } catch (err) {
       console.error('Error fetching target process nodes:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      const status = (err as { status?: number })?.status;
+      if (status !== 401 && status !== 403 && status !== 404) {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+      }
       setTargetNodes([]);
     } finally {
       setIsLoadingNodes(false);
     }
-  }, [t]);
+  }, [t, user]);
 
   // When targetWorkflowId changes, load its nodes
   useEffect(() => {
@@ -165,12 +172,17 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
               disabled={isViewMode}
             >
               <option value="">{t('props.subworkflowPlaceholder')}</option>
-              {processes.length === 0 ? (
+              {processes.length === 0 && !selectedProcessId ? (
                 <option value="" disabled>{t('props.noProcesses')}</option>
               ) : (
                 processes.map(p => (
                   <option key={p.id} value={p.id}>{p.name || 'Unnamed'}</option>
                 ))
+              )}
+              {selectedProcessId && !processes.find(p => p.id === selectedProcessId) && (
+                <option value={selectedProcessId as string}>
+                  {(activeNode?.data?.targetWorkflowName as string) || (selectedProcessId as string)}
+                </option>
               )}
             </select>
             <div className="absolute right-3 top-[34px] pointer-events-none text-muted-foreground">
@@ -201,6 +213,11 @@ export const SubworkflowPicker = ({ activeNode, updateNode, isViewMode }: Subwor
                 {targetNodes.map(n => (
                   <option key={n.id} value={n.id}>{n.label} ({n.type})</option>
                 ))}
+                {selectedNodeId && !targetNodes.find(n => n.id === selectedNodeId) && (
+                  <option value={selectedNodeId as string}>
+                    {(activeNode?.data?.targetNodeLabel as string) || (selectedNodeId as string)}
+                  </option>
+                )}
               </select>
               <div className="absolute right-3 top-[34px] pointer-events-none text-muted-foreground">
                 <ChevronRight size={14} className="rotate-90" />
