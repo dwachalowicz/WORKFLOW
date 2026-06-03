@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { pb, getAvatarUrl, type WorkflowUser } from '@/lib/pocketbase';
 import { usePBSubscription } from '@/hooks/usePBSubscription';
