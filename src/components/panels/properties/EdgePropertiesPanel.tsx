@@ -150,7 +150,7 @@ export const EdgePropertiesPanel = ({
               <Database size={14} className="text-cyan-500" />
               <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{t('props.dbOperation')}</h3>
             </div>
-            <div className="flex flex-col gap-1 bg-muted/80 dark:bg-secondary p-1 rounded-lg border border-border">
+            <div className="flex bg-muted/80 dark:bg-secondary p-1 rounded-lg border border-border">
               {[
                 { id: 'read', icon: Eye, label: t('props.dbRead'), color: 'text-emerald-400' },
                 { id: 'write', icon: Save, label: t('props.dbWrite'), color: 'text-amber-400' },
@@ -163,7 +163,7 @@ export const EdgePropertiesPanel = ({
                     key={op.id}
                     variant="ghost"
                     size="sm"
-                    className={`flex-1 h-8 text-xs gap-2 justify-start px-3 font-medium ${isActive ? 'bg-card shadow-sm hover:bg-card border border-border/50 ' + op.color : 'text-foreground/60 hover:text-foreground/80'}`}
+                    className={`flex-1 h-8 text-[11px] px-1 gap-1 font-medium whitespace-nowrap ${isActive ? 'bg-card shadow-sm hover:bg-card border border-border/50 ' + op.color : 'text-foreground/60 hover:text-foreground/80'}`}
                     onClick={() => {
                       if (isViewMode) return;
                       setEdges(eds => eds.map(ed => 
