@@ -141,23 +141,24 @@ export const FloatingNavBar = () => {
             </button>
           </SimpleTooltip>
 
+          {/* Stats — available in view mode too */}
+          <SimpleTooltip content={limits.canUseAdvancedStats ? t('nav.stats') : t('tierLimits.statsLocked')} side="right">
+            <button 
+              id="tool-stats"
+              onClick={() => limits.canUseAdvancedStats && handleToggle('stats')}
+              className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors border relative ${
+                !limits.canUseAdvancedStats
+                  ? 'bg-surface-elevated text-muted-foreground/40 border-transparent cursor-not-allowed'
+                  : isStatsPanelOpen ? 'bg-surface-elevated text-brand-gold border-transparent' : 'bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-secondary border-transparent hover:border-border-hover'
+              }`}
+            >
+              <BarChart3 size={18} />
+              {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
+            </button>
+          </SimpleTooltip>
+
           {!isViewMode && (
             <>
-              {/* Analytics & history */}
-              <SimpleTooltip content={limits.canUseAdvancedStats ? t('nav.stats') : t('tierLimits.statsLocked')} side="right">
-                <button 
-                  id="tool-stats"
-                  onClick={() => limits.canUseAdvancedStats && handleToggle('stats')}
-                  className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors border relative ${
-                    !limits.canUseAdvancedStats
-                      ? 'bg-surface-elevated text-muted-foreground/40 border-transparent cursor-not-allowed'
-                      : isStatsPanelOpen ? 'bg-surface-elevated text-brand-gold border-transparent' : 'bg-surface-elevated text-muted-foreground hover:text-foreground hover:bg-secondary border-transparent hover:border-border-hover'
-                  }`}
-                >
-                  <BarChart3 size={18} />
-                  {!limits.canUseAdvancedStats && <Lock size={12} className="absolute -bottom-0.5 right-0 text-muted-foreground" />}
-                </button>
-              </SimpleTooltip>
 
               <SimpleTooltip content={t('nav.versionHistory')} side="right">
                 <button 
