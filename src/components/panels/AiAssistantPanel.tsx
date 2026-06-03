@@ -117,6 +117,98 @@ const sanitizeAiNodeData = (data: Record<string, unknown>): Record<string, unkno
 };
 // ── End AI Security ────────────────────────────────────────────────────
 
+/**
+ * Fix common AI-generated JSON errors (trailing commas, unquoted keys,
+ * single-quoted keys) WITHOUT corrupting string values.
+ *
+ * Uses a character-by-character walk that tracks whether we are inside
+ * a double-quoted string.  Fixes are only applied to structural tokens,
+ * so values like `"etap 1, cel: testowy"` are never touched.
+ */
+const fixBrokenJson = (input: string): string => {
+  const out: string[] = [];
+  let i = 0;
+  const len = input.length;
+
+  while (i < len) {
+    const ch = input[i];
+
+    // ── Double-quoted string → copy verbatim (including escapes) ──
+    if (ch === '"') {
+      out.push(ch);
+      i++;
+      while (i < len) {
+        const c = input[i];
+        out.push(c);
+        if (c === '\\' && i + 1 < len) { i++; out.push(input[i]); }
+        else if (c === '"') break;
+        i++;
+      }
+      i++;
+      continue;
+    }
+
+    // ── Trailing comma before } or ] ──
+    if (ch === ',') {
+      let j = i + 1;
+      while (j < len && (input[j] === ' ' || input[j] === '\t' || input[j] === '\n' || input[j] === '\r')) j++;
+      if (j < len && (input[j] === '}' || input[j] === ']')) {
+        i++; // skip trailing comma
+        continue;
+      }
+    }
+
+    // ── Unquoted key (identifier followed by :) ──
+    if (/[a-zA-Z_]/.test(ch)) {
+      let ident = '';
+      let j = i;
+      while (j < len && /[a-zA-Z0-9_]/.test(input[j])) { ident += input[j]; j++; }
+      // skip spaces/tabs between identifier and potential colon
+      let k = j;
+      while (k < len && (input[k] === ' ' || input[k] === '\t')) k++;
+      if (k < len && input[k] === ':') {
+        // Only quote if preceded by a structural char ({  ,) to avoid
+        // false-matching bare values like true / false / null
+        let p = i - 1;
+        while (p >= 0 && (input[p] === ' ' || input[p] === '\t' || input[p] === '\n' || input[p] === '\r')) p--;
+        if (p < 0 || input[p] === '{' || input[p] === ',' || input[p] === '[') {
+          out.push('"', ident, '"');
+          i = j;
+          continue;
+        }
+      }
+      out.push(ch);
+      i++;
+      continue;
+    }
+
+    // ── Single-quoted key  'key':  →  "key":  ──
+    if (ch === "'") {
+      let key = '';
+      let j = i + 1;
+      while (j < len && input[j] !== "'") { key += input[j]; j++; }
+      if (j < len) {
+        j++; // past closing '
+        let k = j;
+        while (k < len && (input[k] === ' ' || input[k] === '\t')) k++;
+        if (k < len && input[k] === ':') {
+          out.push('"', key, '"');
+          i = j;
+          continue;
+        }
+      }
+      out.push(ch);
+      i++;
+      continue;
+    }
+
+    out.push(ch);
+    i++;
+  }
+
+  return out.join('');
+};
+
 const ENABLE_TOOL_SUGGESTIONS = true; // Set to true to restore tool suggestions in the carousel
 
 export const AiAssistantPanel = () => {
@@ -216,22 +308,27 @@ export const AiAssistantPanel = () => {
   }, [allTools]);
 
   const extractJsonFromBlock = (block: string): Record<string, unknown> | null => {
+    const startIdx = block.indexOf('{');
+    const endIdx = block.lastIndexOf('}');
+    if (startIdx === -1 || endIdx <= startIdx) return null;
+
+    const jsonStr = block.slice(startIdx, endIdx + 1);
+
+    // Fast path — AI usually produces valid JSON
     try {
-      const startIdx = block.indexOf('{');
-      const endIdx = block.lastIndexOf('}');
-      if (startIdx !== -1 && endIdx > startIdx) {
-        let jsonStr = block.slice(startIdx, endIdx + 1);
-        // Fix common JSON errors: trailing commas
-        jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
-        // Fix unquoted keys (e.g. { nodes: [] } -> { "nodes": [] })
-        jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
-        // Fix single-quoted keys (e.g. { 'nodes': [] } -> { "nodes": [] })
-        jsonStr = jsonStr.replace(/([{,]\s*)'([^']+)'\s*:/g, '$1"$2":');
-        return JSON.parse(jsonStr);
-      }
-    } catch (e) {
-      console.error('[AI] parse error object:', e);
+      return JSON.parse(jsonStr);
+    } catch (initialErr) {
+      console.warn('[AI] JSON.parse failed, running fixBrokenJson…', initialErr);
     }
+
+    // Slow path — fix structural issues without touching string values
+    try {
+      return JSON.parse(fixBrokenJson(jsonStr));
+    } catch (fallbackErr) {
+      console.error('[AI] parse error after fixBrokenJson:', fallbackErr);
+      console.debug('[AI] raw JSON that failed:', jsonStr);
+    }
+
     return null;
   };
 
