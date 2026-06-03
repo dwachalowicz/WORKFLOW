@@ -614,12 +614,15 @@ export const AiAssistantPanel = () => {
         const key = `${e.source}->${e.target}`;
         if (!existingEdgeKeys.has(key)) {
           const targetNode = allNodesContext.find(n => n.id === e.target);
-          const isDbTarget = targetNode?.type === 'database';
+          const sourceNode = allNodesContext.find(n => n.id === e.source);
+          const isDbEdge = targetNode?.type === 'database' || sourceNode?.type === 'database';
+          const edgeData = typeof e.data === 'object' && e.data !== null ? e.data : {};
           finalNewEdges.push({ 
             ...e, 
             type: e.type || 'custom', 
-            sourceHandle: isDbTarget ? 'db' : 'right', 
-            targetHandle: isDbTarget ? 'db' : 'left' 
+            sourceHandle: isDbEdge ? 'db' : 'right', 
+            targetHandle: isDbEdge ? 'db' : 'left',
+            ...(isDbEdge ? { data: { ...edgeData, dbOperation: (edgeData as Record<string, unknown>).dbOperation || 'read' } } : {})
           }); 
           existingEdgeKeys.add(key); 
         }

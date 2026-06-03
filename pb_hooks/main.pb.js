@@ -227,7 +227,8 @@ routerAdd("POST", "/api/ai/chat", (e) => {
             let tgt = nodes.find(n => n.id === eObj.target);
             let srcLabel = (src && src.data && src.data.label) ? src.data.label : eObj.source;
             let tgtLabel = (tgt && tgt.data && tgt.data.label) ? tgt.data.label : eObj.target;
-            flowArr.push("  " + srcLabel + " -> " + tgtLabel);
+            let dbOp = (eObj.data && eObj.data.dbOperation) ? " [DB:" + eObj.data.dbOperation + "]" : "";
+            flowArr.push("  " + srcLabel + " -> " + tgtLabel + dbOp);
         }
         let flow = flowArr.join('\n');
 
@@ -267,8 +268,8 @@ routerAdd("POST", "/api/ai/chat", (e) => {
             .replace(/{{FLOW}}/g, () => flow || "  (no connections)");
 
         let constraints = lang === 'pl' 
-            ? "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAĆ):\n- NIE MOŁ»ESZ przypinać żadnych dodatkowych sub-procesów (nie używaj pola targetWorkflowId ani targetWorkflowName).\n- Limit węzłów na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedź NIE MOŁ»E przekroczyć tej liczby węzłów.\n- Pamiętaj, by w jsonie używać tablicy stringów dla akcji: np. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"]."
-            : "\nHARD CONSTRAINTS (YOU MUST FOLLOW THEM):\n- YOU CANNOT attach any additional sub-workflows (do not use targetWorkflowId or targetWorkflowName).\n- Node limit for your plan: " + maxNodesPerProcess + ". Your response MUST NOT exceed this number of nodes.\n- Remember to use an array of strings for actions in json: e.g. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].";
+            ? "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAĆ):\n- NIE MOŻESZ przypinać żadnych dodatkowych sub-procesów (nie używaj pola targetWorkflowId ani targetWorkflowName).\n- Limit węzłów na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedź NIE MOŻE przekroczyć tej liczby węzłów.\n- Pamiętaj, by w jsonie używać tablicy stringów dla akcji: np. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].\n- KRAWĘDZIE BAZODANOWE: Gdy tworzysz krawędź DO lub OD węzła DATABASE, MUSISZ ustawić: sourceHandle:\"db\", targetHandle:\"db\" oraz data:{dbOperation:\"read\"} (dopuszczalne wartości: \"read\", \"write\", \"readwrite\"). Zwykłe krawędzie między etapami ZAWSZE muszą mieć sourceHandle:\"right\", targetHandle:\"left\" i NIE mogą mieć pola dbOperation."
+            : "\nHARD CONSTRAINTS (YOU MUST FOLLOW THEM):\n- YOU CANNOT attach any additional sub-workflows (do not use targetWorkflowId or targetWorkflowName).\n- Node limit for your plan: " + maxNodesPerProcess + ". Your response MUST NOT exceed this number of nodes.\n- Remember to use an array of strings for actions in json: e.g. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].\n- DATABASE EDGES: When creating an edge TO or FROM a DATABASE node, you MUST set: sourceHandle:\"db\", targetHandle:\"db\" and data:{dbOperation:\"read\"} (allowed values: \"read\", \"write\", \"readwrite\"). Regular edges between stages MUST use sourceHandle:\"right\", targetHandle:\"left\" and MUST NOT have a dbOperation field.";
         
         systemContent += constraints;
 
