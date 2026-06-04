@@ -515,11 +515,19 @@ routerAdd("POST", "/api/shared/verify", (e) => {
         }
     }
 
+    // getString + JSON.parse ensures native JS arrays are returned, not Go proxy objects
+    var nodesStr = process.getString("nodes");
+    var edgesStr = process.getString("edges");
+    var nodesParsed = [];
+    var edgesParsed = [];
+    try { nodesParsed = nodesStr ? JSON.parse(nodesStr) : []; } catch(pe) {}
+    try { edgesParsed = edgesStr ? JSON.parse(edgesStr) : []; } catch(pe) {}
+
     return e.json(200, {
-        id: process.get("id"),
+        id: process.id,
         name: process.get("name"),
-        nodes: process.get("nodes"),
-        edges: process.get("edges"),
+        nodes: nodesParsed,
+        edges: edgesParsed,
         isPublic: true,
     });
 });
@@ -549,7 +557,7 @@ onRecordCreateRequest((e) => {
     try {
         const pending = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
-            "invited_email ~ {:email} && status = 'pending_registration'",
+            "invited_email = {:email} && status = 'pending_registration'",
             "-created", 100, 0,
             { email: email }
         );
@@ -580,7 +588,7 @@ onRecordAuthRequest((e) => {
     try {
         const pending = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
-            "invited_email ~ {:email} && status = 'pending_registration'",
+            "invited_email = {:email} && status = 'pending_registration'",
             "", 100, 0,
             { email: email }
         );
@@ -1448,8 +1456,8 @@ onRecordCreateRequest(function(e) {
         return [];
     }
 
-    var nodesArray = parsePbJson(record.get("nodes"));
-    var edgesArray = parsePbJson(record.get("edges"));
+    var nodesArray = parsePbJson(record.getString("nodes"));
+    var edgesArray = parsePbJson(record.getString("edges"));
 
     var nodesCount = 0, notesCount = 0, totalVariables = 0, maxChecklist = 0, hasSubworkflow = false;
 
@@ -1550,8 +1558,8 @@ onRecordUpdateRequest(function(e) {
         return [];
     }
 
-    var nodesArray = parsePbJson(record.get("nodes"));
-    var edgesArray = parsePbJson(record.get("edges"));
+    var nodesArray = parsePbJson(record.getString("nodes"));
+    var edgesArray = parsePbJson(record.getString("edges"));
 
     var nodesCount = 0, notesCount = 0, totalVariables = 0, maxChecklist = 0, hasSubworkflow = false;
 
@@ -2974,7 +2982,7 @@ onRecordDeleteRequest((e) => {
         // Now delete memberships
         db.newQuery("DELETE FROM WORKFLOW_workspace_members WHERE workspace = {:wsId}").bind({ wsId: wsId }).execute();
 
-        let userIdsToNotify = members.map(m => m.get("user")).filter(id => id);
+        let userIdsToNotify = Array.from(members).map(m => m.get("user")).filter(id => id);
         
         // Ensure the owner of the workspace is also notified
         const ownerId = ws.get("owner");
@@ -3030,7 +3038,7 @@ onRecordDeleteRequest((e) => {
             { wsId: wsId }
         );
 
-        let userIdsToNotify = members.map(m => m.get("user")).filter(id => id);
+        let userIdsToNotify = Array.from(members).map(m => m.get("user")).filter(id => id);
 
         // Ensure the owner of the workspace is also notified
         let wsOwnerId = null;
@@ -3309,12 +3317,10 @@ onRecordCreateRequest((e) => {
             
             // Pobierz nazwę węzła z JSON-a nodes (wzorzec z Propagate Node Labels hook)
             if (nodeId) {
-                let nodesRaw = proc.get("nodes");
+                let nodesStr = proc.getString("nodes");
                 let nodes = [];
                 try {
-                    // Wymuszamy konwersję na czysty JS string niezależnie od typu Go
-                    let nodesStr = "" + nodesRaw;
-                    nodes = JSON.parse(nodesStr);
+                    nodes = nodesStr ? JSON.parse(nodesStr) : [];
                     // Podwójnie zakodowany JSON
                     while (typeof nodes === "string") {
                         nodes = JSON.parse(nodes);
@@ -3369,7 +3375,7 @@ onRecordCreateRequest((e) => {
                         "", 5000, 0,
                         { wsId: wsId }
                     );
-                    userIdsToNotify = members.map(m => m.get("user")).filter(id => id && id !== authorId);
+                    userIdsToNotify = Array.from(members).map(m => m.get("user")).filter(id => id && id !== authorId);
                 } catch(err) {}
                 
                 // Dodaj też właściciela workspace jeśli nie jest autorem komentarza
