@@ -89,7 +89,7 @@ export const OfferSection: React.FC = () => {
     >
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/landingpage/bg-offer.png)' }}
+        style={{ backgroundImage: 'url(/landingpage/bg-offer.webp)' }}
       />
 
       <div className="relative z-10 w-full px-[5%] md:px-12 flex flex-col items-center">

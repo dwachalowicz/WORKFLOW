@@ -223,6 +223,10 @@ export async function loadTierConfig(): Promise<void> {
           if (tierConfigCache) delete tierConfigCache[tierKey];
           if (import.meta.env.DEV) console.log(`[TierConfig] Realtime: deleted tier "${tierKey}"`);
         }
+      }).catch(err => {
+        const error = err as { isAbort?: boolean };
+        if (error.isAbort) return;
+        console.warn('[TierConfig] Realtime subscription failed:', err);
       });
     } catch (err) {
       console.warn('[TierConfig] Failed to load from DB, using fallback defaults:', err);

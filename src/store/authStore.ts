@@ -83,12 +83,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setProfileModalOpen: (isOpen) => set({ isProfileModalOpen: isOpen }),
 
   login: (token, user, workspaces = []) => {
+    const savedWsId = localStorage.getItem('gryf_active_workspace_id');
+    const savedWs = savedWsId ? workspaces.find(w => w.id === savedWsId) : null;
     set({ 
       user, 
       token, 
       isAuthenticated: true,
       workspaces: workspaces,
-      activeWorkspace: workspaces.length > 0 ? workspaces[0] : null
+      activeWorkspace: savedWs || (workspaces.length > 0 ? workspaces[0] : null)
     });
   },
 
@@ -345,11 +347,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const activeWs = get().activeWorkspace;
         const savedWsId = localStorage.getItem('gryf_active_workspace_id');
 
-        let nextActiveWs = activeWs 
-          ? (wsList.find(w => w.id === activeWs.id) || null)
-          : null;
+        // If the current active workspace still exists in the refreshed list,
+        // keep it selected — just update the object reference (role/name may have changed).
+        // This prevents race conditions where multiple fetchWorkspaces calls
+        // overwrite the user's workspace selection.
+        if (activeWs) {
+          const updatedActiveWs = wsList.find(w => w.id === activeWs.id);
+          if (updatedActiveWs) {
+            set({
+              workspaces: wsList,
+              pendingInvitations: pendingInvites,
+              sentJoinRequests: sentRequests,
+              activeWorkspace: updatedActiveWs
+            });
+
+            // Count pending members across all workspaces where user is owner/admin
+            try {
+              const ownedWsIds = wsList.filter(w => w.role === 'admin').map(w => w.id);
+              if (ownedWsIds.length > 0) {
+                const filterParts = ownedWsIds.map(id => `workspace = "${sanitizeForFilter(id)}"`);
+                const pendingMembers = await pb.collection('WORKFLOW_workspace_members').getFullList({
+                  filter: `(${filterParts.join(' || ')}) && status = "pending" && invited_by = ""`,
+                  fields: 'id',
+                  requestKey: null,
+                });
+                set({ pendingMembersCount: pendingMembers.length });
+              } else {
+                set({ pendingMembersCount: 0 });
+              }
+            } catch {
+              // Non-critical
+            }
+            await get().fetchUnreadNotificationsCount();
+            return; // Early return — workspace selection preserved
+          }
+        }
+
+        // Active workspace is null or was removed — resolve from localStorage or fallback
+        let nextActiveWs: Workspace | null = null;
         
-        if (!nextActiveWs && savedWsId) {
+        if (savedWsId) {
           nextActiveWs = wsList.find(w => w.id === savedWsId) || null;
         }
 

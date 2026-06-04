@@ -1494,7 +1494,6 @@ onRecordCreateRequest(function(e) {
     var maxV = Number(limits.maxVariablesPerProcess) || 999999;
     var maxC = Number(limits.maxChecklistItemsPerNode) || 999999;
 
-    console.log("CREATE HOOK DEBUG: nodesCount=" + nodesCount + ", nodesArray.length=" + nodesArray.length + ", maxN=" + maxN);
 
     if (hasSubworkflow && !limits.canUseSubworkflows) throw new BadRequestError("Funkcja podprocesów nie jest dostępna w Twoim planie. / Subworkflows not available in your plan.");
     if (nodesCount > maxN) throw new BadRequestError("Limit węzłów (" + maxN + ") osiągnięty. / Nodes limit (" + maxN + ") reached.");
@@ -1622,26 +1621,28 @@ routerAdd("POST", "/api/process/lock", (e) => {
 
     try {
         let success = false;
+
+        // --- Security Check (Outside transaction to use e.app safely) ---
+        const recordCheck = e.app.findRecordById("WORKFLOW_processes", processId);
+        const wsId = recordCheck.get("workspace");
+        let hasAccess = false;
+        if (wsId && e.auth.id) {
+            try {
+                const ws = e.app.findRecordById("WORKFLOW_workspaces", wsId);
+                if (ws.get("owner") === e.auth.id) hasAccess = true;
+            } catch(err) {}
+            if (!hasAccess) {
+                try {
+                    const members = e.app.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: wsId, user: e.auth.id });
+                    if (members && members.length > 0) hasAccess = true;
+                } catch(err) {}
+            }
+        }
+        if (!hasAccess) throw new Error("UNAUTHORIZED_WORKSPACE");
+        // ----------------------
+
         e.app.runInTransaction((txApp) => {
             const record = txApp.findRecordById("WORKFLOW_processes", processId);
-            
-            // --- Security Check ---
-            const wsId = record.get("workspace");
-            let hasAccess = false;
-            if (wsId && e.auth.id) {
-                try {
-                    const ws = txApp.findRecordById("WORKFLOW_workspaces", wsId);
-                    if (ws.get("owner") === e.auth.id) hasAccess = true;
-                } catch(err) {}
-                if (!hasAccess) {
-                    try {
-                        const members = txApp.findRecordsByFilter("WORKFLOW_workspace_members", "workspace = {:ws} && user = {:user} && status = 'active'", "", 1, 0, { ws: wsId, user: e.auth.id });
-                        if (members && members.length > 0) hasAccess = true;
-                    } catch(err) {}
-                }
-            }
-            if (!hasAccess) throw new Error("UNAUTHORIZED_WORKSPACE");
-            // ----------------------
             
             const currentLocker = record.get("locked_by");
             const lockedAtStr = record.get("locked_at");
@@ -3352,7 +3353,7 @@ onRecordCreateRequest((e) => {
                         }
                     }
                 }
-                console.log("COMMENT NOTIF v4: nodeId=" + nodeId + " nodeName=" + nodeName + " nodesLen=" + nodes.length);
+
             }
         } catch(err) {
             console.error("COMMENT NOTIF: Error fetching process/node info:", err);
@@ -3425,26 +3426,53 @@ onRecordCreateRequest((e) => {
             }
             
         } else {
-            // Odpowiedź na komentarz - powiadom autora oryginalnego komentarza
+            // Odpowiedź na komentarz - powiadom wszystkich autorów w wątku
             try {
+                // Zbierz unikalnych autorów: autor rodzica + autorzy wszystkich odpowiedzi w wątku
+                var threadAuthors = {};
+
+                // 1. Autor komentarza-rodzica
                 const parentComment = e.app.findRecordById("WORKFLOW_comments", parentId);
                 const parentAuthor = parentComment.get("author");
-                
                 if (parentAuthor && parentAuthor !== authorId) {
-                    const notifRecord = new Record(notifCollection);
-                    notifRecord.set("user", parentAuthor);
-                    notifRecord.set("title", "Nowa odpowiedz / New Reply");
-                    let replyMsgPl = "Odpowiedziano na Twój komentarz w procesie <strong>" + processName + "</strong>";
-                    let replyMsgEn = "Someone replied to your comment in process <strong>" + processName + "</strong>";
-                    if (nodeName) {
-                        replyMsgPl = "Odpowiedziano na Twój komentarz na węźle <strong>" + nodeName + "</strong> w procesie <strong>" + processName + "</strong>";
-                        replyMsgEn = "Someone replied to your comment on node <strong>" + nodeName + "</strong> in process <strong>" + processName + "</strong>";
+                    threadAuthors[parentAuthor] = true;
+                }
+
+                // 2. Autorzy wszystkich odpowiedzi w tym wątku (rodzeństwo)
+                try {
+                    const siblings = e.app.findRecordsByFilter(
+                        "WORKFLOW_comments",
+                        "parent_id = {:parentId}",
+                        "", 5000, 0,
+                        { parentId: parentId }
+                    );
+                    for (let s = 0; s < siblings.length; s++) {
+                        const sibAuthor = siblings[s].get("author");
+                        if (sibAuthor && sibAuthor !== authorId) {
+                            threadAuthors[sibAuthor] = true;
+                        }
                     }
-                    notifRecord.set("message", replyMsgPl + " / " + replyMsgEn);
-                    notifRecord.set("type", "info");
-                    notifRecord.set("isRead", false);
-                    notifRecord.set("link", notifLink);
-                    e.app.save(notifRecord);
+                } catch(err) {}
+
+                // Wyślij powiadomienia do wszystkich unikalnych autorów w wątku
+                var authorsToNotify = Object.keys(threadAuthors);
+                for (let a = 0; a < authorsToNotify.length; a++) {
+                    try {
+                        const notifRecord = new Record(notifCollection);
+                        notifRecord.set("user", authorsToNotify[a]);
+                        notifRecord.set("title", "Nowa odpowiedz / New Reply");
+                        let replyMsgPl = "Odpowiedziano na komentarz w procesie <strong>" + processName + "</strong>";
+                        let replyMsgEn = "Someone replied in a comment thread in process <strong>" + processName + "</strong>";
+                        if (nodeName) {
+                            replyMsgPl = "Odpowiedziano na komentarz na węźle <strong>" + nodeName + "</strong> w procesie <strong>" + processName + "</strong>";
+                            replyMsgEn = "Someone replied in a comment thread on node <strong>" + nodeName + "</strong> in process <strong>" + processName + "</strong>";
+                        }
+                        notifRecord.set("message", replyMsgPl + " / " + replyMsgEn);
+                        notifRecord.set("type", "info");
+                        notifRecord.set("isRead", false);
+                        notifRecord.set("link", notifLink);
+                        e.app.save(notifRecord);
+                    } catch(err) {}
                 }
             } catch(err) {}
         }

@@ -48,7 +48,7 @@ export const HeroSection: React.FC = () => {
       {/* Background Image Overlay */}
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat opacity-[0.15] pointer-events-none z-0"
-        style={{ backgroundImage: 'url("/landingpage/bg-offer.png")' }}
+        style={{ backgroundImage: 'url("/landingpage/bg-offer.webp")' }}
       />
       
       {/* Main Container matching Navbar margins (max-w-[1600px] px-[5%] md:px-16) */}

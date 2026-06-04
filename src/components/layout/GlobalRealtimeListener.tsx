@@ -59,9 +59,9 @@ export function GlobalRealtimeListener() {
 
   const onWorkspaceMemberChange = useCallback((e: import('pocketbase').RecordSubscription<Record<string, unknown>>) => {
     const isRelevantToMe = user && (e.record.user === user.id || e.record.invited_email === user.email);
-    const amIOwner = workspacesRef.current.some(w => w.id === e.record.workspace && w.role === 'admin');
+    const amIAdminOrOwner = workspacesRef.current.some(w => w.id === e.record.workspace && (w.role === 'admin' || w.owner === user?.id));
     
-    if (isRelevantToMe || amIOwner) {
+    if (isRelevantToMe || amIAdminOrOwner) {
       debouncedFetchWorkspaces();
     }
   }, [debouncedFetchWorkspaces, user]);

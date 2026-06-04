@@ -19,7 +19,7 @@ export const StepsSection: React.FC = () => {
       {/* Background image */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-bottom bg-no-repeat opacity-40"
-        style={{ backgroundImage: 'url(/landingpage/bg-offer.png)' }}
+        style={{ backgroundImage: 'url(/landingpage/bg-offer.webp)' }}
       />
       
       <motion.div 
@@ -127,7 +127,7 @@ export const StepsSection: React.FC = () => {
                  {/* Avatar shape */}
                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-[3px] border-brand-gold p-[4px] z-10 bg-landing-bg">
                    <div className="w-full h-full rounded-full overflow-hidden bg-black">
-                      <img loading="lazy" src="/landingpage/a-3.webp" alt={t('landing.stepssection.text14')} className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110" />
+                      <img loading="lazy" src="/a1.webp" alt={t('landing.stepssection.text14')} className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110" />
                    </div>
                  </div>
               </div>
