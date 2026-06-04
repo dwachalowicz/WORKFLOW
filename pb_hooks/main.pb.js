@@ -538,6 +538,12 @@ routerAdd("POST", "/api/shared/verify", (e) => {
 onRecordCreateRequest((e) => {
     const newUser = e.record;
     
+    // Normalize email to lowercase to prevent case-sensitive duplicates
+    let rawEmail = newUser.getString("email");
+    if (rawEmail) {
+        newUser.set("email", rawEmail.toLowerCase());
+    }
+
     // Set default name if missing
     let name = newUser.get("name") || "";
     if (name.trim() === "") {
@@ -613,7 +619,7 @@ onRecordAuthRequest((e) => {
 // HOOK: Clean up required relations after User delete
 // =====================================================
 onRecordDeleteRequest((e) => {
-    const userId = e.record.get("id");
+    const userId = e.record.id;
     const db = e.app.db();
 
     try {
@@ -1857,22 +1863,22 @@ routerAdd("GET", "/api/workspace-stats", (e) => {
         const processStats = {};
         const pRows = arrayOf(new DynamicModel({ workspace: "", cnt: 0 }));
         db.newQuery("SELECT workspace, COUNT(*) as cnt FROM WORKFLOW_processes WHERE workspace IN (" + placeholders + ") GROUP BY workspace").bind(bindParams).all(pRows);
-        pRows.forEach(function(r) { processStats[r.workspace] = r.cnt; });
+        Array.from(pRows).forEach(function(r) { processStats[r.workspace] = r.cnt; });
 
         const memberStats = {};
         const mRows = arrayOf(new DynamicModel({ workspace: "", cnt: 0 }));
         db.newQuery("SELECT workspace, COUNT(*) as cnt FROM WORKFLOW_workspace_members WHERE workspace IN (" + placeholders + ") AND status != 'rejected' GROUP BY workspace").bind(bindParams).all(mRows);
-        mRows.forEach(function(r) { memberStats[r.workspace] = r.cnt; });
+        Array.from(mRows).forEach(function(r) { memberStats[r.workspace] = r.cnt; });
 
         const folderStats = {};
         const fRows = arrayOf(new DynamicModel({ workspace: "", cnt: 0 }));
         db.newQuery("SELECT workspace, COUNT(*) as cnt FROM WORKFLOW_process_groups WHERE workspace IN (" + placeholders + ") GROUP BY workspace").bind(bindParams).all(fRows);
-        fRows.forEach(function(r) { folderStats[r.workspace] = r.cnt; });
+        Array.from(fRows).forEach(function(r) { folderStats[r.workspace] = r.cnt; });
 
         const joinCodes = {};
         const jRows = arrayOf(new DynamicModel({ id: "", join_code: "" }));
         db.newQuery("SELECT id, join_code FROM WORKFLOW_workspaces WHERE id IN (" + placeholders + ")").bind(bindParams).all(jRows);
-        jRows.forEach(function(r) { joinCodes[r.id] = r.join_code; });
+        Array.from(jRows).forEach(function(r) { joinCodes[r.id] = r.join_code; });
 
         const result = {};
         idArray.forEach(function(id) {
@@ -1933,7 +1939,7 @@ routerAdd("GET", "/api/folder-stats/{workspaceId}", (e) => {
         query.all(rows);
         
         const result = {};
-        rows.forEach(function(r) {
+        Array.from(rows).forEach(function(r) {
             if (r.group) {
                 result[r.group] = r.cnt;
             }
@@ -2013,7 +2019,7 @@ routerAdd("GET", "/api/locked-workspaces", (e) => {
 
         // 2. Extract unique owners
         const ownersSet = new Set();
-        let myWsArray = myWorkspaces;
+        let myWsArray = Array.from(myWorkspaces);
         
         myWsArray.forEach(ws => {
             const ownerId = ws.owner;
@@ -2787,7 +2793,7 @@ routerAdd("POST", "/api/ai/delete-account", (e) => {
             throw new Error("Unauthorized");
         }
         
-        const userId = authRecord.get("id");
+        const userId = authRecord.id;
         const db = e.app.db();
         
         // 1. Delete user's comments and versions
@@ -2899,23 +2905,18 @@ cronAdd("cleanStaleLocks", "*/5 * * * *", () => {
 });
 
 onRecordUpdateRequest((e) => {
-    e.next();
     const record = e.record;
+    
+    // Capture original values BEFORE e.next() saves to DB
+    const originalStatus = record.original().get("status");
+    const originalRole = record.original().get("role");
+    
+    e.next();
     
     try {
         const userId = record.get("user");
         const wsId = record.get("workspace");
         if (!userId || !wsId) return;
-
-        let original;
-        try {
-            original = e.app.findRecordById(record.collection().name, record.id);
-        } catch(err) {
-            console.log("Could not get originalCopy: " + err);
-            return;
-        }
-
-        if (!original) return;
 
         let wsName = "Workspace";
         try {
@@ -2926,7 +2927,7 @@ onRecordUpdateRequest((e) => {
         const notifCollection = e.app.findCollectionByNameOrId("WORKFLOW_notifications");
 
         // Status changed to active (Accepted invitation)
-        if (original.get("status") !== "active" && record.get("status") === "active") {
+        if (originalStatus !== "active" && record.get("status") === "active") {
             const title = "Zaakceptowano zaproszenie / Invitation accepted";
             const message = `Dołączyłeś do obszaru roboczego "${wsName}". / You joined workspace "${wsName}".`;
             const notifRecord = new Record(notifCollection);
@@ -2939,8 +2940,8 @@ onRecordUpdateRequest((e) => {
         }
 
         // Role changed
-        if (original.get("status") === "active" && record.get("status") === "active" && String(original.get("role")) !== String(record.get("role"))) {
-            const oldRole = original.get("role");
+        if (originalStatus === "active" && record.get("status") === "active" && String(originalRole) !== String(record.get("role"))) {
+            const oldRole = originalRole;
             const newRole = record.get("role");
             const title = "Zmiana roli / Role change";
             const message = `Twoja rola w "${wsName}" została zmieniona z ${oldRole} na ${newRole}. / Your role in "${wsName}" changed from ${oldRole} to ${newRole}.`;

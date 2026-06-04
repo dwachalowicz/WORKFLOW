@@ -439,7 +439,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await get().fetchWorkspaces();
   },
 
-  inviteMember: async (email: string, workspaceId: string, role = 'editor') => {
+  inviteMember: async (rawEmail: string, workspaceId: string, role = 'editor') => {
+    const email = rawEmail.trim().toLowerCase();
     // 0. Check tier-based member limit
     const currentUser = get().user;
     if (currentUser) {
@@ -550,7 +551,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await get().fetchWorkspaces();
   },
 
-  requestOTP: async (email: string) => {
+  requestOTP: async (rawEmail: string) => {
+    // Normalize email to lowercase — PocketBase auth lookups are case-sensitive,
+    // so we must ensure the email matches the stored (lowercased) format.
+    const email = rawEmail.trim().toLowerCase();
+
     // PocketBase v0.23+ does not send emails for non-existent users upon requestOTP (anti-enumeration security).
     // We must first create an empty (unverified) account to which Pocketbase will send the OTP email.
     try {
