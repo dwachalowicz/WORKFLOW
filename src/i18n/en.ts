@@ -162,6 +162,7 @@ export const en = {
     markAsRead: 'Mark as read',
     markAllAsRead: 'Mark all as read',
     delete: 'Delete',
+    newNotification: 'New notification',
     noNotifications: 'No notifications.',
     deletedFromWorkspace: 'Removed from workspace',
     unread: 'Unread',
@@ -371,6 +372,8 @@ export const en = {
     undo: 'Undo',
     redo: 'Redo (Ctrl+Y)',
     redoLabel: 'Redo',
+    tooManyNodes: 'File contains too many nodes (max 500)',
+    tooManyEdges: 'File contains too many connections (max 1000)',
   },
 
   properties: {
@@ -1026,6 +1029,8 @@ export const en = {
     generationStopped: 'Response generation was stopped.',
     invalidKeyMsg: 'Saved API key is invalid. Update it in profile settings.',
     providerError: 'AI Provider error (check your API key and available credits on your provider account).',
+    toolsFetchError: 'Failed to fetch the tools catalog. Check your connection or AdBlock.',
+    changesApplied: 'Changes have been successfully applied to the canvas.',
     jsonParseErrorTitle: '⚠️ Data reading error',
     jsonParseErrorDesc: 'Assistant generated a structure with JSON formatting errors, which prevents the map update button from displaying. Ask to generate data again without truncation.',
     quickPrompts: {
@@ -1224,6 +1229,7 @@ export const en = {
     saveProcessFirst: 'Save the process to add comments.',
     sendComment: 'Send comment',
     deleteComment: 'Delete comment',
+    deleteErrorNoPermission: 'No permission to delete comment.',
     resolve: 'Resolve',
     unresolve: 'Unresolve',
     noCommentsNode: 'No comments for this node',
@@ -1282,6 +1288,7 @@ export const en = {
     upgradeHint: 'Upgrade your plan to unlock this feature.',
     subworkflowLocked: 'Subprocesses available from Medium plan',
     processMapLocked: 'Process Map available from Medium plan',
+    templateTierRequired: 'This template requires a higher plan',
     reasonViewerRole: 'You have a viewer role in this workspace — read-only access.',
     shareLocked: 'Public sharing available from Medium plan',
     passwordLocked: 'Password protection available on Pro plan',

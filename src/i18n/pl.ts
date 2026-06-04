@@ -171,6 +171,7 @@ export const pl = {
     markAsRead: 'Oznacz jako przeczytane',
     markAllAsRead: 'Oznacz wszystkie jako przeczytane',
     delete: 'Usuń',
+    newNotification: 'Nowe powiadomienie',
     noNotifications: 'Brak powiadomień.',
     deletedFromWorkspace: 'Usunięto z workspace',
     unread: 'Nieprzeczytane',
@@ -385,6 +386,8 @@ export const pl = {
     undo: 'Cofnij',
     redo: 'Ponów (Ctrl+Y)',
     redoLabel: 'Ponów',
+    tooManyNodes: 'Plik zawiera zbyt wiele węzłów (max 500)',
+    tooManyEdges: 'Plik zawiera zbyt wiele połączeń (max 1000)',
   },
 
   // Properties Panel
@@ -1087,6 +1090,8 @@ export const pl = {
     generationStopped: 'Generowanie odpowiedzi zostało zatrzymane.',
     invalidKeyMsg: 'Zapisany klucz API jest nieprawidłowy. Zaktualizuj go w ustawieniach profilu.',
     providerError: 'Błąd dostawcy AI (sprawdź swój klucz API i dostępne środki na koncie dostawcy).',
+    toolsFetchError: 'Nie udało się pobrać katalogu narzędzi. Sprawdź połączenie lub AdBlocka.',
+    changesApplied: 'Zmiany zostały pomyślnie zastosowane na płótnie.',
     jsonParseErrorTitle: '⚠️ Błąd odczytu danych',
     jsonParseErrorDesc: 'Asystent wygenerował strukturę z błędami w formacie JSON, przez co nie można wyświetlić przycisku do aktualizacji mapy. Poproś go o wygenerowanie danych ponownie i bez obcinania.',
     quickPrompts: {
@@ -1286,6 +1291,7 @@ export const pl = {
     noComments: 'Brak komentarzy.',
     noCommentsNode: 'Brak komentarzy do tego węzła',
     deleteComment: 'Usuń komentarz',
+    deleteErrorNoPermission: 'Brak uprawnień do usunięcia komentarza.',
     resolve: 'Rozwiąż',
     unresolve: 'Przywróć',
     unknownUser: 'Użytkownik',
@@ -1366,6 +1372,7 @@ export const pl = {
     upgradeHint: 'Ulepsz plan, aby odblokować tę funkcję.',
     subworkflowLocked: 'Podprocesy dostępne od planu Medium',
     processMapLocked: 'Mapa procesów dostępna od planu Medium',
+    templateTierRequired: 'Ten szablon wymaga wyższego planu',
     reasonViewerRole: 'Masz rolę obserwatora w tym workspace — dostęp tylko do odczytu.',
     shareLocked: 'Udostępnianie publiczne dostępne od planu Medium',
     passwordLocked: 'Ochrona hasłem dostępna w planie Pro',

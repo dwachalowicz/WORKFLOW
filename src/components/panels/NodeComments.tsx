@@ -242,7 +242,18 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
       refreshCommentCounts();
     } catch (err) {
       console.error('Error deleting comment:', err);
-      useToastStore.getState().showToast(t('common.error'), 'error');
+      if (err instanceof Error) {
+        const pbErr = err as Error & { status?: number, response?: { message?: string } };
+        if (pbErr.status === 403 || pbErr.status === 400 || pbErr.status === 404) {
+          useToastStore.getState().showToast(t('comments.deleteErrorNoPermission', 'Brak uprawnień do usunięcia komentarza.'), 'error');
+        } else if (pbErr.response && pbErr.response.message) {
+          useToastStore.getState().showToast(pbErr.response.message, 'error');
+        } else {
+          useToastStore.getState().showToast(err.message, 'error');
+        }
+      } else {
+        useToastStore.getState().showToast(t('common.error'), 'error');
+      }
     }
   };
 
