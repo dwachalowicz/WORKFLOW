@@ -3572,7 +3572,7 @@ routerAdd("POST", "/api/confirm-email-change", (e) => {
         // Verify the full JWT signature using PocketBase's built-in method
         // This ensures the token was actually signed by this PocketBase instance
         try {
-            e.app.findAuthRecordByToken(token, "email_change");
+            e.app.findAuthRecordByToken(token, "emailChange");
         } catch (err) {
             return e.json(400, { message: "Invalid or expired token signature." });
         }
