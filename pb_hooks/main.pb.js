@@ -551,15 +551,17 @@ onRecordCreateRequest((e) => {
 
     e.next();
 
-    const email = newUser.get("email");
+    const email = newUser.getString("email");
     if (!email) return;
+
+    const emailLower = email.toLowerCase();
 
     try {
         const pending = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
             "invited_email = {:email} && status = 'pending_registration'",
             "-created", 100, 0,
-            { email: email }
+            { email: emailLower }
         );
 
         if (pending && pending.length > 0) {
@@ -582,15 +584,17 @@ onRecordAuthRequest((e) => {
     const user = e.record;
     if (!user || user.collection().name !== "WORKFLOW_users") return e.next();
     
-    const email = user.get("email");
+    const email = user.getString("email");
     if (!email) return e.next();
+    
+    const emailLower = email.toLowerCase();
     
     try {
         const pending = e.app.findRecordsByFilter(
             "WORKFLOW_workspace_members",
             "invited_email = {:email} && status = 'pending_registration'",
             "", 100, 0,
-            { email: email }
+            { email: emailLower }
         );
         if (pending && pending.length > 0) {
             for (let i = 0; i < pending.length; i++) {
@@ -662,10 +666,12 @@ onRecordCreateRequest((e) => {
 
     // Auto-link user if they already exist in the database (bypassing client-side privacy restrictions)
     if (status === "pending_registration") {
-        let invitedEmail = record.get("invited_email");
+        let invitedEmail = record.getString("invited_email");
         if (invitedEmail) {
+            invitedEmail = invitedEmail.toLowerCase();
+            record.set("invited_email", invitedEmail);
             try {
-                let existingUser = e.app.findFirstRecordByData("WORKFLOW_users", "email", invitedEmail);
+                let existingUser = e.app.findFirstRecordByFilter("WORKFLOW_users", "LOWER(email) = {:email}", { email: invitedEmail });
                 if (existingUser) {
                     record.set("status", "pending");
                     record.set("user", existingUser.id);
@@ -681,7 +687,12 @@ onRecordCreateRequest((e) => {
     // Dodatkowe zabezpieczenie backendowe przed duplikatami (Race conditions / podwójne kliknięcia)
     let wsId = record.get("workspace");
     let checkUserId = record.get("user");
-    let checkEmail = record.get("invited_email");
+    let checkEmail = record.getString("invited_email");
+    
+    if (checkEmail) {
+        checkEmail = checkEmail.toLowerCase();
+        record.set("invited_email", checkEmail);
+    }
     
     if (wsId) {
         let hasDuplicate = false;
@@ -3340,7 +3351,7 @@ onRecordCreateRequest((e) => {
                         }
                     }
                 }
-                console.log("COMMENT NOTIF v4: nodeId=" + nodeId + " nodeName=" + nodeName + " nodesLen=" + nodes.length + " typeofRaw=" + typeof nodesRaw);
+                console.log("COMMENT NOTIF v4: nodeId=" + nodeId + " nodeName=" + nodeName + " nodesLen=" + nodes.length);
             }
         } catch(err) {
             console.error("COMMENT NOTIF: Error fetching process/node info:", err);
