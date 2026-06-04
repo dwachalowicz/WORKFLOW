@@ -3500,22 +3500,39 @@ routerAdd("POST", "/api/confirm-email-change", (e) => {
         // PocketBase email change tokens contain: id, collectionId, email, newEmail, type, exp
         let claims;
         try {
-            // Split JWT and decode payload (base64url)
             const parts = token.split(".");
             if (parts.length !== 3) {
                 throw new Error("Invalid token format");
             }
-            // Base64url decode the payload
-            let payload = parts[1];
-            // Add padding if needed
-            while (payload.length % 4 !== 0) {
-                payload += "=";
+            let payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (payload.length % 4 !== 0) payload += "=";
+            
+            // Custom base64 decode since atob() might not be available in Goja
+            const b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            let decodedBytes = [];
+            payload = payload.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+            for (let i = 0; i < payload.length;) {
+                let enc1 = b64chars.indexOf(payload.charAt(i++));
+                let enc2 = b64chars.indexOf(payload.charAt(i++));
+                let enc3 = b64chars.indexOf(payload.charAt(i++));
+                let enc4 = b64chars.indexOf(payload.charAt(i++));
+                let chr1 = (enc1 << 2) | (enc2 >> 4);
+                let chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                let chr3 = ((enc3 & 3) << 6) | enc4;
+                decodedBytes.push(chr1);
+                if (enc3 !== 64 && enc3 !== -1) decodedBytes.push(chr2);
+                if (enc4 !== 64 && enc4 !== -1) decodedBytes.push(chr3);
             }
-            // Replace base64url chars with base64 chars
-            payload = payload.replace(/-/g, "+").replace(/_/g, "/");
-
-            const decoded = atob(payload);
-            claims = JSON.parse(decoded);
+            // Simple utf8 decode
+            let decodedStr = "";
+            for (let i = 0; i < decodedBytes.length; i++) {
+                decodedStr += String.fromCharCode(decodedBytes[i]);
+            }
+            // Handle UTF-8 encoding
+            let finalDecoded = decodedStr;
+            try { finalDecoded = decodeURIComponent(escape(decodedStr)); } catch(e) {}
+            
+            claims = JSON.parse(finalDecoded);
         } catch (err) {
             return e.json(400, { message: "Invalid or malformed token." });
         }
