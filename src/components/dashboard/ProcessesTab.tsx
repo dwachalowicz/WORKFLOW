@@ -977,43 +977,29 @@ export const ProcessesTab = () => {
                       <GripVertical size={16} />
                     </div>
 
-                    {/* Adaptive badges: icon-only when 2+ visible, full label when single */}
-                    {(() => {
-                      const isEditedByOther = !!(proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000));
-                      const badgeCount = (proc.isPublic ? 1 : 0) + (isProcessLocked ? 1 : 0) + (isEditedByOther ? 1 : 0);
-                      const compact = badgeCount >= 2;
-
-                      return (
-                        <div className="flex items-center gap-1">
-                          {proc.isPublic && (
-                            <SimpleTooltip content={t('processes.sharePublic')}>
-                              <div className={`flex items-center rounded-full bg-green-500/15 text-green-500 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
-                                <Globe size={compact ? 12 : 11} />
-                                {!compact && <span>{t('processes.public')}</span>}
-                              </div>
-                            </SimpleTooltip>
-                          )}
-
-                          {isProcessLocked && (
-                            <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
-                              <div className={`flex items-center rounded-full bg-red-500/15 text-red-500 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
-                                <Lock size={compact ? 12 : 14} />
-                                {!compact && <span>{t('common.locked', 'Read Only')}</span>}
-                              </div>
-                            </SimpleTooltip>
-                          )}
-
-                          {isEditedByOther && (
-                            <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
-                              <div className={`flex items-center rounded-full bg-amber-500/15 text-amber-400 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
-                                <Lock size={compact ? 12 : 14} />
-                                {!compact && <span>{t('processes.locked')}</span>}
-                              </div>
-                            </SimpleTooltip>
-                          )}
+                    {proc.isPublic && (
+                      <SimpleTooltip content={t('processes.sharePublic')}>
+                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-500/15 text-green-500">
+                          <Globe size={12} />
                         </div>
-                      );
-                    })()}
+                      </SimpleTooltip>
+                    )}
+
+                    {isProcessLocked && (
+                      <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
+                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-red-500/15 text-red-500">
+                          <Lock size={12} />
+                        </div>
+                      </SimpleTooltip>
+                    )}
+
+                    {proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000) && (
+                      <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
+                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-500/15 text-amber-400">
+                          <Lock size={12} />
+                        </div>
+                      </SimpleTooltip>
+                    )}
                     
                     <button
                       onClick={(e) => {
