@@ -2321,16 +2321,15 @@ routerAdd("GET", "/api/process-links/{workspaceId}", (e) => {
         var links = [];
         for (var p = 0; p < processes.length; p++) {
             var proc = processes[p];
-            var nodesRaw = proc.get("nodes");
+            var nodesStr = proc.getString("nodes");
             var nodes = [];
-            if (typeof nodesRaw === "string") {
-                try { nodes = JSON.parse(nodesRaw); } catch(parseErr) { continue; }
-            } else if (Array.isArray(nodesRaw)) {
-                nodes = nodesRaw;
-            }
+            try { nodes = typeof nodesStr === "string" && nodesStr ? JSON.parse(nodesStr) : []; } catch(err) {}
+            
+            var nodesArray = [];
+            try { nodesArray = Array.from(nodes); } catch(err) { nodesArray = nodes || []; }
 
-            for (var n = 0; n < nodes.length; n++) {
-                var node = nodes[n];
+            for (var n = 0; n < nodesArray.length; n++) {
+                var node = nodesArray[n];
                 var data = node.data || {};
                 if (data.targetWorkflowId && data.targetWorkflowId !== proc.id) {
                     links.push({
@@ -2610,11 +2609,9 @@ onRecordDeleteRequest((e) => {
             if (siblings && siblings.length > 0) {
                 for (let s = 0; s < siblings.length; s++) {
                     let proc = siblings[s];
-                    let sNodesStr = proc.get("nodes");
+                    let sNodesStr = proc.getString("nodes");
                     let sNodes = [];
-                    try {
-                        sNodes = typeof sNodesStr === "string" ? JSON.parse(sNodesStr) : (sNodesStr || []);
-                    } catch(err) { continue; }
+                    try { sNodes = typeof sNodesStr === "string" && sNodesStr ? JSON.parse(sNodesStr) : []; } catch(err) { continue; }
 
                     let changed = false;
                     for (let n = 0; n < sNodes.length; n++) {
@@ -2651,9 +2648,9 @@ onRecordUpdateRequest((e) => {
     const oldNodeIds = {};
     try {
         const oldRecord = e.app.findRecordById("WORKFLOW_processes", processId);
-        let oldNodesRaw = oldRecord.get("nodes");
+        let oldNodesRaw = oldRecord.getString("nodes");
         let oldNodes = [];
-        try { oldNodes = typeof oldNodesRaw === "string" ? JSON.parse(oldNodesRaw) : (oldNodesRaw || []); } catch(pe) {}
+        try { oldNodes = typeof oldNodesRaw === "string" && oldNodesRaw ? JSON.parse(oldNodesRaw) : []; } catch(pe) {}
         for (let i = 0; i < oldNodes.length; i++) {
             if (oldNodes[i] && oldNodes[i].id) oldNodeIds[oldNodes[i].id] = true;
         }
@@ -2664,9 +2661,9 @@ onRecordUpdateRequest((e) => {
     // Get new node IDs AFTER save
     const newNodeIds = {};
     try {
-        let newNodesRaw = e.record.get("nodes");
+        let newNodesRaw = e.record.getString("nodes");
         let newNodes = [];
-        try { newNodes = typeof newNodesRaw === "string" ? JSON.parse(newNodesRaw) : (newNodesRaw || []); } catch(pe) {}
+        try { newNodes = typeof newNodesRaw === "string" && newNodesRaw ? JSON.parse(newNodesRaw) : []; } catch(pe) {}
         for (let i = 0; i < newNodes.length; i++) {
             if (newNodes[i] && newNodes[i].id) newNodeIds[newNodes[i].id] = true;
         }
@@ -2706,11 +2703,9 @@ onRecordUpdateRequest((e) => {
 
         if (!workspaceId) return;
 
-        let nodesStr = savedProcess.get("nodes");
+        let nodesStr = savedProcess.getString("nodes");
         let nodes = [];
-        try {
-            nodes = typeof nodesStr === "string" ? JSON.parse(nodesStr) : (nodesStr || []);
-        } catch(err) {}
+        try { nodes = typeof nodesStr === "string" && nodesStr ? JSON.parse(nodesStr) : []; } catch(err) {}
 
         const nodeLabelsMap = {};
         for (let i = 0; i < nodes.length; i++) {
@@ -2730,11 +2725,9 @@ onRecordUpdateRequest((e) => {
         if (siblings && siblings.length > 0) {
             for (let s = 0; s < siblings.length; s++) {
                 let proc = siblings[s];
-                let sNodesStr = proc.get("nodes");
+                let sNodesStr = proc.getString("nodes");
                 let sNodes = [];
-                try {
-                    sNodes = typeof sNodesStr === "string" ? JSON.parse(sNodesStr) : (sNodesStr || []);
-                } catch(err) { continue; }
+                try { sNodes = typeof sNodesStr === "string" && sNodesStr ? JSON.parse(sNodesStr) : []; } catch(err) { continue; }
 
                 let changed = false;
                 for (let n = 0; n < sNodes.length; n++) {
