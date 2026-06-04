@@ -26,6 +26,7 @@ const LandingPage = lazy(() => import('./landingpage/index').then(m => ({ defaul
 const FaqPage = lazy(() => import('./pages/FaqPage').then(m => ({ default: m.FaqPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const ConfirmEmailChangePage = lazy(() => import('./pages/ConfirmEmailChangePage').then(m => ({ default: m.ConfirmEmailChangePage })));
 
 let isAppInitialized = false;
 
@@ -113,6 +114,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/login/verify" element={<MagicLinkVerifyPage />} />
+              <Route path="/auth/confirm-email-change/:token" element={<ConfirmEmailChangePage />} />
               <Route 
                 path="/dashboard/:tab?" 
                 element={
