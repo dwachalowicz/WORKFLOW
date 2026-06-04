@@ -58,18 +58,19 @@ const mockWorkspaces = [
   { id: 'ws2', name: 'Workspace 2', owner: 'user2', role: 'editor' as const },
 ];
 
-describe('authStore — login', () => {
-  beforeEach(() => {
-    useAuthStore.setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      workspaces: [],
-      activeWorkspace: null,
-      pendingInvitations: [],
-    });
+beforeEach(() => {
+  localStorage.clear();
+  useAuthStore.setState({
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    workspaces: [],
+    activeWorkspace: null,
+    pendingInvitations: [],
   });
+});
 
+describe('authStore — login', () => {
   it('sets user and token on login', () => {
     useAuthStore.getState().login('token123', mockUser, mockWorkspaces);
     const state = useAuthStore.getState();
