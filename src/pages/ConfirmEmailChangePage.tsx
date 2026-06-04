@@ -32,8 +32,19 @@ export const ConfirmEmailChangePage = () => {
     isConfirming.current = true;
     setStatus('loading');
     try {
-      // Pass an empty string as password, which works for accounts without a password (OTP/OAuth)
-      await pb.collection('WORKFLOW_users').confirmEmailChange(token, "");
+      // Call our custom backend endpoint that handles email change without password
+      // (PocketBase SDK's confirmEmailChange requires a password, which MagicLink users don't have)
+      const res = await fetch(`${pb.baseURL}/api/confirm-email-change`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || 'Confirmation failed');
+      }
       
       setStatus('success');
       await checkAuth(); // Refresh user data to get the new email in the UI

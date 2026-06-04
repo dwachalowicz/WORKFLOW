@@ -3481,3 +3481,94 @@ onRecordCreateRequest((e) => {
     }
 }, "WORKFLOW_comments");
 
+// =====================================================
+// ROUTE: POST /api/confirm-email-change
+// Custom endpoint for MagicLink (OTP) users who have no password.
+// PocketBase's built-in confirmEmailChange requires a password,
+// so we decode the JWT token server-side and update the email directly.
+// =====================================================
+routerAdd("POST", "/api/confirm-email-change", (e) => {
+    try {
+        const data = e.requestInfo().body || {};
+        const token = data.token || "";
+
+        if (!token) {
+            return e.json(400, { message: "Token is required." });
+        }
+
+        // Decode the JWT token to extract claims
+        // PocketBase email change tokens contain: id, collectionId, email, newEmail, type, exp
+        let claims;
+        try {
+            // Split JWT and decode payload (base64url)
+            const parts = token.split(".");
+            if (parts.length !== 3) {
+                throw new Error("Invalid token format");
+            }
+            // Base64url decode the payload
+            let payload = parts[1];
+            // Add padding if needed
+            while (payload.length % 4 !== 0) {
+                payload += "=";
+            }
+            // Replace base64url chars with base64 chars
+            payload = payload.replace(/-/g, "+").replace(/_/g, "/");
+
+            const decoded = atob(payload);
+            claims = JSON.parse(decoded);
+        } catch (err) {
+            return e.json(400, { message: "Invalid or malformed token." });
+        }
+
+        // Validate token type
+        if (claims.type !== "emailChange") {
+            return e.json(400, { message: "Invalid token type." });
+        }
+
+        // Check expiration
+        if (claims.exp && claims.exp * 1000 < Date.now()) {
+            return e.json(400, { message: "Token has expired." });
+        }
+
+        // Extract user ID and new email
+        const userId = claims.id || "";
+        const newEmail = claims.newEmail || "";
+
+        if (!userId || !newEmail) {
+            return e.json(400, { message: "Token is missing required fields." });
+        }
+
+        // Find the user
+        let user;
+        try {
+            user = e.app.findRecordById("WORKFLOW_users", userId);
+        } catch (err) {
+            return e.json(404, { message: "User not found." });
+        }
+
+        // Verify the token was issued for the correct current email
+        const currentEmail = user.getString("email");
+        if (claims.email && claims.email.toLowerCase() !== currentEmail.toLowerCase()) {
+            return e.json(400, { message: "Token does not match current email." });
+        }
+
+        // Verify the full JWT signature using PocketBase's built-in method
+        // This ensures the token was actually signed by this PocketBase instance
+        try {
+            e.app.findAuthRecordByToken(token, "email_change");
+        } catch (err) {
+            return e.json(400, { message: "Invalid or expired token signature." });
+        }
+
+        // Update the email
+        user.set("email", newEmail.toLowerCase());
+        user.set("verified", true);
+        e.app.save(user);
+
+        return e.json(200, { success: true, message: "Email changed successfully." });
+    } catch (err) {
+        console.error("Confirm email change error:", err);
+        return e.json(400, { message: "Failed to confirm email change: " + String(err.message || err) });
+    }
+});
+
