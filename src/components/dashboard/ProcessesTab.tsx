@@ -969,7 +969,7 @@ export const ProcessesTab = () => {
                   onClick={() => handleLoadProcess(proc.id)}
                 >
                   {/* Drag handle + Public badge + Context Menu */}
-                  <div className="flex justify-between items-center mb-auto">
+                  <div className="flex items-center w-full mb-auto">
                     <div 
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors"
                       onMouseDown={(e) => e.stopPropagation()}
@@ -977,29 +977,31 @@ export const ProcessesTab = () => {
                       <GripVertical size={16} />
                     </div>
 
-                    {proc.isPublic && (
-                      <SimpleTooltip content={t('processes.sharePublic')}>
-                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-500/15 text-green-500">
-                          <Globe size={12} />
-                        </div>
-                      </SimpleTooltip>
-                    )}
+                    <div className="flex-1 flex items-center justify-center gap-1.5">
+                      {proc.isPublic && (
+                        <SimpleTooltip content={t('processes.sharePublic')}>
+                          <div className="w-6 h-6 flex items-center justify-center rounded-full bg-green-500/15 text-green-500">
+                            <Globe size={12} />
+                          </div>
+                        </SimpleTooltip>
+                      )}
 
-                    {isProcessLocked && (
-                      <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
-                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-red-500/15 text-red-500">
-                          <Lock size={12} />
-                        </div>
-                      </SimpleTooltip>
-                    )}
+                      {isProcessLocked && (
+                        <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
+                          <div className="w-6 h-6 flex items-center justify-center rounded-full bg-red-500/15 text-red-500">
+                            <Lock size={12} />
+                          </div>
+                        </SimpleTooltip>
+                      )}
 
-                    {proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000) && (
-                      <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
-                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-500/15 text-amber-400">
-                          <Lock size={12} />
-                        </div>
-                      </SimpleTooltip>
-                    )}
+                      {proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000) && (
+                        <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
+                          <div className="w-6 h-6 flex items-center justify-center rounded-full bg-amber-500/15 text-amber-400">
+                            <Lock size={12} />
+                          </div>
+                        </SimpleTooltip>
+                      )}
+                    </div>
                     
                     <button
                       onClick={(e) => {
