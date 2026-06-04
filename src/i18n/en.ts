@@ -36,6 +36,7 @@ export const en = {
     locked: 'Locked (limit)',
     loadMore: 'Load more',
     loadMoreProcesses: 'Load more processes',
+    goToDashboard: 'Go to dashboard',
   },
   notFound: {
     title: '404',
@@ -133,6 +134,10 @@ export const en = {
     validUntil: 'Valid until: {{date}}',
     validLifetime: 'Valid: lifetime',
     zoom: 'Zoom',
+    confirmEmailTitle: 'Confirm email change',
+    confirmEmailDesc: 'Click the button below to confirm your new email address.',
+    confirmEmailBtn: 'Confirm change',
+    emailChangedSuccess: 'Email changed successfully!',
   },
   dashboard: {
     processes: 'Processes',
@@ -1179,6 +1184,8 @@ export const en = {
     readers: 'Readers:',
     minimize: 'Minimize',
     maximize: 'Maximize',
+    verifying: 'Verifying...',
+    pleaseWait: 'Please wait',
   },
   authStore: {
     defaultWorkspaceName: 'My Workspace',

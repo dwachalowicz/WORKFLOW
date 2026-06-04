@@ -37,6 +37,7 @@ export const pl = {
     locked: 'Zablokowane (limit)',
     loadMore: 'Załaduj więcej',
     loadMoreProcesses: 'Załaduj więcej procesów',
+    goToDashboard: 'Wróć do kokpitu',
   },
 
   notFound: {
@@ -140,6 +141,10 @@ export const pl = {
     validLifetime: 'Ważny: bezterminowo',
     changeAvatar: 'Zmień avatar',
     zoom: 'Powiększenie',
+    confirmEmailTitle: 'Potwierdź zmianę e-maila',
+    confirmEmailDesc: 'Kliknij przycisk poniżej, aby zatwierdzić swój nowy adres e-mail.',
+    confirmEmailBtn: 'Zatwierdź zmianę',
+    emailChangedSuccess: 'E-mail zmieniony pomyślnie!',
   },
 
   // Dashboard
@@ -1242,7 +1247,9 @@ export const pl = {
     editors: 'Edytorzy:',
     readers: 'Czytelnicy:',
     minimize: 'Minimalizuj',
-    maximize: 'Maksymalizuj',
+    maximize: 'Maximize',
+    verifying: 'Weryfikacja...',
+    pleaseWait: 'Proszę czekać',
   },
 
   // Auth Store

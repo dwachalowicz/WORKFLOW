@@ -42,13 +42,14 @@ export const ConfirmEmailChangePage = () => {
       setTimeout(() => {
         navigate('/dashboard', { replace: true });
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Email change confirmation failed:', err);
+      const error = err as Error;
       setStatus('error');
       setErrorMessage(
-        err?.message?.includes('expired') || err?.message?.includes('invalid')
+        error?.message?.includes('expired') || error?.message?.includes('invalid')
           ? t('auth.magicLinkExpired', 'Link wygasł lub jest nieprawidłowy.')
-          : err?.message || t('auth.magicLinkVerifyFail', 'Nie udało się potwierdzić adresu e-mail.')
+          : error?.message || t('auth.magicLinkVerifyFail', 'Nie udało się potwierdzić adresu e-mail.')
       );
       isConfirming.current = false;
     }
