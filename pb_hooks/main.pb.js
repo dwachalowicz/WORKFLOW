@@ -677,7 +677,7 @@ onRecordCreateRequest((e) => {
             invitedEmail = invitedEmail.toLowerCase();
             record.set("invited_email", invitedEmail);
             try {
-                let existingUser = e.app.findFirstRecordByFilter("WORKFLOW_users", "LOWER(email) = {:email}", { email: invitedEmail });
+                let existingUser = e.app.findFirstRecordByFilter("WORKFLOW_users", "email = {:email}", { email: invitedEmail });
                 if (existingUser) {
                     record.set("status", "pending");
                     record.set("user", existingUser.id);

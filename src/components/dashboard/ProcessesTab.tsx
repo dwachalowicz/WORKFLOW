@@ -977,32 +977,43 @@ export const ProcessesTab = () => {
                       <GripVertical size={16} />
                     </div>
 
-                    {proc.isPublic && (
-                      <SimpleTooltip content={t('processes.sharePublic')}>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/15 text-green-500 text-[11px] font-semibold">
-                          <Globe size={11} />
-                          <span>{t('processes.public')}</span>
-                        </div>
-                      </SimpleTooltip>
-                    )}
+                    {/* Adaptive badges: icon-only when 2+ visible, full label when single */}
+                    {(() => {
+                      const isEditedByOther = !!(proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000));
+                      const badgeCount = (proc.isPublic ? 1 : 0) + (isProcessLocked ? 1 : 0) + (isEditedByOther ? 1 : 0);
+                      const compact = badgeCount >= 2;
 
-                    {isProcessLocked && (
-                      <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/15 text-red-500 text-[11px] font-semibold">
-                          <Lock size={14} />
-                          <span>{t('common.locked', 'Read Only')}</span>
-                        </div>
-                      </SimpleTooltip>
-                    )}
+                      return (
+                        <div className="flex items-center gap-1">
+                          {proc.isPublic && (
+                            <SimpleTooltip content={t('processes.sharePublic')}>
+                              <div className={`flex items-center rounded-full bg-green-500/15 text-green-500 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
+                                <Globe size={compact ? 12 : 11} />
+                                {!compact && <span>{t('processes.public')}</span>}
+                              </div>
+                            </SimpleTooltip>
+                          )}
 
-                    {proc.locked_by && proc.locked_at && (now - new Date(proc.locked_at).getTime() < 3 * 60 * 1000) && (
-                      <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-[11px] font-semibold">
-                          <Lock size={14} />
-                          <span>{t('processes.locked')}</span>
+                          {isProcessLocked && (
+                            <SimpleTooltip content={t('tierLimits.readOnlyMode')}>
+                              <div className={`flex items-center rounded-full bg-red-500/15 text-red-500 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
+                                <Lock size={compact ? 12 : 14} />
+                                {!compact && <span>{t('common.locked', 'Read Only')}</span>}
+                              </div>
+                            </SimpleTooltip>
+                          )}
+
+                          {isEditedByOther && (
+                            <SimpleTooltip content={t('processes.editedBy', { name: proc.expand?.locked_by?.name || proc.expand?.locked_by?.email || t('processes.unknownUser') })}>
+                              <div className={`flex items-center rounded-full bg-amber-500/15 text-amber-400 text-[11px] font-semibold ${compact ? 'w-6 h-6 justify-center' : 'gap-1.5 px-2.5 py-1'}`}>
+                                <Lock size={compact ? 12 : 14} />
+                                {!compact && <span>{t('processes.locked')}</span>}
+                              </div>
+                            </SimpleTooltip>
+                          )}
                         </div>
-                      </SimpleTooltip>
-                    )}
+                      );
+                    })()}
                     
                     <button
                       onClick={(e) => {
