@@ -102,7 +102,7 @@ export const FloatingNavBar = () => {
                   <div className="absolute inset-0 w-full h-full animate-pulse-scale">
                     <img 
                       src="/a1.webp" 
-                      alt="AI Assistant" 
+                      alt={t('aiExt.title')} 
                       className="absolute inset-0 w-full h-full object-cover animate-avatar-swap"
                     />
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center text-brand-gold animate-sparkles-swap bg-surface-elevated group-hover:bg-secondary transition-colors">
@@ -435,7 +435,7 @@ export const FloatingNavBar = () => {
                 >
                   <span className="flex items-center gap-3">
                     <span className="font-bold text-xs">EN/PL</span>
-                    {t('settings.language', 'Language')}
+                    {t('settings.language')}
                   </span>
                   <span className="text-brand-gold font-bold uppercase">{i18n.language === 'en' ? 'EN' : 'PL'}</span>
                 </button>

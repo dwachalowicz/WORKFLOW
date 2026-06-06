@@ -81,7 +81,7 @@ export const VersionHistoryPanel = () => {
     if (isComparingId) return;
     setIsComparingId(version.id as string);
     try {
-      // Pobieramy zawsze najświeższy stan bezpośrednio ze store, żeby uniknąć problemów z closure
+      // Always fetch the freshest state directly from store to avoid closure issues
       const currentNodes = useCanvasStore.getState().nodes as Record<string, unknown>[];
       const currentEdges = useCanvasStore.getState().edges as Record<string, unknown>[];
 
@@ -311,7 +311,7 @@ export const VersionHistoryPanel = () => {
                       <div className="absolute -left-[20px] top-[14px] w-2 h-2 rounded-full bg-brand-gold ring-[3px] ring-surface-nav z-10" />
 
                       <div className="bg-card border border-border rounded-xl p-3 hover:border-brand-gold/40 hover:shadow-md transition-all shadow-sm flex flex-col gap-2.5">
-                        {/* Górna sekcja: Informacje */}
+                        {/* Top section: Information */}
                         <div className="flex items-start gap-3">
                           {/* Avatar */}
                           <SimpleTooltip content={authorName} side="top">
@@ -350,7 +350,7 @@ export const VersionHistoryPanel = () => {
                           </div>
                         </div>
 
-                        {/* Dolna sekcja: Akcje */}
+                        {/* Bottom section: Actions */}
                         <div className="flex items-center justify-end gap-1.5 border-t border-border/50 pt-2.5 relative">
                           {/* Compare */}
                           <SimpleTooltip content={t("versions.compareWithCurrent")} side="top">

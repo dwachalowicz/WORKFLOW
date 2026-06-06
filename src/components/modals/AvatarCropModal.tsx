@@ -281,7 +281,7 @@ export const AvatarCropModal = ({
                 <input
                   type="text"
                   className="w-48 bg-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:border-brand-gold outline-none"
-                  placeholder={t('avatar.searchIcon', 'Szukaj ikony...')}
+                  placeholder={t('avatar.searchIcon')}
                   value={iconSearch}
                   onChange={(e) => setIconSearch(e.target.value)}
                 />

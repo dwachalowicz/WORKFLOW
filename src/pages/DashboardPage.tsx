@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { getTierLimits } from '@/lib/tierLimits';
 import { FloatingDashboardNav } from '@/components/layout/FloatingDashboardNav';
 import { GryfSpinner } from '@/components/ui/GryfSpinner';
+import i18n from '@/i18n/config';
 
 // ── Lazy-loaded tabs (code splitting) ────────────────────────
 const ProcessesTab = lazy(() => import('@/components/dashboard/ProcessesTab').then(m => ({ default: m.ProcessesTab })));
@@ -32,7 +33,7 @@ const TabLoader = () => {
   if (isFirstDashboardMount) {
     return (
       <div className="fixed inset-0 z-loader bg-background flex items-center justify-center flex-col">
-        <GryfSpinner size={48} label="Loading..." />
+        <GryfSpinner size={48} label={i18n.t('common.loading')} />
       </div>
     );
   }
@@ -64,12 +65,12 @@ class TabErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
-          <p className="text-lg font-semibold mb-2">Something went wrong</p>
+          <p className="text-lg font-semibold mb-2">{i18n.t('errors.somethingWentWrong')}</p>
           <button
             onClick={() => this.setState({ hasError: false })}
             className="text-sm text-brand-gold hover:underline"
           >
-            Try again
+            {i18n.t('errors.tryAgain')}
           </button>
         </div>
       );

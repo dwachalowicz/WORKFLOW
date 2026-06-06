@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import DOMPurify from 'dompurify';
-import { X, Send, Loader2, RotateCcw, ExternalLink, ChevronLeft, ChevronRight, ArrowLeft, Download, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Send, Loader2, RotateCcw, ExternalLink, ChevronLeft, ChevronRight, ArrowLeft, Download, Maximize2, Minimize2, Star } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl, pb, type WorkflowUser } from '@/lib/pocketbase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import {
 import { getTierLimits, getTierLabel } from '@/lib/tierLimits';
 
 import { SidePanel } from '@/components/ui/side-panel';
-
+import { SimpleTooltip } from '@/components/ui/tooltip';
 const MotionSidePanel = motion.create(SidePanel);
 import { Button } from '@/components/ui/button';
 import { useToastStore } from '@/store/toastStore';
@@ -24,11 +24,12 @@ import { useCanvasStore } from "@/store/canvasStore";
 import type { Node, Edge } from '@xyflow/react';
 
 const UserAvatar = ({ user, className }: { user: WorkflowUser | null, className?: string }) => {
+  const { t } = useTranslation();
   const [error, setError] = useState(false);
   return (
     <div className={`rounded-full bg-secondary overflow-hidden shrink-0 ${className || 'w-6 h-6 mt-0.5'}`}>
       {user?.avatar && !error ? (
-        <img loading="lazy" src={getAvatarUrl(user)} alt="You" className="w-full h-full object-cover" onError={() => setError(true)} />
+        <img loading="lazy" src={getAvatarUrl(user)} alt={t('aiExt.altYou')} className="w-full h-full object-cover" onError={() => setError(true)} />
       ) : (
         <div className="w-full h-full bg-brand-gold/20 flex items-center justify-center text-[10px] font-bold text-brand-gold">{user?.name?.[0] || 'U'}</div>
       )}
@@ -258,7 +259,7 @@ export const AiAssistantPanel = () => {
         setAllTools(tools);
       }).catch(err => {
         console.warn('[AI Assistant] Failed to load tools:', err);
-        useToastStore.getState().showToast(t('aiExt.toolsFetchError', 'Nie udało się pobrać katalogu narzędzi. Sprawdź połączenie lub AdBlocka.'), 'error');
+        useToastStore.getState().showToast(t('aiExt.toolsFetchError'), 'error');
         setAllTools([]); // Set empty to avoid retry loop
       });
     }
@@ -305,6 +306,35 @@ export const AiAssistantPanel = () => {
       }
     }
     return [...new Set(mentioned)];
+  }, [allTools]);
+
+  /** Parse the workflow-tools JSON block returned by AI and extract tool names */
+  const parseToolsFromJson = useCallback((text: string): string[] => {
+    const match = text.match(/```(?:json)?\s*workflow-tools\s*([\s\S]*?)```/);
+    if (!match) return [];
+    try {
+      const raw = match[1];
+      const startIdx = raw.indexOf('{');
+      const endIdx = raw.lastIndexOf('}');
+      if (startIdx === -1 || endIdx <= startIdx) return [];
+      const jsonStr = raw.slice(startIdx, endIdx + 1);
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        parsed = JSON.parse(fixBrokenJson(jsonStr));
+      }
+      if (parsed && typeof parsed === 'object') {
+        // Match JSON keys against the catalog (case-insensitive) and return exact catalog names
+        return Object.keys(parsed)
+          .map(name => allTools.find(tool => tool.name.toLowerCase() === name.toLowerCase()))
+          .filter((tool): tool is ToolFromCatalog => !!tool)
+          .map(tool => tool.name);
+      }
+    } catch (err) {
+      console.warn('[AI Assistant] Failed to parse workflow-tools JSON block:', err);
+    }
+    return [];
   }, [allTools]);
 
   const extractJsonFromBlock = (block: string): Record<string, unknown> | null => {
@@ -421,7 +451,7 @@ export const AiAssistantPanel = () => {
       });
       // Keep edges exactly as they are
       applyAiChanges(updatedNodes, edges);
-      useToastStore.getState().showToast(t('aiExt.changesApplied', 'Zmiany zostały pomyślnie zastosowane na płótnie.'), 'success');
+      useToastStore.getState().showToast(t('aiExt.changesApplied'), 'success');
     } catch (err) {
       console.error('Error applying update:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -434,7 +464,9 @@ export const AiAssistantPanel = () => {
     const msg = text || input.trim();
     if (!msg || isLoading) return;
 
-    const shouldIncludeTools = includeTools || /katalog|narzędz|narzedzi|tools/i.test(msg);
+    const hasToolKeyword = (t: string) => /katalog|narzędz|narzedzi|tools|tool|catalog|recommend/i.test(t);
+    const isRecentToolContext = messages.slice(-3).some(m => hasToolKeyword(m.content) || (m.toolNames && m.toolNames.length > 0));
+    const shouldIncludeTools = includeTools || hasToolKeyword(msg) || isRecentToolContext;
 
     setInput('');
     setMessages(prev => {
@@ -457,13 +489,15 @@ export const AiAssistantPanel = () => {
     try {
       if (!activeWorkspace?.id) throw new Error(t('aiExt.noWorkspace'));
 
-      const toolNames = (ENABLE_TOOL_SUGGESTIONS && shouldIncludeTools) ? allTools.map(t => t.name) : [];
+      const toolNames = (ENABLE_TOOL_SUGGESTIONS && shouldIncludeTools) ? allTools.map(tool => tool.shortDesc ? `[${t('aiExt.toolLabel')}: ${tool.name}]\n${tool.shortDesc}` : `[${t('aiExt.toolLabel')}: ${tool.name}]`) : [];
+      const promoToolNames = (ENABLE_TOOL_SUGGESTIONS && shouldIncludeTools) ? allTools.filter(tool => tool.promo).map(tool => tool.name) : [];
       const limits = getTierLimits(user?.tier);
       
       const contextData = {
         nodes,
         edges,
         toolNames,
+        promoToolNames,
         lang: i18n.language,
         latestMessage: msg
       };
@@ -485,7 +519,12 @@ export const AiAssistantPanel = () => {
         abortControllerRef.current.signal
       );
 
-      const mentionedTools = (ENABLE_TOOL_SUGGESTIONS && shouldIncludeTools) ? findMentionedTools(response) : [];
+      // Extract tools from structured workflow-tools JSON block first; fallback to text matching
+      let mentionedTools: string[] = [];
+      if (ENABLE_TOOL_SUGGESTIONS && shouldIncludeTools) {
+        const toolNamesFromJson = parseToolsFromJson(response);
+        mentionedTools = toolNamesFromJson.length > 0 ? toolNamesFromJson : findMentionedTools(response);
+      }
       const workflowJson = parseWorkflowJson(response);
       const workflowUpdate = parseWorkflowUpdate(response);
       
@@ -493,14 +532,19 @@ export const AiAssistantPanel = () => {
       const jsonParseError = hasWorkflowCodeBlock && !workflowJson && !workflowUpdate;
 
       // Strip all code blocks that contain workflow data (any format variation)
-      let cleanResponse = response;
+      // Generic: cut workflow-tools block (model-text-agnostic)
+      let cleanResponse = response
+        .replace(/```(?:json)?\s*workflow-tools[\s\S]*?```[\s]*/gi, '')
+        .replace(/[Oo]to podsumowanie[^.\n]*?:?\s*/gi, '')
+        .replace(/(?:Oto |Podaję |Poniżej znajdziesz )?[^.\n]*w formacie JSON[^.\n]*:?\s*/gi, '');
+
       if (workflowJson || workflowUpdate || jsonParseError) {
-        cleanResponse = response
+        cleanResponse = cleanResponse
           .replace(/```(?:json)?\s*workflow-json[\s\S]*?```/g, '')
           .replace(/```(?:json)?\s*workflow-update[\s\S]*?```/g, '')
-          .replace(/```[\s\S]*?```/g, '')
-          .trim();
+          .replace(/```[\s\S]*?```/g, '');
       }
+      cleanResponse = cleanResponse.trim();
 
       setMessages(prev => {
         const updated = [...prev, {
@@ -637,14 +681,14 @@ export const AiAssistantPanel = () => {
         if (currentConditionType === 'rule') {
           const currentRules = (Array.isArray(edData.rules) ? edData.rules : []) as Record<string, unknown>[];
           if (currentRules.length > 0) {
-            const parts = currentRules.map((r: Record<string, unknown>) => r.variable ? (r.operator === 'notEmpty' ? `${r.variable} ≠ ∅` : `${r.variable} ${r.operator || '=='} ${r.value || ''}`) : t('props.incomplete', 'Niekompletna'));
-            const joiner = edData.ruleCombinator === 'OR' ? t('props.orJoiner', ' LUB ') : t('props.andJoiner', ' ORAZ ');
+            const parts = currentRules.map((r: Record<string, unknown>) => r.variable ? (r.operator === 'notEmpty' ? `${r.variable} ≠ ∅` : `${r.variable} ${r.operator || '=='} ${r.value || ''}`) : t('props.incomplete'));
+            const joiner = edData.ruleCombinator === 'OR' ? t('props.orJoiner') : t('props.andJoiner');
             newLabel = parts.join(joiner);
           } else {
-            newLabel = t('props.noConditionsLabel', 'Brak warunków');
+            newLabel = t('props.noConditionsLabel');
           }
         } else if (currentConditionType === 'else') {
-          newLabel = t('props.elseAutoLabel', 'Inaczej (Else)');
+          newLabel = t('props.elseAutoLabel');
         } else if (currentConditionType === 'text') {
           newLabel = edData.customText !== undefined ? edData.customText : newLabel;
         }
@@ -743,7 +787,7 @@ export const AiAssistantPanel = () => {
       setTimeout(() => {
         useCanvasStore.getState().autoLayout();
       }, 100);
-      useToastStore.getState().showToast(t('aiExt.changesApplied', 'Zmiany zostały pomyślnie zastosowane na płótnie.'), 'success');
+      useToastStore.getState().showToast(t('aiExt.changesApplied'), 'success');
     } catch (err) { 
       console.error('Error applying JSON:', err); 
       useToastStore.getState().showToast(t('common.error'), 'error');
@@ -756,21 +800,26 @@ export const AiAssistantPanel = () => {
     if (carouselRef.current) carouselRef.current.scrollBy({ left: dir === 'left' ? -220 : 220, behavior: 'smooth' });
   };
 
-  // Use DB prompts with fallback — localized to active language
+  // Use DB prompts exclusively per user request
   const isPl = i18n.language === 'pl';
-  const activePrompts: (QuickPrompt & { includeTools?: boolean })[] = quickPrompts.length > 0 
-    ? quickPrompts.map(qp => ({
-        ...qp,
-        label: isPl ? qp.label : (qp.label_en || qp.label),
-        prompt: isPl ? qp.prompt : (qp.prompt_en || qp.prompt)
-      })) 
-    : [
-    { id: 'f1', label: `✦ ${t('ai.createProcess')}`, prompt: t('aiExt.quickPrompts.createProcess'), context: 'workflow' as const },
-    { id: 'f2', label: `✨ ${t('ai.smartNames')}`, prompt: t('aiExt.quickPrompts.smartNames'), context: 'workflow' as const },
-    { id: 'f3', label: `≡ ${t('ai.analyzeProcess')}`, prompt: t('aiExt.quickPrompts.analyzeProcess'), context: 'workflow' as const },
-    ...(ENABLE_TOOL_SUGGESTIONS && allTools.length > 0 ? [{ id: 'f4', label: `🔧 ${t('ai.recommendTools')}`, prompt: t('aiExt.quickPrompts.recommendTools'), context: 'workflow' as const, includeTools: true }] : []),
-    { id: 'f5', label: `📋 ${t('ai.addStages')}`, prompt: t('aiExt.quickPrompts.addStages'), context: 'workflow' as const },
-  ];
+  const activePrompts: (QuickPrompt & { includeTools?: boolean })[] = quickPrompts.map(qp => ({
+    ...qp,
+    label: isPl ? qp.label : (qp.label_en || qp.label),
+    prompt: isPl ? qp.prompt : (qp.prompt_en || qp.prompt)
+  }));
+
+  /** Determines if a prompt should get brand (gold) styling — driven strictly by DB `variant` field. */
+  const isBrandPrompt = (qp: QuickPrompt & { includeTools?: boolean }) => {
+    return qp.variant === 'brand';
+  };
+
+  const sortedPrompts = [...activePrompts].sort((a, b) => {
+    const aBrand = isBrandPrompt(a);
+    const bBrand = isBrandPrompt(b);
+    if (aBrand && !bBrand) return 1;
+    if (!aBrand && bBrand) return -1;
+    return 0;
+  });
 
   if (!isOpen || isViewMode) return null;
 
@@ -824,7 +873,16 @@ export const AiAssistantPanel = () => {
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin scrollbar-thumb-[#2a2a2a]">
           {selectedTool.logoUrl && (
-            <div className="rounded-xl overflow-hidden -mx-5 -mt-4">
+            <div className="relative rounded-xl overflow-hidden -mx-5 -mt-4">
+              {selectedTool.promo && (
+                <div className="absolute top-2 left-2 z-10">
+                  <SimpleTooltip content={t('aiExt.promoTool')}>
+                    <div className="w-6 h-6 rounded-full bg-brand-gold flex items-center justify-center shadow-lg text-white cursor-help">
+                      <Star size={12} fill="currentColor" stroke="none" />
+                    </div>
+                  </SimpleTooltip>
+                </div>
+              )}
               <img loading="lazy" src={selectedTool.logoUrl} alt={selectedTool.name} className="w-full h-auto object-cover" />
             </div>
           )}
@@ -886,7 +944,7 @@ export const AiAssistantPanel = () => {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full bg-secondary overflow-hidden shrink-0 mt-0.5">
-                  <img loading="lazy" src="/a1.webp" alt="Gryf" className="w-full h-full object-cover" />
+                  <img loading="lazy" src="/a1.webp" alt={t('aiExt.altGryf')} className="w-full h-full object-cover" />
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-foreground font-semibold">{t('aiExt.greeting')}</p>
@@ -897,8 +955,16 @@ export const AiAssistantPanel = () => {
                 <>
                   <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-bold pl-10">{t('ai.quickActions')}</p>
                   <div className="flex flex-wrap gap-2 pl-10">
-                    {activePrompts.map((qp, i) => (
-                      <button key={i} onClick={() => handleSend(qp.prompt, !!qp.includeTools, qp.label)} className="text-[12px] font-semibold text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated px-4 py-2 rounded-full transition-all">
+                    {sortedPrompts.map((qp, i) => (
+                      <button 
+                        key={i} 
+                        onClick={() => handleSend(qp.prompt, !!qp.includeTools, qp.label)} 
+                        className={`text-[12px] font-semibold px-4 py-2 rounded-full transition-all ${
+                          isBrandPrompt(qp)
+                            ? 'bg-brand-gold text-white hover:bg-brand-gold/90'
+                            : 'text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated'
+                        }`}
+                      >
                         {qp.label}
                       </button>
                     ))}
@@ -912,7 +978,7 @@ export const AiAssistantPanel = () => {
             <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'items-start'}`}>
               {msg.role === 'assistant' && (
                 <div className="w-6 h-6 rounded-full bg-secondary overflow-hidden shrink-0 mt-0.5">
-                  <img loading="lazy" src="/a1.webp" alt="Gryf" className="w-full h-full object-cover" />
+                  <img loading="lazy" src="/a1.webp" alt={t('aiExt.altGryf')} className="w-full h-full object-cover" />
                 </div>
               )}
               <div className={`max-w-[85%] ${
@@ -942,12 +1008,21 @@ export const AiAssistantPanel = () => {
                     </div>
                     <div ref={carouselRef} className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
                       {msg.toolNames.map((name, ti) => {
-                        const tool = allTools.find(t => t.name === name);
+                        const tool = allTools.find(at => at.name === name);
                         if (!tool) return null;
                         const colorClass = CARD_COLORS[ti % CARD_COLORS.length];
                         return (
                           <div key={tool.id} className="min-w-[200px] max-w-[200px] shrink-0 rounded-xl overflow-hidden bg-secondary transition-all snap-start group flex flex-col">
-                            <div className="h-[120px] overflow-hidden flex items-center justify-center">
+                            <div className="relative h-[120px] overflow-hidden flex items-center justify-center">
+                              {tool.promo && (
+                                <div className="absolute top-2 left-2 z-10">
+                                  <SimpleTooltip content={t('aiExt.promoTool')}>
+                                    <div className="w-6 h-6 rounded-full bg-brand-gold flex items-center justify-center shadow-lg text-white cursor-help">
+                                      <Star size={12} fill="currentColor" stroke="none" />
+                                    </div>
+                                  </SimpleTooltip>
+                                </div>
+                              )}
                               {tool.logoUrl ? (
                                 <img loading="lazy" src={tool.logoUrl} alt={tool.name} className="w-full h-full object-cover" />
                               ) : (
@@ -958,8 +1033,8 @@ export const AiAssistantPanel = () => {
                             </div>
                             <div className="p-3 bg-secondary flex flex-col flex-1">
                               <h4 className="text-[12px] font-bold text-foreground mb-1">{tool.name}</h4>
-                              <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-4 flex-1">{tool.shortDesc}</p>
-                              <button onClick={() => setSelectedTool(tool)} className="w-full mt-3 text-[10px] font-bold text-foreground bg-surface-elevated hover:bg-border-strong py-2 rounded-xl transition-colors cursor-pointer">
+                              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4 flex-1">{tool.shortDesc}</p>
+                              <button onClick={() => setSelectedTool(tool)} className="w-full mt-3 text-[11px] font-bold text-foreground bg-surface-elevated hover:bg-border-strong py-2 rounded-xl transition-colors cursor-pointer">
                                 {t('aiExt.moreAboutTool')}
                               </button>
                             </div>
@@ -1013,7 +1088,7 @@ export const AiAssistantPanel = () => {
             <div className="flex flex-col gap-3 items-start">
               <div className="flex gap-3 items-start">
                 <div className="w-6 h-6 rounded-full bg-secondary overflow-hidden shrink-0">
-                  <img loading="lazy" src="/a1.webp" alt="Gryf" className="w-full h-full object-cover" />
+                  <img loading="lazy" src="/a1.webp" alt={t('aiExt.altGryf')} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <Loader2 size={12} className="animate-spin" /> {t('aiExt.thinking')}
@@ -1029,7 +1104,7 @@ export const AiAssistantPanel = () => {
                   }
                 }}
               >
-                ■ {t('aiExt.stopGenerating', 'Zatrzymaj generowanie')}
+                ■ {t('aiExt.stopGenerating')}
               </Button>
             </div>
           )}
@@ -1076,8 +1151,17 @@ export const AiAssistantPanel = () => {
 
           {messages.length > 0 && hasKey && (
             <div className="flex flex-wrap gap-2 mt-2.5">
-              {activePrompts.filter(qp => qp.prompt).map((qp, i) => (
-                <button key={i} onClick={() => handleSend(qp.prompt, !!qp.includeTools)} disabled={isLoading} className="text-[12px] font-semibold text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated px-3.5 py-1.5 rounded-full transition-all disabled:opacity-30">
+              {sortedPrompts.filter(qp => qp.prompt).map((qp, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => handleSend(qp.prompt, !!qp.includeTools, qp.label)} 
+                  disabled={isLoading} 
+                  className={`text-[12px] font-semibold px-3.5 py-1.5 rounded-full transition-all disabled:opacity-30 ${
+                    isBrandPrompt(qp)
+                      ? 'bg-brand-gold text-white hover:bg-brand-gold/90'
+                      : 'text-muted-foreground hover:text-foreground bg-secondary hover:bg-surface-elevated'
+                  }`}
+                >
                   {qp.label}
                 </button>
               ))}

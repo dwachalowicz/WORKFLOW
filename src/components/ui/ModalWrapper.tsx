@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import i18n from '@/i18n/config'
 
 /* ─── Overlay ─── */
 
@@ -123,7 +124,7 @@ export const ModalHeader = ({
         {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
       </div>
     </div>
-    <Button variant="iconGhost" size="icon" onClick={onClose} aria-label="Close" className="shrink-0 ml-2">
+    <Button variant="iconGhost" size="icon" onClick={onClose} aria-label={i18n.t('common.close')} className="shrink-0 ml-2">
       <X size={18} />
     </Button>
   </div>

@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 onClick={this.handleReset}
                 className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-xl hover:bg-secondary/80 transition-colors"
               >
-                {i18n.t('common.tryAgain', 'Spróbuj ponownie')}
+                {i18n.t('common.tryAgain')}
               </button>
               <button
                 onClick={this.handleReload}

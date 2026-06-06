@@ -201,7 +201,7 @@ export const GroupsTab = () => {
                   <Camera className="w-5 h-5 text-foreground" />
                 </div>
               </div>
-              <p className="text-[10px] text-muted-foreground text-center mt-1">{t('common.avatar', { defaultValue: 'Avatar' })}</p>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">{t('common.avatar')}</p>
               {newAvatarPreview && (
                 <button onClick={(e) => { e.stopPropagation(); setNewAvatarBlob(null); setNewAvatarPreview(''); }}
                   className="text-[10px] text-muted-foreground hover:text-destructive text-center mt-0.5 transition-colors">{t('common.delete')}</button>

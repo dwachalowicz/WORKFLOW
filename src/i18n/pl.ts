@@ -35,6 +35,9 @@ export const pl = {
     pendingSave: 'po zapisie',
     more: 'Więcej',
     locked: 'Zablokowane (limit)',
+    lightMode: 'Tryb jasny',
+    darkMode: 'Tryb ciemny',
+    changeColor: 'Zmień kolor',
     loadMore: 'Załaduj więcej',
     loadMoreProcesses: 'Załaduj więcej procesów',
     goToDashboard: 'Wróć do kokpitu',
@@ -139,7 +142,6 @@ export const pl = {
     membersPerWs: 'członków/ws',
     validUntil: 'Ważny do: {{date}}',
     validLifetime: 'Ważny: bezterminowo',
-    changeAvatar: 'Zmień avatar',
     zoom: 'Powiększenie',
     confirmEmailTitle: 'Potwierdź zmianę e-maila',
     confirmEmailDesc: 'Kliknij przycisk poniżej, aby zatwierdzić swój nowy adres e-mail.',
@@ -157,7 +159,7 @@ export const pl = {
     workspaces: 'Workspace\'y',
     processesAndFolders: 'Procesy i foldery',
     workspace: 'Workspace',
-    switchTheme: 'Przełącz motyw',
+    switchTheme: 'Motyw i kolor',
     manageWorkspaces: 'Zarządzaj Workspace\'ami',
     processMap: 'Mapa procesów',
     notifications: 'Powiadomienia',
@@ -694,6 +696,7 @@ export const pl = {
     invitedToCollaborateBy: '{{name}} zaprosił(a) Cię do współtworzenia procesów w tym Workspace.',
     asRole: 'Jako: {{role}}',
     joinRequestSent: 'Wysłano prośbę o dołączenie. Oczekuje na akceptację.',
+    emailPlaceholder: 'jan@firma.pl',
   },
 
   // Settings
@@ -756,7 +759,7 @@ export const pl = {
     aiMemory: 'Pamięć asystenta (ilość wiadomości)',
     memoryShort: 'Krótka',
     memoryLong: 'Długa',
-    memoryDowngraded: 'Uwaga: Twój poprzedni limit to {{previous}}, but obecny plan pozwala maksymalnie na {{max}}. Przesunięcie suwaka zaktualizuje wartość.',
+    memoryDowngraded: 'Uwaga: Twój poprzedni limit to {{previous}}, ale obecny plan pozwala maksymalnie na {{max}}. Przesunięcie suwaka zaktualizuje wartość.',
     memoryWarning: 'Wskazówka: Dłuższa pamięć daje szerszy kontekst, ale zużywa więcej tokenów API za każdym razem.',
     viewerReadOnly: 'Masz dostęp tylko do odczytu w tym workspace. Skontaktuj się z właścicielem, aby uzyskać wyższe uprawnienia.',
   },
@@ -1143,9 +1146,6 @@ export const pl = {
     toUseAi: 'aby korzystać z AI.',
     yourPlan: 'Twój plan',
     stopGenerating: 'Zatrzymaj generowanie',
-    generationStopped: 'Generowanie odpowiedzi zostało zatrzymane.',
-    jsonParseErrorTitle: '⚠️ Błąd odczytu danych',
-    jsonParseErrorDesc: 'Asystent wygenerował strukturę z błędami w formacie JSON, przez co nie można wyświetlić przycisku do aktualizacji mapy. Poproś go o wygenerowanie danych ponownie i bez obcinania.',
     // Voice & Image
     voiceRecord: 'Nagraj głos',
     voiceRecording: 'Nagrywanie...',
@@ -1156,6 +1156,9 @@ export const pl = {
     imageTooLarge: 'Zdjęcie jest za duże. Maks. rozmiar: 5MB.',
     imageAttached: 'Zdjęcie dołączone',
     describeImage: 'Opisz co widzisz na tym obrazku.',
+    toolLabel: 'Narzędzie',
+    altYou: 'Ty',
+    altGryf: 'Gryf',
   },
 
   // Templates Modal
@@ -1218,6 +1221,8 @@ export const pl = {
     deleteWorkspaceFail: 'Wystąpił błąd podczas usuwania Workspace.',
     avatarTooLarge: 'Plik avatara jest za duży (maks. 2MB)',
     invalidImageType: 'Nieprawidłowy typ pliku graficznego',
+    somethingWentWrong: 'Coś poszło nie tak',
+    tryAgain: 'Spróbuj ponownie',
   },
 
   ui: {
@@ -1247,7 +1252,7 @@ export const pl = {
     editors: 'Edytorzy:',
     readers: 'Czytelnicy:',
     minimize: 'Minimalizuj',
-    maximize: 'Maximize',
+    maximize: 'Maksymalizuj',
     verifying: 'Weryfikacja...',
     pleaseWait: 'Proszę czekać',
   },
@@ -1287,7 +1292,6 @@ export const pl = {
     mustBeLoggedIn: 'Musisz być zalogowany.',
     saveProcessFirst: 'Najpierw zapisz proces, aby utworzyć wersję.',
     duplicateName: 'Proces o nazwie "{{name}}" już istnieje w tym workspace. Wybierz inną nazwę.',
-    viewerCannotSave: 'Masz rolę obserwatora w tym workspace — akcja niedozwolona.',
   },
 
   // Comments
@@ -1314,20 +1318,6 @@ export const pl = {
 
   // Tutorial
   tutorial: {
-    welcome: 'Witaj w GRYF.AI Workflow!',
-    welcomeContent: 'Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
-    navBar: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
-    saveBar: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
-    canvas: 'To Twoje Płótno (Canvas). Kliknij PRAWYM przyciskiem myszy w dowolnym miejscu, aby otworzyć Menu Kołowe (Radial Menu).',
-    radialMenu: 'Oto Menu Kołowe! Z niego wstawisz: Etapy procesu, Bazy danych, Podprocesy (Inne Workflow), punkt Końcowy (Koniec), a także zduplikujesz lub usuniesz istniejące elementy.',
-    propertiesPanel: 'Gdy zaznaczysz węzeł, tu pojawią się jego szczegóły. Ustawisz tu czas na wykonanie (SLA), przypiszesz Edytorów, Czytelników i Decydentów oraz dodasz zmienne i instrukcje stanowiskowe.',
-    linter: 'To nasz inteligentny Walidator. Dba o to, by proces nie miał "ślepych uliczek" i sprawdza m.in. czy baza danych ma przypisane relacje.',
-    bottomControls: 'W tym dolnym, prawym menu znajdziesz kontrolki przybliżania/oddalania, centrowania widoku oraz przyciski Cofnij i Ponów.',
-    finish: 'Zakończ',
-    next: 'Dalej',
-    prev: 'Wstecz',
-    skip: 'Pomiń',
-
     step1: 'Witaj w GRYF.AI Workflow! Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
     step2: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
     step3: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
@@ -1380,7 +1370,6 @@ export const pl = {
     subworkflowLocked: 'Podprocesy dostępne od planu Medium',
     processMapLocked: 'Mapa procesów dostępna od planu Medium',
     templateTierRequired: 'Ten szablon wymaga wyższego planu',
-    reasonViewerRole: 'Masz rolę obserwatora w tym workspace — dostęp tylko do odczytu.',
     shareLocked: 'Udostępnianie publiczne dostępne od planu Medium',
     passwordLocked: 'Ochrona hasłem dostępna w planie Pro',
     crossWorkflowLocked: 'Triggery między workflow dostępne w planie Pro',
@@ -1472,7 +1461,8 @@ export const pl = {
       text1_3: "przez Gryfa",
       text7_1: "Przy rejestracji podajesz tylko swój",
       text7_2: "adres email",
-      text7_3: ", na który otrzymasz PIN. Żadnych haseł ani dodatkowych danych."
+      text7_3: ", na który otrzymasz PIN. Żadnych haseł ani dodatkowych danych.",
+      goRunYourFlow: 'GO RUN YOUR FLOW',
     },
     fullscreenmobilemenu: {
       text1: "Oferta",
@@ -1497,7 +1487,8 @@ export const pl = {
       text9: "Wpisz swój email",
       text10: "Twoja wiadomość...",
       text11: "Wyślij wiadomość",
-      blog: "Blog"
+      blog: "Blog",
+      closeForm: 'Zamknij formularz',
     },
     organizationsection: {
       html_1: "Połącz",
@@ -1635,7 +1626,7 @@ export const pl = {
       text1: "Zobacz"
     },
     languageselector: {
-      text1: "text-white/70 hover:text-white hover:bg-white/5"
+      text1: "Wybierz język"
     },
     navlinks: {
       text1: "Oferta",
@@ -1679,7 +1670,9 @@ export const pl = {
       tooltip4: "Ok, wszystko jasne!",
       oneClick: "1 prawy klik,",
       possibilities: "możliwości",
-      design: "Projektuj procesy biznesowe z"
+      design: "Projektuj procesy biznesowe z",
+      goRun: "GO RUN",
+      your: "YOUR"
     },
     contactpage: {
       text1: "Wystąpił błąd podczas wysyłania wiadomości. Spróbuj ponownie.",
@@ -1713,5 +1706,13 @@ export const pl = {
       searchPlaceholder: "Szukaj pytań...",
       noResults: "Brak wyników wyszukiwania."
     }
-  }
+  },
+
+  settings: {
+    language: "Język",
+  },
+
+  toast: {
+    warning: "Ostrzeżenie",
+  },
 };

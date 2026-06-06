@@ -108,11 +108,11 @@ export function useProcessFileOperations() {
           }
           // Size limits to prevent DoS
           if (json.nodes.length > 500) {
-            showToast(t('canvas.tooManyNodes', 'Plik zawiera zbyt wiele węzłów (max 500)'), 'error');
+            showToast(t('canvas.tooManyNodes'), 'error');
             return;
           }
           if (json.edges.length > 1000) {
-            showToast(t('canvas.tooManyEdges', 'Plik zawiera zbyt wiele połączeń (max 1000)'), 'error');
+            showToast(t('canvas.tooManyEdges'), 'error');
             return;
           }
           // Validate each node has required fields

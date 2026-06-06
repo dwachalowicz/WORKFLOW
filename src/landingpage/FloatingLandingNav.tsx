@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// import { useLandingTranslation } from './LandingTranslationContext';
+import { useLandingTranslation } from './LandingTranslationContext';
 import { Menu, Palette } from 'lucide-react';
 import { FullScreenMobileMenu } from './FullScreenMobileMenu';
 import { useThemeToggle, THEME_COLORS } from '../hooks/useThemeToggle';
@@ -11,6 +11,7 @@ import { NavLinks } from './components/NavLinks';
 const NavDivider = () => <div className="w-px h-6 bg-white/10 mx-1" />;
 
 export const FloatingLandingNav: React.FC = () => {
+  const { t } = useLandingTranslation();
   const { brandColor, changeBrandColor } = useThemeToggle();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -61,7 +62,7 @@ export const FloatingLandingNav: React.FC = () => {
               <button 
                 onClick={() => setIsColorMenuOpen(!isColorMenuOpen)}
                 className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors ${isColorMenuOpen ? 'bg-brand-gold/20 text-brand-gold border border-brand-gold/30' : 'bg-transparent text-white/70 hover:text-white hover:bg-white/10 border border-transparent'}`}
-                title="Theme Color"
+                title={t('landing.fullscreenmobilemenu.text5')}
               >
                 <Palette size={16} />
               </button>

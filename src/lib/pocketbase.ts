@@ -155,6 +155,8 @@ export interface AiModelRecord {
   provider: string;
   active: boolean;
   sort_order: number;
+  description_pl?: string;
+  description_en?: string;
   created: string;
   updated: string;
 }
@@ -226,7 +228,7 @@ interface TypedPocketBase extends PocketBase {
   collection(idOrName: 'WORKFLOW_ai_models'): RecordService<AiModelRecord>;
   collection(idOrName: 'WORKFLOW_quick_prompts'): RecordService<QuickPromptRecord>;
   collection(idOrName: 'KATALOG_NARZEDZI'): RecordService<KatalogNarzedzi>;
-  collection(idOrName: 'landing_translations'): RecordService<LandingTranslation>;
+  collection(idOrName: 'WORKFLOW_landing_translations'): RecordService<LandingTranslation>;
   collection(idOrName: string): RecordService;
 }
 

@@ -93,7 +93,6 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
       useToastStore.getState().showToast(
         t('tierLimits.templateTierRequired', {
           tier: template.tier_required,
-          defaultValue: `Ten szablon wymaga planu ${template.tier_required}. Zaktualizuj swój plan, aby go użyć. / This template requires ${template.tier_required} plan. Upgrade to use it.`
         }),
         'error'
       );

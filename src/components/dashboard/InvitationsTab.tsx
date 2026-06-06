@@ -80,7 +80,7 @@ export const InvitationsTab = () => {
                 <p className="text-sm text-muted-foreground">
                   {inv.invitedBy 
                     ? t('invitations.invitedToCollaborateBy', { name: inv.invitedBy.name || inv.invitedBy.email }) 
-                    : t('invitations.joinRequestSent', { defaultValue: 'Join request sent. Waiting for approval.' })}
+                    : t('invitations.joinRequestSent')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export const InvitationsTab = () => {
                   disabled={isProcessing}
                   className="flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <XCircle size={18} /> {inv.invitedBy ? t('invitations.reject') : t('common.cancel', { defaultValue: 'Cancel' })}
+                  <XCircle size={18} /> {inv.invitedBy ? t('invitations.reject') : t('common.cancel')}
                 </Button>
                 {inv.invitedBy && (
                   <Button 

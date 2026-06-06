@@ -21,7 +21,7 @@ import { getCroppedImg } from '@/lib/imageUtils';
 import { useClickOutside } from '@/hooks/useClickOutside';
 
 export const ProfileModal = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isProfileModalOpen, setProfileModalOpen } = useAuthStore();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -134,7 +134,7 @@ export const ProfileModal = () => {
         });
       } catch (aiErr) {
         console.warn('Could not save AI config (endpoint may not be deployed yet):', aiErr);
-        useToastStore.getState().showToast(t('profile.aiConfigSaveFail', 'Nie udało się zapisać ustawień AI'), 'error');
+        useToastStore.getState().showToast(t('profile.aiConfigSaveFail'), 'error');
       }
 
       await pb.collection('WORKFLOW_users').update(user.id, formData);
@@ -243,9 +243,9 @@ export const ProfileModal = () => {
     
     if (hasNameChange || hasAvatarChange || hasAiKeyChange) {
       const confirmed = await useConfirmStore.getState().confirm({
-        title: t('profile.unsavedChangesTitle', 'Niezapisane zmiany'),
-        message: t('profile.unsavedChangesMessage', 'Masz niezapisane zmiany. Czy na pewno chcesz zamknąć?'),
-        confirmLabel: t('common.close', 'Zamknij'),
+        title: t('profile.unsavedChangesTitle'),
+        message: t('profile.unsavedChangesMessage'),
+        confirmLabel: t('common.close'),
         cancelLabel: t('common.cancel'),
         variant: 'default',
       });
@@ -329,7 +329,7 @@ export const ProfileModal = () => {
                   <Input
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="twój@email.com"
+                    placeholder={t("profile.emailPlaceholder")}
                     className="bg-secondary/30"
                   />
                   <Button 
@@ -406,7 +406,7 @@ export const ProfileModal = () => {
                 <div className={`flex flex-col gap-3 p-5 sm:p-6 rounded-2xl border border-border/30 shadow-sm ${getTierBgColor(tier)}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('ui.yourPlan', 'Twój Plan')}</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('ui.yourPlan')}</span>
                       <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${getTierColor(tier)} ${getTierBgColor(tier)} ring-1 ring-inset ring-brand-gold/20 flex items-center`}>
                         {getTierLabel(tier)}
                       </span>
@@ -421,7 +421,7 @@ export const ProfileModal = () => {
                       className="flex items-center gap-1.5 text-xs font-bold text-brand-gold hover:text-brand-gold/80 transition-colors bg-brand-gold/10 px-3 py-1.5 rounded-full hover:bg-brand-gold/20"
                     >
                       <Crown size={14} />
-                      {t('tierCompare.comparePlans', 'Porównaj plany')}
+                      {t('tierCompare.comparePlans')}
                     </button>
                   </div>
                   <div className="h-px w-full bg-border/30 my-1" />
@@ -556,8 +556,15 @@ export const ProfileModal = () => {
                               aiModel === m.modelId ? 'bg-brand-gold/10 text-brand-gold font-bold' : 'text-foreground'
                             }`}
                           >
-                            <span>{m.label}</span>
-                            <span className="text-[10px] text-muted-foreground/60 font-mono">{m.modelId}</span>
+                            <div className="flex flex-col gap-0.5">
+                              <span>{m.label}</span>
+                              {(m.description_pl || m.description_en) && (
+                                <span className={`text-[10px] ${aiModel === m.modelId ? 'text-brand-gold/80' : 'text-muted-foreground/70'} font-normal`}>
+                                  {i18n.language === 'pl' ? (m.description_pl || m.description_en) : (m.description_en || m.description_pl)}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground/60 font-mono shrink-0 ml-2">{m.modelId}</span>
                           </button>
                         ))}
                         {filteredModels.length === 0 && (
@@ -636,7 +643,7 @@ export const ProfileModal = () => {
                 </div>
                 <div className="flex flex-col justify-center gap-3 bg-secondary/30 p-3 rounded-2xl border border-border/50 flex-1 min-h-[44px]">
                   <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground px-1">
-                    <span>{t('settingsTab.memoryShort', 'Krótka')} (1)</span>
+                    <span>{t('settingsTab.memoryShort')} (1)</span>
                     <span className={`font-bold text-xs ${aiMemoryLength && aiMemoryLength > tierLimits.aiMemoryLength ? 'text-destructive' : 'text-foreground'}`}>
                       {aiMemoryLength ?? tierLimits.aiMemoryLength}
                     </span>

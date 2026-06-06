@@ -1124,7 +1124,7 @@ export const ProcessesTab = () => {
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors text-left"
                 >
                   <LayoutGrid size={14} className="text-muted-foreground" />
-                  {isProcessLocked ? t('processes.openReadOnly', 'Otwórz do odczytu') : t('processes.openEditor')}
+                  {isProcessLocked ? t('processes.openReadOnly') : t('processes.openEditor')}
                 </button>
                 {!isProcessLocked && !isViewer && (
                   <button

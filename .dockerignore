@@ -5,11 +5,6 @@ dist
 .env.*
 !.env.example
 
-# Dev/audit artifacts
-do_usuniecia/
-PLIKI_WSTEPNE/
-scripts/
-
 # Tests (not needed in production image)
 e2e/
 test-results/
@@ -21,30 +16,6 @@ vitest.config.ts
 # Temp files
 *.log
 *.json.bak
-compile_errors.txt
-lint_output*.txt
-*-eslint.json
-*-eslint.txt
-eslint-*.json
-eslint-*.txt
-final-eslint*
-total-eslint*
-new-total-eslint*
-remaining-eslint*
-pb_collections_dump.json
-prompt.md
-implementation_plan.md
-
-# Test/audit scripts in root
-audit_pb.cjs
-inspect_*.cjs
-pen_test.cjs
-test_*.cjs
-test_*.ts
-scratch_*.mjs
-parse_rules.cjs
-extract-eslint.cjs
-patch_pb_rules.cjs
 
 # IDE
 .vscode

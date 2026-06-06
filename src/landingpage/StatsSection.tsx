@@ -99,7 +99,7 @@ export const StatsSection: React.FC = () => {
                    transition={{ duration: 0.5, delay: 0.6 }}
                    className="flex items-center justify-between bg-[#25262b] border border-white/10 p-3 rounded-xl shadow-lg">
                    <div className="flex items-center gap-3">
-                     <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-8 h-8 rounded-full border border-gray-600 object-cover" alt="Sprzedaż" />
+                     <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-8 h-8 rounded-full border border-gray-600 object-cover" alt={t("landing.stats.sales")} />
                      <span className="font-bold text-sm text-white">{t('landing.statssection.text13')}</span>
                    </div>
                    <div className="flex gap-4 text-xs text-white/70">

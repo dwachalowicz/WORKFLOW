@@ -167,7 +167,7 @@ export const MembersTab = () => {
       // Refresh pending members count in the nav badge
       useAuthStore.getState().fetchWorkspaces();
       if (newStatus === 'active') {
-        useToastStore.getState().showToast(t('members.memberApproved', { defaultValue: 'Członek zatwierdzony' }), 'success');
+        useToastStore.getState().showToast(t('members.memberApproved'), 'success');
       }
     } catch (err) {
       console.error('Error updating member status:', err);
@@ -219,9 +219,9 @@ export const MembersTab = () => {
   const handleLeaveWorkspace = async () => {
     if (!activeWorkspace) return;
     const confirmed = await useConfirmStore.getState().confirm({
-      title: t('workspaces.leaveConfirm', { defaultValue: 'Czy na pewno chcesz opuścić ten workspace? / Are you sure you want to leave this workspace?' }),
+      title: t('workspaces.leaveConfirm'),
       message: `"${activeWorkspace.name}"`,
-      confirmLabel: t('workspaces.leaveWorkspace', { defaultValue: 'Opuść / Leave' }),
+      confirmLabel: t('workspaces.leaveWorkspace'),
       cancelLabel: t('common.cancel'),
     });
     if (!confirmed) return;

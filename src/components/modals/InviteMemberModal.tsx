@@ -116,7 +116,7 @@ export const InviteMemberModal = ({ isOpen, onClose, workspaceId }: InviteMember
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john@company.com"
+                    placeholder={t('invitations.emailPlaceholder')}
                     disabled={isLoading}
                     className="pl-10"
                     autoFocus

@@ -54,10 +54,10 @@ export const ThemeToggleButton = () => {
           className="fixed -translate-y-1/2 bg-card border border-border rounded-2xl shadow-2xl p-1.5 flex items-center gap-2 z-[100] animate-in fade-in slide-in-from-left-2 duration-150"
           style={{ top: dropdownPos.top, left: dropdownPos.left }}
         >
-          <SimpleTooltip content={isDark ? 'Light Mode' : 'Dark Mode'} side="top">
+          <SimpleTooltip content={isDark ? t('common.lightMode') : t('common.darkMode')} side="top">
             <button
               onClick={toggleTheme}
-              aria-label={isDark ? t('common.lightMode', 'Tryb jasny') : t('common.darkMode', 'Tryb ciemny')}
+              aria-label={isDark ? t('common.lightMode') : t('common.darkMode')}
               className="w-8 h-8 rounded-full bg-surface-elevated hover:bg-secondary flex items-center justify-center text-muted-foreground hover:text-brand-gold transition-colors"
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}

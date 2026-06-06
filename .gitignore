@@ -33,4 +33,12 @@ test-results/
 playwright-report/
 
 # Dev artifacts
-*.json.bak
+*.json.bak
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# TypeScript build cache
+*.tsbuildinfo

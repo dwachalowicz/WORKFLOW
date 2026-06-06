@@ -12,6 +12,31 @@ globalThis.escapeHtml = function(str) {
         .replace(/'/g, '&#039;');
 };
 
+globalThis.parsePbJson = function(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
+    
+    var str = "";
+    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
+        for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
+        try { str = decodeURIComponent(escape(str)); } catch(e) {}
+    } else if (typeof raw === "string") {
+        str = raw;
+    } else {
+        return [];
+    }
+
+    try {
+        var parsed = JSON.parse(str);
+        if (typeof parsed === "string") parsed = JSON.parse(parsed);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
+    } catch(e) {}
+    
+    return [];
+};
+
+// PROMPT MODULE FUNCTIONS MOVED INSIDE ROUTER FOR GOJA COMPATIBILITY
 
 // =====================================================
 // ROUTE: POST /api/ai/chat — AI Chat Proxy
@@ -63,6 +88,67 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         return false;
     }
 
+    function buildToolsSection(lang, toolNames, promoToolNames) {
+        if (!toolNames || toolNames.length === 0) return "";
+
+        var promoMsg = "";
+        if (promoToolNames && promoToolNames.length > 0) {
+            promoMsg = lang === 'pl'
+                ? " Oznaczenie PROMO posiadają narzędzia: " + promoToolNames.join(', ') + ". Rekomenduj je TYLKO jeśli faktycznie pasują kontekstowo do analizowanego procesu — sam fakt oznaczenia PROMO nie wystarczy."
+                : " The following tools have the PROMO tag: " + promoToolNames.join(', ') + ". Recommend them ONLY if they are genuinely contextually relevant to the analyzed process — the PROMO tag alone is not sufficient.";
+        }
+
+        var jsonFormat = '\n```json workflow-tools\n{\n  '
+            + (lang === 'pl' ? '"Dokładna Nazwa Narzędzia z katalogu": "Krótki opis jak to narzędzie pomoże w tym konkretnym procesie/etapie."' : '"Exact Tool Name from catalog": "Short explanation of how this tool helps in this specific process/stage."')
+            + '\n}\n```';
+
+        var scopeGuard = lang === 'pl'
+            ? "\nSkup się TYLKO na opisie narzędzi. Absolutnie NIE wspominaj o przypisywaniu ról, edytorach, czytelnikach, decydentach ani o panelu właściwości."
+            : "\nFocus ONLY on describing the tools. Absolutely DO NOT mention assigning roles, editors, readers, decision makers, or the properties panel.";
+
+        if (lang === 'pl') {
+            return "\nKatalog narzędzi (" + toolNames.length + "): " + toolNames.join(', ')
+                + "\nGdy proszony o polecenie narzędzi, postępuj dwutorowo:"
+                + "\n1) Poleć narzędzia do OGÓLNEJ automatyzacji i zarządzania całym procesem (np. orkiestracja, integracje, zarządzanie zadaniami)."
+                + "\n2) Przeanalizuj KAŻDY węzeł/etap procesu OSOBNO i dopasuj do niego SPECYFICZNE narzędzia z katalogu na podstawie ich opisów. Np. jeśli etap dotyczy 'generowania audio/mp3', poleć narzędzia do generowania muzyki (np. Suno); jeśli etap dotyczy 'tworzenia grafik', poleć narzędzia graficzne — nie ograniczaj się do ogólników."
+                + "\nPoleć WSZYSTKIE narzędzia z katalogu, które kontekstowo pasują — zarówno ogólne jak i specyficzne per-etap. Nie ograniczaj się do 3–5 — jeśli pasuje 10, 20 lub 30 narzędzi, wymień je wszystkie."
+                + promoMsg
+                + " Używaj DOKŁADNYCH nazw z tego katalogu."
+                + " NA SAMYM KOŃCU ODPOWIEDZI umieść wyłącznie blok kodu json. NIE PISZ absolutnie niczego (żadnego tekstu wprowadzającego typu 'Oto json' czy 'w formacie') bezpośrednio przed tym blokiem. Format bloku:"
+                + jsonFormat
+                + "\nTo jest wymagane, by zasilić UI karuzeli."
+                + scopeGuard;
+        } else {
+            return "\nTool catalog (" + toolNames.length + "): " + toolNames.join(', ')
+                + "\nWhen asked to recommend tools, take a two-pronged approach:"
+                + "\n1) Recommend tools for GENERAL automation and management of the entire process (e.g., orchestration, integrations, task management)."
+                + "\n2) Analyze EACH node/stage of the process INDIVIDUALLY and match SPECIFIC tools from the catalog based on their descriptions. E.g., if a stage involves 'generating audio/mp3', recommend music generation tools (e.g. Suno); if a stage involves 'creating graphics', recommend graphic design tools — don't limit to generics."
+                + "\nRecommend ALL tools from the catalog that are contextually relevant — both general AND stage-specific. Do not limit yourself to 3–5 — if 10, 20, or 30 tools match, list them all."
+                + promoMsg
+                + " Use EXACT names from this catalog."
+                + " AT THE VERY END OF YOUR RESPONSE output only the json code block. DO NOT write absolutely anything (no introductory text) right before this block. Block format:"
+                + jsonFormat
+                + "\nThis is required to populate the UI carousel."
+                + scopeGuard;
+        }
+    }
+
+    function buildConstraints(lang, maxNodesPerProcess) {
+        if (lang === 'pl') {
+            return "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAĆ):"
+                + "\n- NIE MOŻESZ przypinać żadnych dodatkowych sub-procesów (nie używaj pola targetWorkflowId ani targetWorkflowName)."
+                + "\n- Limit węzłów na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedź NIE MOŻE przekroczyć tej liczby węzłów."
+                + '\n- Pamiętaj, by w jsonie używać tablicy stringów dla akcji: np. "enterActionTypes": ["email"], "exitActionTypes": ["webhook"].'
+                + '\n- KRAWĘDZIE BAZODANOWE: Gdy tworzysz krawędź DO lub OD węzła DATABASE, MUSISZ ustawić: sourceHandle:"db", targetHandle:"db" oraz data:{dbOperation:"read"} (dopuszczalne wartości: "read", "write", "readwrite"). Zwykłe krawędzie między etapami ZAWSZE muszą mieć sourceHandle:"right", targetHandle:"left" i NIE mogą mieć pola dbOperation.';
+        } else {
+            return "\nHARD CONSTRAINTS (YOU MUST FOLLOW THEM):"
+                + "\n- YOU CANNOT attach any additional sub-workflows (do not use targetWorkflowId or targetWorkflowName)."
+                + "\n- Node limit for your plan: " + maxNodesPerProcess + ". Your response MUST NOT exceed this number of nodes."
+                + '\n- Remember to use an array of strings for actions in json: e.g. "enterActionTypes": ["email"], "exitActionTypes": ["webhook"].'
+                + '\n- DATABASE EDGES: When creating an edge TO or FROM a DATABASE node, you MUST set: sourceHandle:"db", targetHandle:"db" and data:{dbOperation:"read"} (allowed values: "read", "write", "readwrite"). Regular edges between stages MUST use sourceHandle:"right", targetHandle:"left" and MUST NOT have a dbOperation field.';
+        }
+    }
+
     try {
         if (!e.auth) {
             return e.json(401, { message: "Not authenticated. Token is missing or invalid." });
@@ -95,6 +181,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         const nodes = contextData.nodes || [];
         const edges = contextData.edges || [];
         const toolNames = contextData.toolNames || [];
+        const promoToolNames = contextData.promoToolNames || [];
         const lang = contextData.lang || "pl";
         const latestMessage = contextData.latestMessage || "";
 
@@ -157,6 +244,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         let aiAccess = "none";
         let maxNodesPerProcess = 25;
         let debugErr = "";
+        let aiMemoryLength = 10;
         try {
             const configs = e.app.findRecordsByFilter(
                 "WORKFLOW_tier_config",
@@ -167,6 +255,8 @@ routerAdd("POST", "/api/ai/chat", (e) => {
             if (configs && configs.length > 0) {
                 aiAccess = configs[0].get("ai_access") || "none";
                 maxNodesPerProcess = configs[0].get("max_nodes_per_process") || 25;
+                let dbMem = Number(configs[0].get("ai_memory_length"));
+                if (!isNaN(dbMem) && dbMem > 0) aiMemoryLength = dbMem;
             } else {
                 debugErr = "No configs found for tier: " + effectiveTier;
             }
@@ -193,6 +283,15 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         let provider = user.get("ai_provider") || "openai";
         let model = user.get("ai_model") || "gpt-4o-mini";
         const temperature = user.get("ai_temperature") ?? 0.7;
+
+        let customMem = Number(user.get("ai_custom_memory"));
+        if (!isNaN(customMem) && customMem > 0 && customMem < aiMemoryLength) {
+            aiMemoryLength = customMem;
+        }
+        let trimmedMessages = messages;
+        if (trimmedMessages.length > aiMemoryLength) {
+            trimmedMessages = trimmedMessages.slice(-aiMemoryLength);
+        }
 
         // --- SYSTEM PROMPT GENERATION (Moved from client) ---
         let startNode = null;
@@ -235,8 +334,9 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         let startInfo = startNode ? "EXISTING START NODE: id=\"" + startNode.id + "\", position: x=" + Math.round((startNode.position && startNode.position.x) || 0) + ", y=" + Math.round((startNode.position && startNode.position.y) || 0) : "NO START NODE";
         let stopInfo = stopNodes.length > 0 ? "EXISTING STOP NODES: " + stopNodes.map(s => "id=\"" + s.id + "\" (x=" + Math.round((s.position && s.position.x) || 0) + ", y=" + Math.round((s.position && s.position.y) || 0) + ")").join(', ') : "NO STOP NODE";
 
-        let langInstruction = lang === 'pl' ? "WAŁ»NE: Zawsze odpowiadaj po polsku." : "IMPORTANT: You must always respond in English, regardless of the prompt language. Do not use Polish.";
-        let toolsSection = toolNames.length > 0 ? (lang === 'pl' ? "\nKatalog narzędzi (" + toolNames.length + "): " + toolNames.join(', ') + "\nGdy rekomenduj narzędzia, używaj DOKŁADNYCH nazw z tego katalogu." : "\nTool catalog (" + toolNames.length + "): " + toolNames.join(', ') + "\nWhen recommending tools, use EXACT names from this catalog.") : "";
+        let langInstruction = lang === 'pl' ? "WAŻNE: Zawsze odpowiadaj po polsku." : "IMPORTANT: You must always respond in English, regardless of the prompt language. Do not use Polish.";
+        
+        let toolsSection = buildToolsSection(lang, toolNames, promoToolNames);
 
         // Fetch prompt template
         let template = "";
@@ -267,11 +367,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
             .replace(/{{NODE_DESCRIPTIONS}}/g, () => nodeDescs || "  (empty workflow)")
             .replace(/{{FLOW}}/g, () => flow || "  (no connections)");
 
-        let constraints = lang === 'pl' 
-            ? "\nTWARDE OGRANICZENIA (MUSISZ ICH PRZESTRZEGAĆ):\n- NIE MOŻESZ przypinać żadnych dodatkowych sub-procesów (nie używaj pola targetWorkflowId ani targetWorkflowName).\n- Limit węzłów na Twoim planie: " + maxNodesPerProcess + ". Twoja odpowiedź NIE MOŻE przekroczyć tej liczby węzłów.\n- Pamiętaj, by w jsonie używać tablicy stringów dla akcji: np. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].\n- KRAWĘDZIE BAZODANOWE: Gdy tworzysz krawędź DO lub OD węzła DATABASE, MUSISZ ustawić: sourceHandle:\"db\", targetHandle:\"db\" oraz data:{dbOperation:\"read\"} (dopuszczalne wartości: \"read\", \"write\", \"readwrite\"). Zwykłe krawędzie między etapami ZAWSZE muszą mieć sourceHandle:\"right\", targetHandle:\"left\" i NIE mogą mieć pola dbOperation."
-            : "\nHARD CONSTRAINTS (YOU MUST FOLLOW THEM):\n- YOU CANNOT attach any additional sub-workflows (do not use targetWorkflowId or targetWorkflowName).\n- Node limit for your plan: " + maxNodesPerProcess + ". Your response MUST NOT exceed this number of nodes.\n- Remember to use an array of strings for actions in json: e.g. \"enterActionTypes\": [\"email\"], \"exitActionTypes\": [\"webhook\"].\n- DATABASE EDGES: When creating an edge TO or FROM a DATABASE node, you MUST set: sourceHandle:\"db\", targetHandle:\"db\" and data:{dbOperation:\"read\"} (allowed values: \"read\", \"write\", \"readwrite\"). Regular edges between stages MUST use sourceHandle:\"right\", targetHandle:\"left\" and MUST NOT have a dbOperation field.";
-        
-        systemContent += constraints;
+        systemContent += buildConstraints(lang, maxNodesPerProcess);
 
         if (template.indexOf("{{LANG_INSTRUCTION}}") === -1) {
             systemContent += "\n\n" + langInstruction;
@@ -326,8 +422,8 @@ routerAdd("POST", "/api/ai/chat", (e) => {
 
         // Inject System Prompt at the beginning of messages
         let finalMessages = [{ role: "system", content: systemContent }];
-        for (let i = 0; i < messages.length; i++) {
-            finalMessages.push({ role: messages[i].role, content: messages[i].content });
+        for (let i = 0; i < trimmedMessages.length; i++) {
+            finalMessages.push({ role: trimmedMessages[i].role, content: trimmedMessages[i].content });
         }
 
         // Call AI API
@@ -770,15 +866,7 @@ onRecordCreateRequest((e) => {
             : role;
 
         function getInvitationEmailHtml(wsName, subtitleText, roleLabel, ctaText, inviterName, inviterEmail) {
-            function escapeHtml(str) {
-                if (!str) return '';
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-            }
+            // escapeHtml is defined globally via globalThis.escapeHtml
             return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                 + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                 + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -865,15 +953,7 @@ onRecordCreateRequest((e) => {
 onRecordCreateRequest((e) => {
     e.next();
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
+    // escapeHtml is defined globally via globalThis.escapeHtml
 
     try {
         const record = e.record;
@@ -1415,7 +1495,8 @@ onRecordCreateRequest(function(e) {
     var limits = {
         maxProcesses: 0, maxNodesPerProcess: 0, maxEdgesPerProcess: 0,
         maxNotesPerProcess: 0, maxVariablesPerProcess: 0,
-        maxChecklistItemsPerNode: 0, canUseSubworkflows: false
+        maxChecklistItemsPerNode: 0, canUseSubworkflows: false,
+        canSharePublic: false, canShareWithPassword: false
     };
 
     try {
@@ -1431,6 +1512,10 @@ onRecordCreateRequest(function(e) {
             limits.maxChecklistItemsPerNode = gn(conf.get("max_checklist_items_per_node"));
             var sub = conf.get("can_use_subworkflows");
             limits.canUseSubworkflows = (sub === true || sub === "true" || sub === 1 || sub === "1");
+            var sp = conf.get("can_share_public");
+            limits.canSharePublic = (sp === true || sp === "true" || sp === 1 || sp === "1");
+            var swp = conf.get("can_share_with_password");
+            limits.canShareWithPassword = (swp === true || swp === "true" || swp === 1 || swp === "1");
         }
     } catch(err) {
         console.log("Error loading tier config in create hook: " + err);
@@ -1449,29 +1534,8 @@ onRecordCreateRequest(function(e) {
     }
 
     // Walidacja wnętrza procesu
-    function parsePbJson(raw) {
-        if (!raw) return [];
-        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
-        
-        var str = "";
-        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
-            for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
-            try { str = decodeURIComponent(escape(str)); } catch(e) {}
-        } else if (typeof raw === "string") {
-            str = raw;
-        } else {
-            return [];
-        }
-
-        try {
-            var parsed = JSON.parse(str);
-            if (typeof parsed === "string") parsed = JSON.parse(parsed);
-            if (Array.isArray(parsed)) return parsed;
-            if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
-        } catch(e) {}
-        
-        return [];
-    }
+    // parsePbJson is defined globally via globalThis.parsePbJson
+    var parsePbJson = globalThis.parsePbJson;
 
     var nodesArray = parsePbJson(record.getString("nodes"));
     var edgesArray = parsePbJson(record.getString("edges"));
@@ -1502,6 +1566,14 @@ onRecordCreateRequest(function(e) {
     if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiągnięty. / Variables limit (" + maxV + ") reached.");
     if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiągnięty. / Checklist limit (" + maxC + ") reached.");
 
+    if (record.get("isPublic") === true && !limits.canSharePublic) {
+        throw new BadRequestError("Udostępnianie publiczne nie jest dostępne w Twoim planie. / Public sharing is not available in your plan.");
+    }
+    var pubPass = record.getString("publicPassword");
+    if (pubPass && String(pubPass).trim() !== "" && !limits.canShareWithPassword) {
+        throw new BadRequestError("Zabezpieczenie hasłem nie jest dostępne w Twoim planie. / Password protection is not available in your plan.");
+    }
+
     return e.next();
 }, "WORKFLOW_processes");
 
@@ -1510,10 +1582,10 @@ onRecordUpdateRequest(function(e) {
     var authRecord = e.auth;
     if (!authRecord) return e.next();
 
-    // Sprawdź czy nodes/edges są w ogóle zmieniane w tym PATCH.
+    // Sprawdź czy nodes/edges/isPublic są w ogóle zmieniane w tym PATCH.
     // Jeśli nie (np. zmiana folderu, nazwy), pomiń walidację limitów.
     var body = e.requestInfo().body || {};
-    if (body.nodes === undefined && body.edges === undefined) {
+    if (body.nodes === undefined && body.edges === undefined && body.isPublic === undefined && body.publicPassword === undefined) {
         return e.next();
     }
 
@@ -1527,7 +1599,8 @@ onRecordUpdateRequest(function(e) {
     var limits = {
         maxProcesses: 0, maxNodesPerProcess: 0, maxEdgesPerProcess: 0,
         maxNotesPerProcess: 0, maxVariablesPerProcess: 0,
-        maxChecklistItemsPerNode: 0, canUseSubworkflows: false
+        maxChecklistItemsPerNode: 0, canUseSubworkflows: false,
+        canSharePublic: false, canShareWithPassword: false
     };
 
     try {
@@ -1542,6 +1615,10 @@ onRecordUpdateRequest(function(e) {
             limits.maxChecklistItemsPerNode = gn(conf.get("max_checklist_items_per_node"));
             var sub = conf.get("can_use_subworkflows");
             limits.canUseSubworkflows = (sub === true || sub === "true" || sub === 1 || sub === "1");
+            var sp = conf.get("can_share_public");
+            limits.canSharePublic = (sp === true || sp === "true" || sp === 1 || sp === "1");
+            var swp = conf.get("can_share_with_password");
+            limits.canShareWithPassword = (swp === true || swp === "true" || swp === 1 || swp === "1");
         }
     } catch(err) {
         console.log("Error loading tier config in update hook: " + err);
@@ -1550,29 +1627,8 @@ onRecordUpdateRequest(function(e) {
     var record = e.record;
 
     // Walidacja wnętrza procesu (bez sprawdzania maxProcesses bo to UPDATE)
-    function parsePbJson(raw) {
-        if (!raw) return [];
-        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
-        
-        var str = "";
-        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
-            for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
-            try { str = decodeURIComponent(escape(str)); } catch(e) {}
-        } else if (typeof raw === "string") {
-            str = raw;
-        } else {
-            return [];
-        }
-
-        try {
-            var parsed = JSON.parse(str);
-            if (typeof parsed === "string") parsed = JSON.parse(parsed);
-            if (Array.isArray(parsed)) return parsed;
-            if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
-        } catch(e) {}
-        
-        return [];
-    }
+    // parsePbJson is defined globally via globalThis.parsePbJson
+    var parsePbJson = globalThis.parsePbJson;
 
     var nodesArray = parsePbJson(record.getString("nodes"));
     var edgesArray = parsePbJson(record.getString("edges"));
@@ -1601,6 +1657,13 @@ onRecordUpdateRequest(function(e) {
     if (notesCount > maxNo) throw new BadRequestError("Limit notatek (" + maxNo + ") osiągnięty. / Notes limit (" + maxNo + ") reached.");
     if (totalVariables > maxV) throw new BadRequestError("Limit zmiennych (" + maxV + ") osiągnięty. / Variables limit (" + maxV + ") reached.");
     if (maxChecklist > maxC) throw new BadRequestError("Limit checklisty (" + maxC + ") osiągnięty. / Checklist limit (" + maxC + ") reached.");
+
+    if (body.isPublic === true && !limits.canSharePublic) {
+        throw new BadRequestError("Udostępnianie publiczne nie jest dostępne w Twoim planie. / Public sharing is not available in your plan.");
+    }
+    if (body.publicPassword !== undefined && String(body.publicPassword).trim() !== "" && !limits.canShareWithPassword) {
+        throw new BadRequestError("Zabezpieczenie hasłem nie jest dostępne w Twoim planie. / Password protection is not available in your plan.");
+    }
 
     return e.next();
 }, "WORKFLOW_processes");

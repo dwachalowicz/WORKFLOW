@@ -24,7 +24,7 @@ export const LandingTranslationProvider: React.FC<{ children: React.ReactNode }>
   useEffect(() => {
     const fetchTranslations = async () => {
       try {
-        const records = await pb.collection('landing_translations').getFullList({
+        const records = await pb.collection('WORKFLOW_landing_translations').getFullList({
           $autoCancel: false,
         });
         const map: Record<string, LandingTranslation> = {};

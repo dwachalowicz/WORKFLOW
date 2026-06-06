@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { GryfSpinner } from './GryfSpinner';
+import { useTranslation } from 'react-i18next';
 
 interface InitialLoaderProps {
   isLoading: boolean;
 }
 
 export const InitialLoader = ({ isLoading }: InitialLoaderProps) => {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {isLoading && (
@@ -21,7 +23,7 @@ export const InitialLoader = ({ isLoading }: InitialLoaderProps) => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <GryfSpinner size={48} label="Loading..." />
+            <GryfSpinner size={48} label={t('common.loading')} />
           </motion.div>
         </motion.div>
       )}

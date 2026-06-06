@@ -59,8 +59,8 @@ export const ConfirmEmailChangePage = () => {
       setStatus('error');
       setErrorMessage(
         error?.message?.includes('expired') || error?.message?.includes('invalid')
-          ? t('auth.magicLinkExpired', 'Link wygasł lub jest nieprawidłowy.')
-          : error?.message || t('auth.magicLinkVerifyFail', 'Nie udało się potwierdzić adresu e-mail.')
+          ? t('auth.magicLinkExpired')
+          : error?.message || t('auth.magicLinkVerifyFail')
       );
       isConfirming.current = false;
     }
@@ -78,13 +78,13 @@ export const ConfirmEmailChangePage = () => {
                 <AlertCircle className="w-6 h-6 text-destructive" />
               </div>
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-bold text-foreground">{t('auth.magicLinkError', 'Błąd weryfikacji')}</h1>
+                <h1 className="text-xl font-bold text-foreground">{t('auth.magicLinkError')}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {t('auth.magicLinkBroken', 'Brakujący token. Upewnij się, że skopiowałeś pełny link z e-maila.')}
+                  {t('auth.magicLinkBroken')}
                 </p>
               </div>
               <Button onClick={() => navigate('/dashboard')} className="w-full">
-                {t('common.goToDashboard', 'Wróć do kokpitu')}
+                {t('common.goToDashboard')}
               </Button>
             </>
           )}
@@ -95,13 +95,13 @@ export const ConfirmEmailChangePage = () => {
                 <MailCheck className="w-6 h-6 text-brand-gold" />
               </div>
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-bold text-foreground">{t('profile.confirmEmailTitle', 'Potwierdź zmianę e-maila')}</h1>
+                <h1 className="text-xl font-bold text-foreground">{t('profile.confirmEmailTitle')}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {t('profile.confirmEmailDesc', 'Kliknij przycisk poniżej, aby zatwierdzić swój nowy adres e-mail.')}
+                  {t('profile.confirmEmailDesc')}
                 </p>
               </div>
               <Button onClick={handleConfirm} className="w-full">
-                {t('profile.confirmEmailBtn', 'Zatwierdź zmianę')}
+                {t('profile.confirmEmailBtn')}
               </Button>
             </>
           )}
@@ -112,8 +112,8 @@ export const ConfirmEmailChangePage = () => {
                 <GryfSpinner size={24} />
               </div>
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-bold text-foreground">{t('ui.verifying', 'Weryfikacja...')}</h1>
-                <p className="text-sm text-muted-foreground">{t('ui.pleaseWait', 'Proszę czekać')}</p>
+                <h1 className="text-xl font-bold text-foreground">{t('ui.verifying')}</h1>
+                <p className="text-sm text-muted-foreground">{t('ui.pleaseWait')}</p>
               </div>
             </>
           )}
@@ -124,8 +124,8 @@ export const ConfirmEmailChangePage = () => {
                 <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </div>
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-bold text-foreground">{t('profile.emailChangedSuccess', 'E-mail zmieniony pomyślnie!')}</h1>
-                <p className="text-sm text-muted-foreground">{t('ui.redirecting', 'Przekierowywanie...')}</p>
+                <h1 className="text-xl font-bold text-foreground">{t('profile.emailChangedSuccess')}</h1>
+                <p className="text-sm text-muted-foreground">{t('ui.redirecting')}</p>
               </div>
             </>
           )}
@@ -136,11 +136,11 @@ export const ConfirmEmailChangePage = () => {
                 <AlertCircle className="w-6 h-6 text-destructive" />
               </div>
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-bold text-foreground">{t('auth.magicLinkError', 'Błąd weryfikacji')}</h1>
+                <h1 className="text-xl font-bold text-foreground">{t('auth.magicLinkError')}</h1>
                 <p className="text-sm text-muted-foreground">{errorMessage}</p>
               </div>
               <Button onClick={() => navigate('/dashboard')} className="w-full text-foreground hover:bg-secondary" variant="outline">
-                {t('common.goToDashboard', 'Wróć do kokpitu')}
+                {t('common.goToDashboard')}
               </Button>
             </>
           )}

@@ -9,7 +9,7 @@ Platforma do tworzenia i zarządzania procesami biznesowymi z wizualnym edytorem
 | Frontend | React 19, TypeScript 6, Vite 8 |
 | State | Zustand + Zundo (undo/redo) |
 | UI | Tailwind CSS, Radix UI, Framer Motion, Lucide Icons |
-| Canvas | React Flow 11 |
+| Canvas | React Flow 12 (@xyflow/react) |
 | Backend | PocketBase (osobny kontener) |
 | i18n | i18next (PL + EN) |
 | Testy | Vitest (unit) + Playwright (e2e) |
@@ -18,8 +18,8 @@ Platforma do tworzenia i zarządzania procesami biznesowymi z wizualnym edytorem
 
 ```bash
 # 1. Sklonuj repo
-git clone git@github.com:<your-org>/gryf-workflow.git
-cd gryf-workflow
+git clone https://github.com/dwachalowicz/WORKFLOW.git
+cd WORKFLOW
 
 # 2. Zainstaluj zależności
 npm ci
@@ -60,7 +60,7 @@ npm run test:all     # typecheck + unit + e2e smoke
 ### Build lokalny
 ```bash
 docker build -t gryf-workflow .
-docker run -p 3000:80 gryf-workflow
+docker run -p 3000:8080 gryf-workflow
 ```
 
 ### Z custom PB URL
@@ -73,11 +73,11 @@ W Coolify:
 1. **Source**: GitHub repo
 2. **Build Pack**: Dockerfile
 3. **Build Arguments**: `VITE_PB_URL=https://pb.gryf.ai`
-4. **Port**: 80
+4. **Port**: 8080
 5. **Health Check Path**: `/`
 
 Dockerfile wykonuje multi-stage build:
-- **Stage 1** (node:20-alpine): `npm ci` + `npm run build`
+- **Stage 1** (node:22-alpine): `npm ci` + `npm run build`
 - **Stage 2** (nginx:1.27-alpine): serwuje statyczne pliki z gzip, cache 1y na assets, SPA fallback
 
 ## Architektura

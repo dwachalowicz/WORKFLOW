@@ -57,7 +57,7 @@ export const CookieBanner = () => {
           <div className="bg-surface-nav border border-border shadow-2xl p-5 rounded-2xl w-full max-w-[800px] pointer-events-auto flex flex-col gap-5">
             
             {!showPreferences ? (
-              // Widok Skrócony
+              // Compact View
               <div className="flex flex-col gap-5">
                 <div className="flex gap-4 items-start">
                   <div className="hidden sm:flex shrink-0 items-center justify-center pr-2 mt-1">
@@ -103,7 +103,7 @@ export const CookieBanner = () => {
                 </div>
               </div>
             ) : (
-              // Widok Preferencji
+              // Preferences View
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between border-b border-border pb-3">
                   <h3 className="text-foreground font-semibold text-sm flex items-center gap-2">
@@ -127,7 +127,7 @@ export const CookieBanner = () => {
                     <Switch checked={true} disabled />
                   </div>
 
-                  {/* Analityczne */}
+                  {/* Analytics */}
                   <div className="flex items-start justify-between gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
                     <div className="flex gap-3">
                       <Activity size={18} className="text-brand-gold shrink-0 mt-0.5" />
@@ -142,7 +142,7 @@ export const CookieBanner = () => {
                     />
                   </div>
 
-                  {/* Marketingowe */}
+                  {/* Marketing */}
                   <div className="flex items-start justify-between gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
                     <div className="flex gap-3">
                       <Share2 size={18} className="text-brand-gold shrink-0 mt-0.5" />

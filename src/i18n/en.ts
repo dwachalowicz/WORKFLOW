@@ -34,6 +34,9 @@ export const en = {
     pendingSave: 'pending save',
     more: 'More',
     locked: 'Locked (limit)',
+    lightMode: 'Light Mode',
+    darkMode: 'Dark Mode',
+    changeColor: 'Change color',
     loadMore: 'Load more',
     loadMoreProcesses: 'Load more processes',
     goToDashboard: 'Go to dashboard',
@@ -148,7 +151,7 @@ export const en = {
     workspaces: 'Workspaces',
     processesAndFolders: 'Processes & Folders',
     workspace: 'Workspace',
-    switchTheme: 'Switch Theme',
+    switchTheme: 'Theme & Color',
     manageWorkspaces: 'Manage Workspaces',
     processMap: 'Process Map',
     notifications: 'Notifications',
@@ -650,6 +653,7 @@ export const en = {
     invitedToCollaborateBy: '{{name}} invited you to collaborate on processes in this Workspace.',
     asRole: 'As: {{role}}',
     joinRequestSent: 'Join request sent. Awaiting approval.',
+    emailPlaceholder: 'john@company.com',
   },
   settingsTab: {
     title: 'Workspace Settings',
@@ -1082,9 +1086,6 @@ export const en = {
     toUseAi: 'to use AI.',
     yourPlan: 'Your plan',
     stopGenerating: 'Stop generating',
-    generationStopped: 'Generation stopped.',
-    jsonParseErrorTitle: '⚠️ Data reading error',
-    jsonParseErrorDesc: 'The assistant generated a structure with errors in JSON format, so the button to update the map cannot be displayed. Ask it to generate the data again without truncating.',
     // Voice & Image
     voiceRecord: 'Record voice',
     voiceRecording: 'Recording...',
@@ -1095,6 +1096,9 @@ export const en = {
     imageTooLarge: 'Image is too large. Max size: 5MB.',
     imageAttached: 'Image attached',
     describeImage: 'Describe what you see in this image.',
+    toolLabel: 'Tool',
+    altYou: 'You',
+    altGryf: 'Gryf',
   },
 
   templates: {
@@ -1154,6 +1158,8 @@ export const en = {
     deleteWorkspaceFail: 'An error occurred while deleting the Workspace.',
     avatarTooLarge: 'Avatar file too large (max 2MB)',
     invalidImageType: 'Invalid image type',
+    somethingWentWrong: 'Something went wrong',
+    tryAgain: 'Try again',
   },
 
   ui: {
@@ -1221,7 +1227,6 @@ export const en = {
     mustBeLoggedIn: 'You must be logged in.',
     saveProcessFirst: 'Save the process first before creating a version.',
     duplicateName: 'A process named "{{name}}" already exists in this workspace. Choose a different name.',
-    viewerCannotSave: 'You have a viewer role in this workspace — action not allowed.',
   },
   comments: {
     title: 'Comments',
@@ -1296,7 +1301,6 @@ export const en = {
     subworkflowLocked: 'Subprocesses available from Medium plan',
     processMapLocked: 'Process Map available from Medium plan',
     templateTierRequired: 'This template requires a higher plan',
-    reasonViewerRole: 'You have a viewer role in this workspace — read-only access.',
     shareLocked: 'Public sharing available from Medium plan',
     passwordLocked: 'Password protection available on Pro plan',
     crossWorkflowLocked: 'Cross-workflow triggers available on Pro plan',
@@ -1388,7 +1392,8 @@ export const en = {
       "text1_3": "by Gryf",
       "text7_1": "When registering, you only provide your",
       "text7_2": "email address",
-      "text7_3": ", to which you'll receive a PIN. No passwords or additional data."
+      "text7_3": ", to which you'll receive a PIN. No passwords or additional data.",
+      goRunYourFlow: 'GO RUN YOUR FLOW',
     },
     "fullscreenmobilemenu": {
       "text1": "Offer",
@@ -1413,7 +1418,8 @@ export const en = {
       "text9": "Enter your email",
       "text10": "Your message...",
       "text11": "Send message",
-      "blog": "Blog"
+      "blog": "Blog",
+      closeForm: 'Close form',
     },
     "organizationsection": {
       html_1: "Connect",
@@ -1551,7 +1557,7 @@ export const en = {
       "text1": "View"
     },
     "languageselector": {
-      "text1": "text-white/70 hover:text-white hover:bg-white/5"
+      "text1": "Choose language"
     },
     "navlinks": {
       "text1": "Offer",
@@ -1595,7 +1601,9 @@ export const en = {
       "tooltip4": "Ok, I get it now!",
       oneClick: '1 right click,',
       possibilities: 'possibilities',
-      design: 'Design business processes with'
+      design: 'Design business processes with',
+      goRun: 'GO RUN',
+      your: 'YOUR',
     },
     contactpage: {
       text1: 'An error occurred while sending the message. Please try again.',
@@ -1629,5 +1637,13 @@ export const en = {
       searchPlaceholder: 'Search questions...',
       noResults: 'No search results found.'
     }
-  }
+  },
+
+  settings: {
+    language: "Language",
+  },
+
+  toast: {
+    warning: "Warning",
+  },
 };

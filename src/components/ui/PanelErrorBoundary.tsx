@@ -50,7 +50,7 @@ export class PanelErrorBoundary extends React.Component<Props, State> {
             <AlertTriangle className="w-5 h-5 text-destructive" />
           </div>
           <p className="text-sm text-muted-foreground">
-            {i18n.t('errorBoundary.panelCrash', 'Ten panel napotkał błąd.')}
+            {i18n.t('errorBoundary.panelCrash')}
           </p>
           {import.meta.env.DEV && this.state.error && (
             <pre className="text-left text-xs text-destructive/80 bg-destructive/5 border border-destructive/20 rounded-lg p-2 overflow-auto max-h-24 w-full">
@@ -62,7 +62,7 @@ export class PanelErrorBoundary extends React.Component<Props, State> {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
           >
             <RefreshCw size={12} />
-            {i18n.t('common.tryAgain', 'Spróbuj ponownie')}
+            {i18n.t('common.tryAgain')}
           </button>
         </div>
       );

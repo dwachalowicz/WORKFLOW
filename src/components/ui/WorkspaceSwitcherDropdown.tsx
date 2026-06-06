@@ -31,7 +31,7 @@ export const WorkspaceSwitcherDropdown = () => {
         >
           <span className="font-medium text-sm flex items-center gap-1.5">
             {activeWorkspace.name}
-            {activeWorkspace.isLocked && <Lock size={12} className="text-muted-foreground" title={t('common.locked', 'Zablokowany')} />}
+            {activeWorkspace.isLocked && <Lock size={12} className="text-muted-foreground" title={t('common.locked')} />}
           </span>
           <ChevronDown 
             size={14} 
@@ -64,7 +64,7 @@ export const WorkspaceSwitcherDropdown = () => {
                   <div className={`text-sm truncate ${activeWorkspace.id === ws.id ? 'font-bold text-brand-gold' : 'font-medium text-foreground'}`}>
                     {ws.name}
                   </div>
-                  {ws.isLocked && <Lock size={12} className="text-muted-foreground shrink-0" title={t('common.locked', 'Zablokowany')} />}
+                  {ws.isLocked && <Lock size={12} className="text-muted-foreground shrink-0" title={t('common.locked')} />}
                 </div>
                 {activeWorkspace.id === ws.id && (
                   <Check size={14} className="text-brand-gold shrink-0" />

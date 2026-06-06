@@ -165,7 +165,7 @@ export const Footer: React.FC = () => {
             textShadow: '1px 1px 0 hsl(var(--brand-color) / 0.15), -1px -1px 0 hsl(var(--brand-color) / 0.15), 1px -1px 0 hsl(var(--brand-color) / 0.15), -1px 1px 0 hsl(var(--brand-color) / 0.15)'
           }}
         >
-          GO RUN YOUR FLOW
+          {t('landing.footer.goRunYourFlow')}
         </span>
       </div>
     </footer>

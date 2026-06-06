@@ -232,7 +232,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const inviteObj = {
               id: m.id,
               workspaceId: m.expand?.workspace?.id || m.workspace,
-              workspaceName: m.expand?.workspace?.name || i18n.t('authStore.pendingWorkspaceName', { defaultValue: 'Workspace' }),
+              workspaceName: m.expand?.workspace?.name || i18n.t('authStore.pendingWorkspaceName'),
               role: m.role as 'admin' | 'editor' | 'viewer',
               invitedBy: m.expand?.invited_by ? {
                 name: m.expand.invited_by.name,
@@ -338,8 +338,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             console.error('Error bootstrapping default workspace:', bootstrapErr);
             useToastStore.getState().addToast({
               type: 'warning',
-              title: i18n.t('toast.warning', { defaultValue: 'Warning' }),
-              message: i18n.t('authStore.defaultWorkspaceError', { defaultValue: 'Failed to create the default workspace. You can create it manually in settings.' })
+              title: i18n.t('toast.warning'),
+              message: i18n.t('authStore.defaultWorkspaceError')
             });
           }
         }

@@ -58,9 +58,11 @@ export const PricingSection: React.FC = () => {
   const renderPrice = (tier?: TierConfig, defaultEur = 0, defaultEurAnn = 0, defaultPln = 0, defaultPlnAnn = 0) => {
     if (isPL) {
       const val = isYearly ? (tier?.priceAnnualPln ?? defaultPlnAnn) : (tier?.priceMonthlyPln ?? defaultPln);
+      if (val === -1) return '--';
       return `${val} zł`;
     } else {
       const val = isYearly ? (tier?.priceAnnualEur ?? defaultEurAnn) : (tier?.priceMonthlyEur ?? defaultEur);
+      if (val === -1) return '--';
       return `€${val}`;
     }
   };
@@ -123,7 +125,7 @@ export const PricingSection: React.FC = () => {
             <p className="text-white/60 text-xs h-12 mb-8 leading-relaxed">
               {formatWidows(isPL ? freePlan?.description_pl : freePlan?.description_en)}
             </p>
-            <div className="text-5xl font-black text-white mb-2 tracking-tight">{t('landing.pricing.freePrice')}</div>
+            <div className="text-5xl font-black text-white mb-2 tracking-tight">{renderPrice(tiers.free, 0, 0, 0, 0)}</div>
             <div className="text-xs text-white/50 mb-8 font-medium">{t('landing.pricingsection.text5')}</div>
             <button className="w-full py-3 rounded-xl bg-landing-card text-white text-sm font-semibold border border-white/10 mb-8 transition-all duration-300 hover:bg-brand-gold hover:text-white hover:scale-105 hover:shadow-none hover:border-transparent">
               {t('landing.pricingsection.text6')}

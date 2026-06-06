@@ -61,10 +61,10 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
           className="absolute top-[12%] md:top-[18%] left-[5%] md:left-8 lg:left-16 flex flex-col items-start z-0 pointer-events-none select-none"
         >
-          <span className="text-[80px] md:text-[130px] lg:text-[200px] xl:text-[250px] font-black text-white/10 leading-[0.8] tracking-tighter">GO RUN</span>
+          <span className="text-[80px] md:text-[130px] lg:text-[200px] xl:text-[250px] font-black text-white/10 leading-[0.8] tracking-tighter">{t('landing.hero.goRun')}</span>
           {/* GO RUN YOUR FLOW aligned perfectly to the left of GRYF */}
           <span className="text-xl md:text-3xl lg:text-6xl font-black text-primary mt-2 md:mt-3 lg:mt-4 ml-1 lg:ml-2 whitespace-nowrap flex items-center">
-            YOUR <span className="w-2 md:w-3"></span>
+            {t('landing.hero.your')} <span className="w-2 md:w-3"></span>
             F
             <AnimatePresence mode="wait">
               <motion.span
@@ -222,7 +222,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container pointing DOWN */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img loading="lazy" src="/landingpage/avatar-hero1.webp" alt="User 1" className="w-full h-full object-cover" />
+               <img loading="lazy" src="/landingpage/avatar-hero1.webp" alt="Avatar" className="w-full h-full object-cover" />
              </div>
            </div>
         </motion.div>
@@ -244,7 +244,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container pointing DOWN */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img loading="lazy" src="/landingpage/avatar-gryf.webp" alt="OK Avatar" className="w-full h-full object-cover" />
+               <img loading="lazy" src="/landingpage/avatar-gryf.webp" alt="Avatar" className="w-full h-full object-cover" />
              </div>
            </div>
         </motion.div>
@@ -260,7 +260,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container rotated to point down */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: '-40px', top: 'calc(-56.6px - 40px)', transform: 'rotate(45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(-45deg)' }}>
-               <img loading="lazy" src="/landingpage/avatar-hero3.webp" className="w-full h-full object-cover" alt="Poprawiam" />
+               <img loading="lazy" src="/landingpage/avatar-hero3.webp" className="w-full h-full object-cover" alt={t('landing.hero.tooltip3')} />
              </div>
            </div>
            
@@ -281,7 +281,7 @@ export const HeroSection: React.FC = () => {
            {/* Avatar Container rotated to point right */}
            <div className="absolute w-20 h-20 bg-white/20 p-[4px] rounded-full rounded-br-none shadow-2xl flex items-center justify-center" style={{ left: 'calc(-56.6px - 40px)', top: '-40px', transform: 'rotate(-45deg)' }}>
              <div className="w-full h-full rounded-full overflow-hidden bg-black" style={{ transform: 'rotate(45deg)' }}>
-               <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-full h-full object-cover" alt="Akceptuj" />
+               <img loading="lazy" src="/landingpage/avatar-hero2.webp" className="w-full h-full object-cover" alt={t('landing.hero.tooltip4')} />
              </div>
            </div>
            
@@ -345,7 +345,7 @@ export const HeroSection: React.FC = () => {
               >
                 <img 
                   src="/landingpage/menu-without-bg.webp" 
-                  alt="Menu" 
+                  alt="Radial Menu" 
                   className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
                 />
               </motion.div>

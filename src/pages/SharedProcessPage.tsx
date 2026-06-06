@@ -182,7 +182,7 @@ export const SharedProcessPage = () => {
               className="w-full"
               disabled={isLoading || isLocked}
             >
-              {isLocked ? t('share.tryAgainLater', 'Poczekaj...') : t('share.unlock')}
+              {isLocked ? t('share.tryAgainLater') : t('share.unlock')}
             </Button>
           </form>
         </div>

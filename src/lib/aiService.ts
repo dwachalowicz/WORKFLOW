@@ -17,6 +17,7 @@ export interface ToolFromCatalog {
   videoUrl: string;
   logoUrl: string;
   tags: string[];
+  promo?: boolean;
 }
 
 // ===== BYOK AI config (per user) =====
@@ -73,6 +74,8 @@ export interface AiModelOption {
   label: string;
   modelId: string;
   provider: 'openai' | 'openrouter';
+  description_pl?: string;
+  description_en?: string;
 }
 
 let cachedModels: AiModelOption[] | null = null;
@@ -101,6 +104,8 @@ export async function fetchAiModels(provider?: 'openai' | 'openrouter'): Promise
       label: r.label || r.model_id,
       modelId: r.model_id,
       provider: r.provider as 'openai' | 'openrouter',
+      description_pl: r.description_pl || '',
+      description_en: r.description_en || '',
     }));
     modelsCacheTimestamp = now;
     return provider ? cachedModels.filter(m => m.provider === provider) : cachedModels;
@@ -118,6 +123,8 @@ export interface QuickPrompt {
   label_en?: string;
   prompt_en?: string;
   context: 'workflow' | 'article' | 'general';
+  /** Controls button appearance: 'brand' = gold/brand styling, 'default' = normal. Set in PocketBase. */
+  variant?: 'default' | 'brand';
 }
 
 let cachedQuickPrompts: QuickPrompt[] | null = null;
@@ -141,13 +148,14 @@ export async function fetchQuickPrompts(context: string = 'workflow'): Promise<Q
       sort: 'sort_order',
       requestKey: null,
     });
-    cachedQuickPrompts = records.map((r: { id: string; label?: string; prompt?: string; label_en?: string; prompt_en?: string; context?: string }) => ({
+    cachedQuickPrompts = records.map((r: { id: string; label?: string; prompt?: string; label_en?: string; prompt_en?: string; context?: string; variant?: string }) => ({
       id: r.id,
       label: r.label || '',
       prompt: r.prompt || '',
       label_en: r.label_en || '',
       prompt_en: r.prompt_en || '',
       context: (r.context || 'workflow') as 'article' | 'workflow' | 'general',
+      variant: (r.variant === 'brand' ? 'brand' : 'default') as 'default' | 'brand',
     }));
     qpCacheTimestamp = now;
     return cachedQuickPrompts!.filter(qp => qp.context === context);
@@ -174,16 +182,29 @@ export async function fetchAllTools(): Promise<ToolFromCatalog[]> {
       sort: 'NAZWA',
       requestKey: null,
     });
-    cachedTools = records.map((r: Record<string, unknown>) => ({
+    
+    // Filter out tools where AKTYWNE is false
+    const activeRecords = records.filter((r: Record<string, unknown>) => r.AKTYWNE !== false && r.aktywne !== false);
+    
+    cachedTools = activeRecords.map((r: Record<string, unknown>) => ({
       id: String(r.id),
       name: String(r.NAZWA || 'Unknown tool'),
       shortDesc: String(r.OPIS || ''),
       fullDesc: String(r.OPIS_PELNY || ''),
       url: String(r.URL || ''),
-      videoUrl: String(r.url_film || ''),
-      logoUrl: r.logo ? pb.files.getUrl(r as unknown as import('pocketbase').RecordModel, String(r.logo)) : '',
+      videoUrl: String(r.url_film || r.URL_FILM || ''),
+      logoUrl: (r.LOGO || r.logo) ? pb.files.getURL(r as import('pocketbase').RecordModel, String(r.LOGO || r.logo)) : '',
       tags: (r.tags as string[]) || [],
+      promo: Boolean(r.promo || r.PROMO),
     }));
+    
+    // Sort promo tools to top
+    cachedTools.sort((a, b) => {
+      if (a.promo && !b.promo) return -1;
+      if (!a.promo && b.promo) return 1;
+      return 0;
+    });
+
     toolsCacheTimestamp = now;
     return cachedTools;
   } catch (err) {
@@ -204,6 +225,7 @@ export interface AiContextData {
   nodes: Record<string, unknown>[];
   edges: Record<string, unknown>[];
   toolNames: string[];
+  promoToolNames: string[];
   lang: string;
   latestMessage: string;
 }

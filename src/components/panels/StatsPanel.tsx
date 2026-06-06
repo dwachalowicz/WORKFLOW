@@ -295,7 +295,7 @@ export const StatsPanel = () => {
               )}
               {base.pathLimitHit && (
                 <div className="text-center text-xs text-amber-500 py-2 px-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                  ⚠️ {t('statsExt.pathLimitWarning', 'Graf jest zbyt złożony do pełnej analizy ścieżek. Wyświetlono pierwsze 1000 ścieżek.')}
+                  ⚠️ {t('statsExt.pathLimitWarning')}
                 </div>
               )}
               {!hasPaths && (

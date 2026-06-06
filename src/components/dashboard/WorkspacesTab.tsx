@@ -321,7 +321,7 @@ export const WorkspacesTab = ({ onSwitchTab }: WorkspacesTabProps) => {
                   await joinByCode(joinCode);
                   setJoinCode('');
                   setIsJoining(false);
-                  useToastStore.getState().showToast(t('workspaces.joinRequestSent') + '. ' + t('workspaces.checkInvitationsTab', { defaultValue: 'Sprawdź zakładkę Zaproszenia.' }), 'success');
+                  useToastStore.getState().showToast(t('workspaces.joinRequestSent') + '. ' + t('workspaces.checkInvitationsTab'), 'success');
                 } catch (err) {
                   setJoinError(err instanceof Error ? err.message : t('common.unknownError'));
                 }

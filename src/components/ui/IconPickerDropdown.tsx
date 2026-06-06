@@ -47,7 +47,7 @@ export const IconPickerDropdown = ({ value, onChange, disabled }: IconPickerDrop
           <input
             type="text"
             className="w-full bg-secondary border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:border-brand-gold outline-none"
-            placeholder={t('avatar.searchIcon', 'Szukaj ikony...')}
+            placeholder={t('avatar.searchIcon')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
@@ -61,7 +61,7 @@ export const IconPickerDropdown = ({ value, onChange, disabled }: IconPickerDrop
                 setSearch('');
               }}
               className={`flex items-center justify-center p-2 rounded-lg transition-colors border ${!value ? 'border-brand-gold bg-brand-gold/10' : 'border-transparent hover:bg-secondary'}`}
-              title={t('common.none', 'Brak')}
+              title={t('common.none')}
             >
               <LucideIcons.Ban size={18} className="text-muted-foreground" />
             </button>

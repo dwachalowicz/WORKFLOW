@@ -182,7 +182,7 @@ export const OfferSection: React.FC = () => {
               <button
                 onClick={(e) => { e.preventDefault(); setIsFormOpen(false); }}
                 className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors bg-transparent border-none"
-                aria-label="Close form"
+                aria-label={t('landing.offersection.closeForm')}
               >
                 <X className="w-5 h-5" />
               </button>

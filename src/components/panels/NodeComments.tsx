@@ -21,7 +21,7 @@ import type { TFunction } from 'i18next';
 const formatCommentDate = (dateStr: string | undefined, t: TFunction) =>
   formatDate(dateStr, { relative: true, t, noDateKey: 'comments.noDate' });
 
-// --- Wydzielony komponent pojedynczego komentarza (wzorzec projektowy) ---
+// --- Extracted single comment component (design pattern) ---
 interface CommentItemProps {
   comment: Comment;
   isViewMode: boolean;
@@ -82,7 +82,7 @@ const CommentItem = ({ comment, isViewMode, user, isAdminOrOwner, onResolve, onD
         {/* Actions — visible on hover */}
         {!isViewMode && (
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <SimpleTooltip content={t('comments.reply', 'Odpowiedz')}>
+            <SimpleTooltip content={t('comments.reply')}>
               <button
                 onClick={() => onReply(parentIdForReply)}
                 className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
@@ -90,7 +90,7 @@ const CommentItem = ({ comment, isViewMode, user, isAdminOrOwner, onResolve, onD
                 <Reply size={12} className="text-muted-foreground" />
               </button>
             </SimpleTooltip>
-            <SimpleTooltip content={comment.resolved ? t('comments.unresolve', 'Cofnij rozwiązanie') : t('comments.resolve', 'Rozwiąż')}>
+            <SimpleTooltip content={comment.resolved ? t('comments.unresolve') : t('comments.resolve')}>
               <button
                 onClick={() => onResolve(comment)}
                 className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
@@ -103,7 +103,7 @@ const CommentItem = ({ comment, isViewMode, user, isAdminOrOwner, onResolve, onD
               </button>
             </SimpleTooltip>
             {canDelete && (
-              <SimpleTooltip content={t('comments.deleteComment', 'Usuń komentarz')}>
+              <SimpleTooltip content={t('comments.deleteComment')}>
                 <button
                   onClick={() => onDelete(comment.id)}
                   className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-destructive/10 transition-colors"
@@ -133,7 +133,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
   const [isSending, setIsSending] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   
-  // Wątki (odpowiedzi)
+  // Threads (replies)
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
 
@@ -245,7 +245,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
       if (err instanceof Error) {
         const pbErr = err as Error & { status?: number, response?: { message?: string } };
         if (pbErr.status === 403 || pbErr.status === 400 || pbErr.status === 404) {
-          useToastStore.getState().showToast(t('comments.deleteErrorNoPermission', 'Brak uprawnień do usunięcia komentarza.'), 'error');
+          useToastStore.getState().showToast(t('comments.deleteErrorNoPermission'), 'error');
         } else if (pbErr.response && pbErr.response.message) {
           useToastStore.getState().showToast(pbErr.response.message, 'error');
         } else {
@@ -276,7 +276,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
     }, 50);
   };
 
-  // Grupowanie na rodziców i dzieci
+  // Grouping into parents and children
   const topLevelComments = comments.filter(c => !c.parent_id);
   const getChildren = (parentId: string) => comments.filter(c => c.parent_id === parentId).reverse();
 
@@ -305,7 +305,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
             </p>
           ) : (
             <>
-              {/* Główny Input */}
+              {/* Main Input */}
               {!isViewMode && (
                 <div className="flex items-center gap-2 bg-secondary/50 rounded-xl px-3 py-2.5 border border-border/30">
                   <input
@@ -329,7 +329,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                 </div>
               )}
 
-              {/* Lista komentarzy */}
+              {/* Comments list */}
               {isLoading ? (
                 <div className="flex justify-center py-4">
                   <GryfSpinner size={18} />
@@ -340,7 +340,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                 <div className="space-y-4 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-border pr-1">
                   {topLevelComments.map(parent => (
                     <div key={parent.id} className="space-y-2 relative">
-                      {/* Główny komentarz */}
+                      {/* Main comment */}
                       <CommentItem
                         comment={parent}
                         isViewMode={isViewMode}
@@ -351,9 +351,9 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                         onReply={handleReplyClick}
                       />
 
-                      {/* Odpowiedzi i Input odpowiedzi */}
+                      {/* Replies and reply input */}
                       <div className="space-y-2 relative">
-                        {/* Linia łącząca odpowiedzi */}
+                        {/* Line connecting replies */}
                         {getChildren(parent.id).length > 0 && (
                           <div className="absolute left-4 top-0 bottom-4 w-px bg-border/50 z-0"></div>
                         )}
@@ -372,10 +372,10 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                           />
                         ))}
 
-                        {/* Input do odpowiedzi na ten wątek */}
+                        {/* Input for replying to this thread */}
                         {replyingToId === parent.id && !isViewMode && (
                           <div className="ml-8 relative flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2 border border-border/30 animate-in fade-in slide-in-from-top-1 duration-200">
-                            {/* Pozioma kreska nawiązująca do wątku */}
+                            {/* Horizontal line for thread connection */}
                             <div className="absolute -left-4 top-1/2 w-4 h-px bg-border/50"></div>
                             <input
                               ref={replyInputRef}
@@ -389,7 +389,7 @@ export const NodeComments = ({ nodeId }: NodeCommentsProps) => {
                                   setReplyText('');
                                 }
                               }}
-                              placeholder={t('comments.replyPlaceholder', 'Napisz odpowiedź...')}
+                              placeholder={t('comments.replyPlaceholder')}
                               className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
                             />
                             <button

@@ -211,7 +211,7 @@ export const LoginPage = () => {
                   </div>
                   <span className="leading-tight group-hover:text-foreground transition-colors text-[13px]">
                     {t('auth.acceptTerms')} 
-                    <a href="/page/regulamin" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">{t('ui.terms', 'Regulamin')}</a>
+                    <a href="/page/regulamin" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">{t('ui.terms')}</a>
                   </span>
                 </label>
 
@@ -229,7 +229,7 @@ export const LoginPage = () => {
                   </div>
                   <span className="leading-tight group-hover:text-foreground transition-colors text-[13px]">
                     {t('auth.acceptTerms')} 
-                    <a href="/page/polityka-prywatnosci" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">{t('ui.privacy', 'Prywatność')}</a>
+                    <a href="/page/polityka-prywatnosci" target="_blank" rel="noopener noreferrer" className="text-brand-gold hover:underline">{t('ui.privacy')}</a>
                   </span>
                 </label>
               </div>

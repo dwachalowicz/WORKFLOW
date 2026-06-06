@@ -26,20 +26,20 @@ const NotFoundContent = () => {
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-4 pt-40 pb-16">
         <div className="text-center">
           <h1 className="text-8xl md:text-9xl font-bold text-brand-gold mb-4">
-            {t('notFound.title', '404')}
+            {t('notFound.title')}
           </h1>
           <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-white">
-            {t('notFound.subtitle', 'Nie znaleziono strony')}
+            {t('notFound.subtitle')}
           </h2>
           <p className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-10">
-            {t('notFound.desc', 'Strona, której szukasz nie istnieje, została usunięta lub zmieniono jej adres.')}
+            {t('notFound.desc')}
           </p>
           
           <Link 
             to="/" 
             className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-neutral-200 transition-all duration-300 transform hover:scale-105"
           >
-            {t('notFound.backToHome', 'Wróć na stronę główną')}
+            {t('notFound.backToHome')}
           </Link>
         </div>
       </main>

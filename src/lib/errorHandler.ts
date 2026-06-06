@@ -45,7 +45,7 @@ export async function tryCatchToast<T>(
     if (errorKey) {
       const translated = i18n.t(errorKey);
       // If i18n returns the key itself (missing translation), show generic error
-      const message = translated !== errorKey ? translated : i18n.t('common.error', 'Wystąpił błąd');
+      const message = translated !== errorKey ? translated : i18n.t('common.error');
       useToastStore.getState().showToast(message, 'error');
     }
     onError?.(err);
