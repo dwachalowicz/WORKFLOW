@@ -14,7 +14,25 @@ globalThis.escapeHtml = function(str) {
 
 globalThis.parsePbJson = function(raw) {
     if (!raw) return [];
+    // Handle native JS arrays (already parsed)
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
+    // Handle Go proxy objects that have a length but aren't recognized by Array.isArray
+    if (typeof raw === 'object' && !Array.isArray(raw) && typeof raw !== 'string') {
+        try {
+            // Try to convert Go proxy to native JS via JSON round-trip
+            var jsonStr = JSON.stringify(raw);
+            if (jsonStr) {
+                var parsed = JSON.parse(jsonStr);
+                if (Array.isArray(parsed)) return parsed;
+            }
+        } catch(e) {}
+        // Try Array.from for array-like objects
+        try {
+            var arr = Array.from(raw);
+            if (arr && arr.length > 0) return arr;
+        } catch(e) {}
+        return [];
+    }
     
     var str = "";
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
@@ -22,6 +40,8 @@ globalThis.parsePbJson = function(raw) {
         try { str = decodeURIComponent(escape(str)); } catch(e) {}
     } else if (typeof raw === "string") {
         str = raw;
+    } else if (Array.isArray(raw) && raw.length === 0) {
+        return [];
     } else {
         return [];
     }
@@ -1537,8 +1557,20 @@ onRecordCreateRequest(function(e) {
     // parsePbJson is defined globally via globalThis.parsePbJson
     var parsePbJson = globalThis.parsePbJson;
 
-    var nodesArray = parsePbJson(record.getString("nodes"));
-    var edgesArray = parsePbJson(record.getString("edges"));
+    var nodesArray = [];
+    var edgesArray = [];
+    try {
+        var nodesRaw = record.get("nodes");
+        nodesArray = parsePbJson(typeof nodesRaw === 'string' ? nodesRaw : record.getString("nodes"));
+    } catch(parseErr) {
+        console.log("CREATE hook: Error parsing nodes: " + parseErr);
+    }
+    try {
+        var edgesRaw = record.get("edges");
+        edgesArray = parsePbJson(typeof edgesRaw === 'string' ? edgesRaw : record.getString("edges"));
+    } catch(parseErr) {
+        console.log("CREATE hook: Error parsing edges: " + parseErr);
+    }
 
     var nodesCount = 0, notesCount = 0, totalVariables = 0, maxChecklist = 0, hasSubworkflow = false;
 
@@ -1630,8 +1662,20 @@ onRecordUpdateRequest(function(e) {
     // parsePbJson is defined globally via globalThis.parsePbJson
     var parsePbJson = globalThis.parsePbJson;
 
-    var nodesArray = parsePbJson(record.getString("nodes"));
-    var edgesArray = parsePbJson(record.getString("edges"));
+    var nodesArray = [];
+    var edgesArray = [];
+    try {
+        var nodesRaw = record.get("nodes");
+        nodesArray = parsePbJson(typeof nodesRaw === 'string' ? nodesRaw : record.getString("nodes"));
+    } catch(parseErr) {
+        console.log("UPDATE hook: Error parsing nodes: " + parseErr);
+    }
+    try {
+        var edgesRaw = record.get("edges");
+        edgesArray = parsePbJson(typeof edgesRaw === 'string' ? edgesRaw : record.getString("edges"));
+    } catch(parseErr) {
+        console.log("UPDATE hook: Error parsing edges: " + parseErr);
+    }
 
     var nodesCount = 0, notesCount = 0, totalVariables = 0, maxChecklist = 0, hasSubworkflow = false;
 
@@ -2972,8 +3016,16 @@ onRecordUpdateRequest((e) => {
     const record = e.record;
     
     // Capture original values BEFORE e.next() saves to DB
-    const originalStatus = record.original().get("status");
-    const originalRole = record.original().get("role");
+    // Use findRecordById for compatibility with PocketBase v0.38 (record.original() may not be available)
+    let originalStatus = record.get("status");
+    let originalRole = record.get("role");
+    try {
+        const orig = e.app.findRecordById(record.collection().name, record.id);
+        if (orig) {
+            originalStatus = orig.get("status");
+            originalRole = orig.get("role");
+        }
+    } catch(err) {}
     
     e.next();
     

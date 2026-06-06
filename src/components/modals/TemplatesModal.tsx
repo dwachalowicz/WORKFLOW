@@ -118,9 +118,10 @@ export const TemplatesModal = ({ isOpen, onClose }: TemplatesModalProps) => {
       const record = await pb.collection('WORKFLOW_processes').create({
         name: template.name,
         owner: user.id,
+        lastEditedBy: user.id,
         workspace: activeWorkspace.id,
-        nodes: nodes,
-        edges: edges,
+        nodes: JSON.stringify(nodes),
+        edges: JSON.stringify(edges),
       });
 
       onClose();
