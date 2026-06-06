@@ -2,7 +2,7 @@
 // Endpoint: POST /api/ai/chat
 // Klucz API nigdy nie opuszcza serwera.
 
-globalThis.escapeHtml = function(str) {
+function escapeHtml(str) {
     if (!str) return '';
     return String(str)
         .replace(/&/g, '&amp;')
@@ -12,7 +12,7 @@ globalThis.escapeHtml = function(str) {
         .replace(/'/g, '&#039;');
 };
 
-globalThis.parsePbJson = function(raw) {
+function parsePbJson(raw) {
     if (!raw) return [];
     // Handle native JS arrays (already parsed)
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
@@ -886,7 +886,7 @@ onRecordCreateRequest((e) => {
             : role;
 
         function getInvitationEmailHtml(wsName, subtitleText, roleLabel, ctaText, inviterName, inviterEmail) {
-            // escapeHtml is defined globally via globalThis.escapeHtml
+            // escapeHtml is a top-level function
             return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                 + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                 + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -973,7 +973,7 @@ onRecordCreateRequest((e) => {
 onRecordCreateRequest((e) => {
     e.next();
 
-    // escapeHtml is defined globally via globalThis.escapeHtml
+    // escapeHtml is a top-level function
 
     try {
         const record = e.record;
@@ -1443,8 +1443,8 @@ onRecordDeleteRequest((e) => {
                     + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Notification</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:28px 36px;">'
-                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
-                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + escapeHtml(wsName) + '</strong>.</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
                     + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
@@ -1554,8 +1554,7 @@ onRecordCreateRequest(function(e) {
     }
 
     // Walidacja wnętrza procesu
-    // parsePbJson is defined globally via globalThis.parsePbJson
-    var parsePbJson = globalThis.parsePbJson;
+    // parsePbJson is a top-level function available in this file
 
     var nodesArray = [];
     var edgesArray = [];
@@ -1659,8 +1658,7 @@ onRecordUpdateRequest(function(e) {
     var record = e.record;
 
     // Walidacja wnętrza procesu (bez sprawdzania maxProcesses bo to UPDATE)
-    // parsePbJson is defined globally via globalThis.parsePbJson
-    var parsePbJson = globalThis.parsePbJson;
+    // parsePbJson is a top-level function available in this file
 
     var nodesArray = [];
     var edgesArray = [];
