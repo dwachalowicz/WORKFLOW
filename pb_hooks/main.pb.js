@@ -2,7 +2,7 @@
 // Endpoint: POST /api/ai/chat
 // Klucz API nigdy nie opuszcza serwera.
 
-function escapeHtml(str) {
+globalThis.escapeHtml = function(str) {
     if (!str) return '';
     return String(str)
         .replace(/&/g, '&amp;')
@@ -12,7 +12,7 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 };
 
-function parsePbJson(raw) {
+globalThis.parsePbJson = function(raw) {
     if (!raw) return [];
     // Handle native JS arrays (already parsed)
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
@@ -886,7 +886,7 @@ onRecordCreateRequest((e) => {
             : role;
 
         function getInvitationEmailHtml(wsName, subtitleText, roleLabel, ctaText, inviterName, inviterEmail) {
-            // escapeHtml is a top-level function
+            var escapeHtml = globalThis.escapeHtml;
             return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                 + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                 + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -973,7 +973,7 @@ onRecordCreateRequest((e) => {
 onRecordCreateRequest((e) => {
     e.next();
 
-    // escapeHtml is a top-level function
+    var escapeHtml = globalThis.escapeHtml;
 
     try {
         const record = e.record;
@@ -1443,8 +1443,8 @@ onRecordDeleteRequest((e) => {
                     + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Notification</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:28px 36px;">'
-                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
-                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
                     + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
@@ -1554,7 +1554,7 @@ onRecordCreateRequest(function(e) {
     }
 
     // Walidacja wnętrza procesu
-    // parsePbJson is a top-level function available in this file
+    var parsePbJson = globalThis.parsePbJson;
 
     var nodesArray = [];
     var edgesArray = [];
@@ -1658,7 +1658,7 @@ onRecordUpdateRequest(function(e) {
     var record = e.record;
 
     // Walidacja wnętrza procesu (bez sprawdzania maxProcesses bo to UPDATE)
-    // parsePbJson is a top-level function available in this file
+    var parsePbJson = globalThis.parsePbJson;
 
     var nodesArray = [];
     var edgesArray = [];
@@ -2594,12 +2594,12 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf9;border:1px solid #f0ede6;border-radius:12px;overflow:hidden;">'
                         + '<tr><td style="padding:18px 20px;border-bottom:1px solid #f0ede6;">'
                         + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">Workspace</span><br/>'
-                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(wsName) + '</span>'
+                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + globalThis.escapeHtml(wsName) + '</span>'
                         + '</td></tr>'
                         + '<tr><td style="padding:18px 20px;">'
                         + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">Użytkownik / User</span><br/>'
-                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(joinedName) + '</span>'
-                        + '<br/><span style="font-size:13px;color:#6b7280;">' + escapeHtml(joinedEmail) + '</span>'
+                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + globalThis.escapeHtml(joinedName) + '</span>'
+                        + '<br/><span style="font-size:13px;color:#6b7280;">' + globalThis.escapeHtml(joinedEmail) + '</span>'
                         + '</td></tr>'
                         + '</table>'
                         + '</td></tr>'
@@ -3270,12 +3270,12 @@ onRecordUpdateRequest((e) => {
 // Prevents User A from reading User B's ai_api_key etc.
 // Keeps expand (comment authors, lock info) working.
 // =====================================================
-var SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
+globalThis.SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
 
-function stripSensitiveFields(record, authId) {
+globalThis.stripSensitiveFields = function(record, authId) {
     if (!record || record.id === authId) return;
-    for (var i = 0; i < SENSITIVE_USER_FIELDS.length; i++) {
-        record.set(SENSITIVE_USER_FIELDS[i], "");
+    for (var i = 0; i < globalThis.SENSITIVE_USER_FIELDS.length; i++) {
+        record.set(globalThis.SENSITIVE_USER_FIELDS[i], "");
     }
 }
 
@@ -3283,6 +3283,7 @@ onRecordViewRequest((e) => {
     e.next();
     try {
         var authId = e.auth ? e.auth.id : "";
+        var stripSensitiveFields = globalThis.stripSensitiveFields;
         stripSensitiveFields(e.record, authId);
     } catch(err) {}
 }, "WORKFLOW_users");
@@ -3291,6 +3292,7 @@ onRecordsListRequest((e) => {
     e.next();
     try {
         var authId = e.auth ? e.auth.id : "";
+        var stripSensitiveFields = globalThis.stripSensitiveFields;
         if (e.records && e.records.length) {
             for (var i = 0; i < e.records.length; i++) {
                 stripSensitiveFields(e.records[i], authId);
