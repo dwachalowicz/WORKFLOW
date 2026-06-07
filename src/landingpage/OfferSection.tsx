@@ -39,7 +39,7 @@ export const OfferSection: React.FC = () => {
       try {
         const records = await pb.collection('WORKFLOW_ai_services').getFullList<AIService>({
           sort: 'order',
-          $autoCancel: false
+          requestKey: null
         });
         setServices(records);
       } catch (err) {

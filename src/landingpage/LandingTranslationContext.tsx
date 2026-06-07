@@ -25,7 +25,7 @@ export const LandingTranslationProvider: React.FC<{ children: React.ReactNode }>
     const fetchTranslations = async () => {
       try {
         const records = await pb.collection('WORKFLOW_landing_translations').getFullList({
-          $autoCancel: false,
+          requestKey: null,
         });
         const map: Record<string, LandingTranslation> = {};
         records.forEach(r => {

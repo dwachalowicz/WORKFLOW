@@ -36,7 +36,7 @@ export const CasesSection: React.FC = () => {
         const records = await pb.collection('WORKFLOW_process_cases').getFullList<ProcessCase>({
           sort: 'order',
           filter: 'is_active = true',
-          $autoCancel: false
+          requestKey: null
         });
         setCasesData(records);
       } catch (err) {

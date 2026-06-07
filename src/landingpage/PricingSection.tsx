@@ -41,7 +41,7 @@ export const PricingSection: React.FC = () => {
       try {
         const records = await pb.collection('WORKFLOW_pricing').getFullList<PricingPlan>({
           sort: 'order',
-          $autoCancel: false
+          requestKey: null
         });
         setPricingData(records);
       } catch (err) {
