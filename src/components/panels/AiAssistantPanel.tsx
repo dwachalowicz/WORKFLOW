@@ -316,8 +316,9 @@ export const AiAssistantPanel = () => {
       const raw = match[1];
       const startIdx = raw.indexOf('{');
       const endIdx = raw.lastIndexOf('}');
-      if (startIdx === -1 || endIdx <= startIdx) return [];
-      const jsonStr = raw.slice(startIdx, endIdx + 1);
+      if (startIdx === -1) return [];
+      // Handle truncated JSON by adding closing braces if needed
+      let jsonStr = endIdx > startIdx ? raw.slice(startIdx, endIdx + 1) : raw.slice(startIdx) + '\n}';
       let parsed: Record<string, unknown>;
       try {
         parsed = JSON.parse(jsonStr);
@@ -549,7 +550,7 @@ export const AiAssistantPanel = () => {
       setMessages(prev => {
         const updated = [...prev, {
           role: 'assistant' as const,
-          content: cleanResponse || (workflowJson ? t('aiExt.generatedWorkflow') : workflowUpdate ? t('aiExt.updatedNodes') : response),
+          content: cleanResponse || (workflowJson ? t('aiExt.generatedWorkflow') : workflowUpdate ? t('aiExt.updatedNodes') : (mentionedTools.length > 0 ? t('aiExt.recommendedTools') : response)),
           toolNames: mentionedTools.length > 0 ? mentionedTools : undefined,
           workflowJson: workflowJson || undefined,
           workflowUpdate: workflowUpdate || undefined,
