@@ -83,7 +83,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
                 + "\nPoleć WSZYSTKIE narzędzia z katalogu, które kontekstowo pasują — zarówno ogólne jak i specyficzne per-etap. Nie ograniczaj się do 3–5 — jeśli pasuje 10, 20 lub 30 narzędzi, wymień je wszystkie."
                 + promoMsg
                 + " Używaj DOKŁADNYCH nazw z tego katalogu."
-                + " NA SAMYM KOŃCU ODPOWIEDZI umieść blok kodu json. Format bloku:"
+                + " NA SAMYM KOŃCU ODPOWIEDZI umieść blok kodu json. MUSISZ zachować dokładny znacznik 'workflow-tools' przy otwarciu bloku (tj. użyj ```json workflow-tools). Format bloku:"
                 + jsonFormat
                 + "\nTo jest wymagane, by zasilić UI karuzeli."
                 + scopeGuard;
@@ -95,7 +95,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
                 + "\nRecommend ALL tools from the catalog that are contextually relevant — both general AND stage-specific. Do not limit yourself to 3–5 — if 10, 20, or 30 tools match, list them all."
                 + promoMsg
                 + " Use EXACT names from this catalog."
-                + " AT THE VERY END OF YOUR RESPONSE output the json code block. Block format:"
+                + " AT THE VERY END OF YOUR RESPONSE output the json code block. YOU MUST keep the exact 'workflow-tools' tag when opening the block (i.e. use ```json workflow-tools). Block format:"
                 + jsonFormat
                 + "\nThis is required to populate the UI carousel."
                 + scopeGuard;
