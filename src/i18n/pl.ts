@@ -1643,9 +1643,9 @@ export const pl = {
     },
     features: {
       bullet1: "BYOK (Bring Your Own Key) – korzystaj z własnego klucza API z szyfrowaniem AES-256.",
-      bullet2: "Generuj kompletne mapy procesów wyłącznie na podstawie opisu tekstowego.",
-      bullet3: "Automatycznie nazywaj etapy i twórz optymalne ścieżki jednym kliknięciem.",
-      bullet4: "Udoskonalaj wygenerowane ramy, dopracowując detale według własnych potrzeb.",
+      bullet2: "Generuj kompletne mapy procesów z opisów tekstowych.",
+      bullet3: "Automatycznie nazywaj etapy, optymalizuj ścieżki i dopracowuj detale jednym kliknięciem.",
+      bullet4: "AI dobiera narzędzia do Twojego procesu – rekomenduje konkretne rozwiązania z katalogu.",
       chat1: "Cześć, chcę zmapować proces akceptacji wyceny dla klienta.",
       chat2: "Jasne. Czy uwzględnić automatyczną analizę rentowności przez AI?",
       chat3: "Tak, i skieruj wyceny powyżej 50k do dyrektora do akceptacji.",

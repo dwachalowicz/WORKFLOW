@@ -1574,9 +1574,9 @@ export const en = {
     },
     "features": {
       "bullet1": "BYOK (Bring Your Own Key) – use your own AI API key, secured with AES-256 encryption.",
-      "bullet2": "Generate complete process maps purely from a text description.",
-      "bullet3": "Automatically name stages and create optimal paths with a single click.",
-      "bullet4": "Refine generated frameworks by manually fine-tuning details to your needs.",
+      "bullet2": "Generate complete process maps from text descriptions.",
+      "bullet3": "Automatically name stages, optimize paths, and fine-tune details with a single click.",
+      "bullet4": "AI selects tools for your process – recommending specific solutions from the catalog.",
       "chat1": "Hi, I want to map the client quote approval process.",
       "chat2": "Sure. Should I include automatic profitability analysis by AI?",
       "chat3": "Yes, and route quotes over 50k to the director for approval.",

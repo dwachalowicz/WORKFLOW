@@ -2,59 +2,8 @@
 // Endpoint: POST /api/ai/chat
 // Klucz API nigdy nie opuszcza serwera.
 
-globalThis.escapeHtml = function(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-};
 
-globalThis.parsePbJson = function(raw) {
-    if (!raw) return [];
-    // Handle native JS arrays (already parsed)
-    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
-    // Handle Go proxy objects that have a length but aren't recognized by Array.isArray
-    if (typeof raw === 'object' && !Array.isArray(raw) && typeof raw !== 'string') {
-        try {
-            // Try to convert Go proxy to native JS via JSON round-trip
-            var jsonStr = JSON.stringify(raw);
-            if (jsonStr) {
-                var parsed = JSON.parse(jsonStr);
-                if (Array.isArray(parsed)) return parsed;
-            }
-        } catch(e) {}
-        // Try Array.from for array-like objects
-        try {
-            var arr = Array.from(raw);
-            if (arr && arr.length > 0) return arr;
-        } catch(e) {}
-        return [];
-    }
-    
-    var str = "";
-    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
-        for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
-        try { str = decodeURIComponent(escape(str)); } catch(e) {}
-    } else if (typeof raw === "string") {
-        str = raw;
-    } else if (Array.isArray(raw) && raw.length === 0) {
-        return [];
-    } else {
-        return [];
-    }
 
-    try {
-        var parsed = JSON.parse(str);
-        if (typeof parsed === "string") parsed = JSON.parse(parsed);
-        if (Array.isArray(parsed)) return parsed;
-        if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
-    } catch(e) {}
-    
-    return [];
-};
 
 // PROMPT MODULE FUNCTIONS MOVED INSIDE ROUTER FOR GOJA COMPATIBILITY
 
@@ -175,23 +124,30 @@ routerAdd("POST", "/api/ai/chat", (e) => {
         }
 
         // --- RATE LIMITING ---
-        globalThis.__chatRateLimits = globalThis.__chatRateLimits || {};
+        let rateLimits = e.app.store().get("chatRateLimits");
+        if (!rateLimits) {
+            rateLimits = {};
+        }
+        
         const now = Date.now();
-        for (let key in globalThis.__chatRateLimits) {
-            if (now - globalThis.__chatRateLimits[key].lastTime > 60000) {
-                delete globalThis.__chatRateLimits[key];
+        for (let key in rateLimits) {
+            if (now - rateLimits[key].lastTime > 60000) {
+                delete rateLimits[key];
             }
         }
-        let userCache = globalThis.__chatRateLimits[e.auth.id];
+        
+        let userCache = rateLimits[e.auth.id];
         if (!userCache || (now - userCache.lastTime > 2000)) {
-            globalThis.__chatRateLimits[e.auth.id] = { count: 1, lastTime: now };
+            rateLimits[e.auth.id] = { count: 1, lastTime: now };
         } else {
             userCache.count++;
             if (userCache.count > 3) {
+                e.app.store().set("chatRateLimits", rateLimits);
                 return e.json(429, { message: "Zbyt wiele zapytań. Spróbuj ponownie za chwilę. / Too many requests." });
             }
         }
-        // ---------------------
+        e.app.store().set("chatRateLimits", rateLimits);
+
 
         const rawBody = e.requestInfo().body || {};
         const data = JSON.parse(JSON.stringify(rawBody));
@@ -886,7 +842,10 @@ onRecordCreateRequest((e) => {
             : role;
 
         function getInvitationEmailHtml(wsName, subtitleText, roleLabel, ctaText, inviterName, inviterEmail) {
-            var escapeHtml = globalThis.escapeHtml;
+            var escapeHtml = function(str) {
+                if (!str) return '';
+                return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            };
             return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                 + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                 + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -973,7 +932,10 @@ onRecordCreateRequest((e) => {
 onRecordCreateRequest((e) => {
     e.next();
 
-    var escapeHtml = globalThis.escapeHtml;
+    var escapeHtml = function(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    };
 
     try {
         const record = e.record;
@@ -1432,6 +1394,10 @@ onRecordDeleteRequest((e) => {
                 let recipientEmail = user.get("email");
                 
                 if (recipientEmail) {
+                    var escapeHtml = function(str) {
+                        if (!str) return '';
+                        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                    };
                     let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                     + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                     + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -1443,8 +1409,8 @@ onRecordDeleteRequest((e) => {
                     + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Notification</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:28px 36px;">'
-                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
-                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + globalThis.escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:15px;color:#1a1a1a;line-height:1.6;">Zostałeś usunięty z obszaru roboczego <strong>' + escapeHtml(wsName) + '</strong>.</p>'
+                    + '<p style="font-size:14px;color:#6b7280;line-height:1.6;">You have been removed from the workspace <strong>' + escapeHtml(wsName) + '</strong>.</p>'
                     + '</td></tr>'
                     + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
                     + '<p style="margin:0 0 4px;font-size:12px;color:#9ca3af;font-weight:500;">Gryf.ai — Projektowanie Procesów Biznesowych / Business Process Design</p>'
@@ -1554,7 +1520,42 @@ onRecordCreateRequest(function(e) {
     }
 
     // Walidacja wnętrza procesu
-    var parsePbJson = globalThis.parsePbJson;
+    var parsePbJson = function(raw) {
+        if (!raw) return [];
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
+        if (typeof raw === 'object' && !Array.isArray(raw) && typeof raw !== 'string') {
+            try {
+                var jsonStr = JSON.stringify(raw);
+                if (jsonStr) {
+                    var parsed = JSON.parse(jsonStr);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch(pe) {}
+            try {
+                var arr = Array.from(raw);
+                if (arr && arr.length > 0) return arr;
+            } catch(pe) {}
+            return [];
+        }
+        var str = "";
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
+            for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
+            try { str = decodeURIComponent(escape(str)); } catch(pe) {}
+        } else if (typeof raw === "string") {
+            str = raw;
+        } else if (Array.isArray(raw) && raw.length === 0) {
+            return [];
+        } else {
+            return [];
+        }
+        try {
+            var parsed = JSON.parse(str);
+            if (typeof parsed === "string") parsed = JSON.parse(parsed);
+            if (Array.isArray(parsed)) return parsed;
+            if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
+        } catch(pe) {}
+        return [];
+    };
 
     var nodesArray = [];
     var edgesArray = [];
@@ -1658,7 +1659,42 @@ onRecordUpdateRequest(function(e) {
     var record = e.record;
 
     // Walidacja wnętrza procesu (bez sprawdzania maxProcesses bo to UPDATE)
-    var parsePbJson = globalThis.parsePbJson;
+    var parsePbJson = function(raw) {
+        if (!raw) return [];
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object') return raw;
+        if (typeof raw === 'object' && !Array.isArray(raw) && typeof raw !== 'string') {
+            try {
+                var jsonStr = JSON.stringify(raw);
+                if (jsonStr) {
+                    var parsed = JSON.parse(jsonStr);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch(pe) {}
+            try {
+                var arr = Array.from(raw);
+                if (arr && arr.length > 0) return arr;
+            } catch(pe) {}
+            return [];
+        }
+        var str = "";
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'number') {
+            for(var i=0; i<raw.length; i++) str += String.fromCharCode(raw[i]);
+            try { str = decodeURIComponent(escape(str)); } catch(pe) {}
+        } else if (typeof raw === "string") {
+            str = raw;
+        } else if (Array.isArray(raw) && raw.length === 0) {
+            return [];
+        } else {
+            return [];
+        }
+        try {
+            var parsed = JSON.parse(str);
+            if (typeof parsed === "string") parsed = JSON.parse(parsed);
+            if (Array.isArray(parsed)) return parsed;
+            if (parsed && typeof parsed === 'object') return Array.from(parsed) || [];
+        } catch(pe) {}
+        return [];
+    };
 
     var nodesArray = [];
     var edgesArray = [];
@@ -2579,6 +2615,10 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                 const wsName = ws.get("name") || "Workspace";
 
                 if (ownerEmail) {
+                    const escapeHtml = function(str) {
+                        if (!str) return '';
+                        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                    };
                     let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
                         + '<body style="margin:0;padding:0;background:#f4f4f5;font-family:Inter,system-ui,-apple-system,sans-serif;">'
                         + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 20px;">'
@@ -2594,12 +2634,12 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf9;border:1px solid #f0ede6;border-radius:12px;overflow:hidden;">'
                         + '<tr><td style="padding:18px 20px;border-bottom:1px solid #f0ede6;">'
                         + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">Workspace</span><br/>'
-                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + globalThis.escapeHtml(wsName) + '</span>'
+                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(wsName) + '</span>'
                         + '</td></tr>'
                         + '<tr><td style="padding:18px 20px;">'
                         + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;font-weight:600;">Użytkownik / User</span><br/>'
-                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + globalThis.escapeHtml(joinedName) + '</span>'
-                        + '<br/><span style="font-size:13px;color:#6b7280;">' + globalThis.escapeHtml(joinedEmail) + '</span>'
+                        + '<span style="font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.6;">' + escapeHtml(joinedName) + '</span>'
+                        + '<br/><span style="font-size:13px;color:#6b7280;">' + escapeHtml(joinedEmail) + '</span>'
                         + '</td></tr>'
                         + '</table>'
                         + '</td></tr>'
@@ -3270,20 +3310,19 @@ onRecordUpdateRequest((e) => {
 // Prevents User A from reading User B's ai_api_key etc.
 // Keeps expand (comment authors, lock info) working.
 // =====================================================
-globalThis.SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
 
-globalThis.stripSensitiveFields = function(record, authId) {
-    if (!record || record.id === authId) return;
-    for (var i = 0; i < globalThis.SENSITIVE_USER_FIELDS.length; i++) {
-        record.set(globalThis.SENSITIVE_USER_FIELDS[i], "");
-    }
-}
 
 onRecordViewRequest((e) => {
     e.next();
     try {
         var authId = e.auth ? e.auth.id : "";
-        var stripSensitiveFields = globalThis.stripSensitiveFields;
+        var SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
+        var stripSensitiveFields = function(record, authId) {
+            if (!record || record.id === authId) return;
+            for (var i = 0; i < SENSITIVE_USER_FIELDS.length; i++) {
+                record.set(SENSITIVE_USER_FIELDS[i], "");
+            }
+        };
         stripSensitiveFields(e.record, authId);
     } catch(err) {}
 }, "WORKFLOW_users");
@@ -3292,7 +3331,13 @@ onRecordsListRequest((e) => {
     e.next();
     try {
         var authId = e.auth ? e.auth.id : "";
-        var stripSensitiveFields = globalThis.stripSensitiveFields;
+        var SENSITIVE_USER_FIELDS = ["ai_api_key", "ai_provider", "ai_model", "ai_temperature", "ai_custom_memory", "ai_source"];
+        var stripSensitiveFields = function(record, authId) {
+            if (!record || record.id === authId) return;
+            for (var i = 0; i < SENSITIVE_USER_FIELDS.length; i++) {
+                record.set(SENSITIVE_USER_FIELDS[i], "");
+            }
+        };
         if (e.records && e.records.length) {
             for (var i = 0; i < e.records.length; i++) {
                 stripSensitiveFields(e.records[i], authId);
@@ -3645,7 +3690,7 @@ routerAdd("POST", "/api/confirm-email-change", (e) => {
             }
             // Handle UTF-8 encoding
             let finalDecoded = decodedStr;
-            try { finalDecoded = decodeURIComponent(escape(decodedStr)); } catch(e) {}
+            try { finalDecoded = decodeURIComponent(escape(decodedStr)); } catch(decErr) {}
             
             claims = JSON.parse(finalDecoded);
         } catch (err) {
