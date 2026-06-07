@@ -251,6 +251,9 @@ export const ProcessesTab = () => {
       const lockedIds = await getLockedProcessIdsForWorkspace(activeWorkspace.id);
       setLockedProcessIds(lockedIds);
     } catch (err) {
+      const errObj = err as { isAbort?: boolean; status?: number; originalError?: Error };
+      if (errObj.isAbort || errObj.status === 0) return; // Ignore aborts and unmount network errors
+
       const error = err as Error;
       console.error('Error fetching data:', err);
       useToastStore.getState().showToast(t('common.error'), 'error');
