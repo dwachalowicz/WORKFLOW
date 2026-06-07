@@ -318,7 +318,7 @@ export const AiAssistantPanel = () => {
       const endIdx = raw.lastIndexOf('}');
       if (startIdx === -1) return [];
       // Handle truncated JSON by adding closing braces if needed
-      let jsonStr = endIdx > startIdx ? raw.slice(startIdx, endIdx + 1) : raw.slice(startIdx) + '\n}';
+      const jsonStr = endIdx > startIdx ? raw.slice(startIdx, endIdx + 1) : raw.slice(startIdx) + '\n}';
       let parsed: Record<string, unknown>;
       try {
         parsed = JSON.parse(jsonStr);
