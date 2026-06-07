@@ -32,10 +32,6 @@ export const FeaturesSection: React.FC = () => {
         if (scrollWrapperRef.current) {
           scrollWrapperRef.current.scrollTo({ top: scrollWrapperRef.current.scrollHeight, behavior: 'smooth' });
         }
-        // Also ensure the container itself stays visible on the page
-        if (containerRef.current) {
-          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
       }, 500);
       
       // Stop auto-scrolling after the last message (approx 11s)
