@@ -310,7 +310,7 @@ export const AiAssistantPanel = () => {
 
   /** Parse the workflow-tools JSON block returned by AI and extract tool names */
   const parseToolsFromJson = useCallback((text: string): string[] => {
-    const match = text.match(/```(?:json)?\s*workflow-tools\s*([\s\S]*?)```/);
+    const match = text.match(/```\s*(?:json)?\s*workflow-tools\s*([\s\S]*?)(?:```|$)/i);
     if (!match) return [];
     try {
       const raw = match[1];
@@ -534,7 +534,7 @@ export const AiAssistantPanel = () => {
       // Strip all code blocks that contain workflow data (any format variation)
       // Generic: cut workflow-tools block (model-text-agnostic)
       let cleanResponse = response
-        .replace(/```(?:json)?\s*workflow-tools[\s\S]*?```[\s]*/gi, '')
+        .replace(/```\s*(?:json)?\s*workflow-tools[\s\S]*?(?:```|$)[\s]*/gi, '')
         .replace(/[Oo]to podsumowanie[^.\n]*?:?\s*/gi, '')
         .replace(/(?:Oto |Podaję |Poniżej znajdziesz )?[^.\n]*w formacie JSON[^.\n]*:?\s*/gi, '');
 

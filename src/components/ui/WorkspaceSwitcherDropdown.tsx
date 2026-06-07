@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { ChevronDown, Check, Crown, Edit3, Eye, Users, Lock } from 'lucide-react';
 import { getRecordFileUrl } from '@/lib/pocketbase';
+import { getIcon } from '@/lib/iconMap';
 import { useTranslation } from 'react-i18next';
 
 export const WorkspaceSwitcherDropdown = () => {
@@ -55,6 +56,13 @@ export const WorkspaceSwitcherDropdown = () => {
                     alt={ws.name}
                     className="w-6 h-6 rounded-md object-cover ring-1 ring-border shrink-0"
                   />
+                ) : ws.icon ? (
+                  <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center text-foreground ring-1 ring-border shrink-0">
+                    {(() => {
+                      const IconCmp = getIcon(ws.icon);
+                      return IconCmp ? <IconCmp size={14} /> : <span className="text-[10px] font-bold">{ws.name.charAt(0).toUpperCase()}</span>;
+                    })()}
+                  </div>
                 ) : (
                   <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center text-[10px] font-bold text-foreground ring-1 ring-border shrink-0">
                     {ws.name.charAt(0).toUpperCase()}

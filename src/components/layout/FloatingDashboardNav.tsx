@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getAvatarUrl, getRecordFileUrl } from '@/lib/pocketbase';
 import { getTierLimits } from '@/lib/tierLimits';
+import { getIcon } from '@/lib/iconMap';
 import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { useTranslation } from 'react-i18next';
@@ -67,6 +68,11 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
                   alt={activeWorkspace.name}
                   className="w-full h-full object-cover"
                 />
+              ) : activeWorkspace?.icon ? (
+                (() => {
+                  const IconCmp = getIcon(activeWorkspace.icon);
+                  return IconCmp ? <IconCmp size={20} className="text-background" /> : (activeWorkspace?.name?.charAt(0) || 'W');
+                })()
               ) : (
                 activeWorkspace?.name?.charAt(0) || 'W'
               )}
@@ -248,6 +254,13 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
         <button onClick={onOpenWorkspaceSwitcher} aria-label={t('dashboard.manageWorkspaces')} className={`cursor-pointer flex items-center justify-center p-2 rounded-xl transition-colors ${activeTab === 'workspaces' ? 'text-brand-gold bg-brand-gold/10' : 'text-muted-foreground'}`}>
           {activeWorkspace?.avatar ? (
             <img src={getRecordFileUrl('WORKFLOW_workspaces', activeWorkspace, activeWorkspace.avatar, 32)} alt="" className="w-6 h-6 rounded-full object-cover" />
+          ) : activeWorkspace?.icon ? (
+            <div className="w-6 h-6 rounded-full bg-brand-gold text-background flex items-center justify-center">
+              {(() => {
+                const IconCmp = getIcon(activeWorkspace.icon);
+                return IconCmp ? <IconCmp size={14} /> : <span className="text-xs font-bold">{(activeWorkspace?.name || 'W').charAt(0).toUpperCase()}</span>;
+              })()}
+            </div>
           ) : (
             <div className="w-6 h-6 rounded-full bg-brand-gold text-background flex items-center justify-center text-xs font-bold">
               {(activeWorkspace?.name || 'W').charAt(0).toUpperCase()}
