@@ -606,6 +606,7 @@ export const en = {
     title: 'Appearance (Avatar / Icon)',
     avatarTab: 'Avatar',
     iconTab: 'Icon',
+    searchIcon: 'Search icons...',
     selectFile: 'Select file',
     cropAndSave: 'Crop and save',
     removeAvatar: 'Remove avatar',

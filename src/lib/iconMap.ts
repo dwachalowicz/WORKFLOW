@@ -52,9 +52,15 @@ import {
   Trophy,
   ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
   ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
-  Bot, Cpu, Waypoints, GitBranch, GitMerge, FileSpreadsheet, FileJson, FileCode, FileImage,
-  Wand2, Calculator, ArrowRightLeft, Link2, Workflow, Boxes, Braces, Brackets, TerminalSquare,
-  ShieldAlert, ShieldCheck, PlayCircle, Clock, TimerReset, Repeat1, ArrowDownToLine, ArrowUpFromLine,
+  GitBranch, GitMerge, GitPullRequest, Workflow, Bot, Cpu, FileSpreadsheet, FileCode, AlertCircle, Wrench, MousePointerClick, Blocks, Factory,
+  Kanban, ListTodo, ListChecks, BarChart, TrendingDown,
+  LockKeyhole, ShieldCheck, ShieldAlert, Banknote, Coins, Wallet,
+  PackageSearch, PackageCheck, PackagePlus, PackageMinus, Book, Warehouse, Bug, Code2,
+  ServerCrash, Router, Megaphone, PlayCircle, PauseCircle, FolderTree, FolderPlus, FolderMinus,
+  FilePlus, FileWarning, FileArchive, FileSearch, Globe2, ThumbsDown, Smile, Meh,
+  ExternalLink, Link2, Unlink, RefreshCcw, RotateCcw, SaveAll, SearchCheck, ClipboardList,
+  ClipboardCopy, ClipboardPaste, Wand2, Fingerprint, BadgeCheck, BellRing, AlarmClock,
+  CalendarDays, CalendarClock, CalendarCheck, CalendarPlus, EyeOff, UserCog,
   type LucideIcon
 } from 'lucide-react';
 
@@ -106,9 +112,15 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   Trophy,
   ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
   ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
-  Bot, Cpu, Waypoints, GitBranch, GitMerge, FileSpreadsheet, FileJson, FileCode, FileImage,
-  Wand2, Calculator, ArrowRightLeft, Link2, Workflow, Boxes, Braces, Brackets, TerminalSquare,
-  ShieldAlert, ShieldCheck, PlayCircle, Clock, TimerReset, Repeat1, ArrowDownToLine, ArrowUpFromLine,
+  GitBranch, GitMerge, GitPullRequest, Workflow, Bot, Cpu, FileSpreadsheet, FileCode, AlertCircle, Wrench, MousePointerClick, Blocks, Factory,
+  Kanban, ListTodo, ListChecks, BarChart, TrendingDown,
+  LockKeyhole, ShieldCheck, ShieldAlert, Banknote, Coins, Wallet,
+  PackageSearch, PackageCheck, PackagePlus, PackageMinus, Book, Warehouse, Bug, Code2,
+  ServerCrash, Router, Megaphone, PlayCircle, PauseCircle, FolderTree, FolderPlus, FolderMinus,
+  FilePlus, FileWarning, FileArchive, FileSearch, Globe2, ThumbsDown, Smile, Meh,
+  ExternalLink, Link2, Unlink, RefreshCcw, RotateCcw, SaveAll, SearchCheck, ClipboardList,
+  ClipboardCopy, ClipboardPaste, Wand2, Fingerprint, BadgeCheck, BellRing, AlarmClock,
+  CalendarDays, CalendarClock, CalendarCheck, CalendarPlus, EyeOff, UserCog,
 };
 
 /**

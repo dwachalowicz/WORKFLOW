@@ -645,6 +645,7 @@ export const pl = {
     title: 'Wygląd (Avatar / Ikona)',
     avatarTab: 'Avatar',
     iconTab: 'Ikona',
+    searchIcon: 'Szukaj ikon...',
     selectFile: 'Wybierz plik',
     cropAndSave: 'Przytnij i zapisz',
     removeAvatar: 'Usuń avatar',
