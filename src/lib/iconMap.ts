@@ -52,6 +52,9 @@ import {
   Trophy,
   ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
   ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
+  Bot, Cpu, Waypoints, GitBranch, GitMerge, FileSpreadsheet, FileJson, FileCode, FileImage,
+  Wand2, Calculator, ArrowRightLeft, Link2, Workflow, Boxes, Braces, Brackets, TerminalSquare,
+  ShieldAlert, ShieldCheck, PlayCircle, Clock, TimerReset, Repeat1, ArrowDownToLine, ArrowUpFromLine,
   type LucideIcon
 } from 'lucide-react';
 
@@ -103,6 +106,9 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   Trophy,
   ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
   ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
+  Bot, Cpu, Waypoints, GitBranch, GitMerge, FileSpreadsheet, FileJson, FileCode, FileImage,
+  Wand2, Calculator, ArrowRightLeft, Link2, Workflow, Boxes, Braces, Brackets, TerminalSquare,
+  ShieldAlert, ShieldCheck, PlayCircle, Clock, TimerReset, Repeat1, ArrowDownToLine, ArrowUpFromLine,
 };
 
 /**
