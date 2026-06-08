@@ -212,7 +212,7 @@ export const CustomEdge = memo(({
                 
                 {hasLabel && (
                   <div className={cn("group/label relative flex items-center justify-center shrink-0", decisionMakers.length > 0 ? "mr-1.5" : "")}>
-                    <span className="text-[10px] font-semibold text-foreground truncate max-w-[120px]">
+                    <span className="text-[10px] font-semibold text-foreground whitespace-normal break-words text-center max-w-[250px]">
                       {labelText}
                     </span>
                     <InlineTooltip groupName="label">

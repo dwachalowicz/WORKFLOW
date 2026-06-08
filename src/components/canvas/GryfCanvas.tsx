@@ -171,7 +171,7 @@ export const GryfCanvas = () => {
   }, [isViewMode, screenToFlowPosition, addNode]);
 
   const onPaneClick = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('collapseAllNodes'));
+    // Intentionally empty to prevent closing nodes when clicking on canvas
   }, []);
 
   const onNodeClick = useCallback(() => {

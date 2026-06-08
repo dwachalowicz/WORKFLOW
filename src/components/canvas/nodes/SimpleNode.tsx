@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { memo, useEffect, useState } from 'react';
 import { Handle, Position, useUpdateNodeInternals } from '@xyflow/react';
 import { cn } from '@/lib/utils';
-import { Clock, CalendarDays, CheckSquare, Database, ChevronDown, MessageCircle, Ban, Mail, Webhook, CheckCircle2, Network, MoreHorizontal } from 'lucide-react';
+import { Clock, CalendarDays, CheckSquare, Database, ChevronDown, ChevronUp, MessageCircle, Ban, Mail, Webhook, CheckCircle2, Network, MoreHorizontal } from 'lucide-react';
 import { getIcon } from '@/lib/iconMap';
 import { getRotatedHandlePosition, getHandleClass, getDbHandleClass, getSharedNodeClasses } from './nodeUtils';
 import { useHandleActive, useNodeVisualState, useNodeRotation } from './useNodeHooks';
@@ -109,32 +109,81 @@ export const SimpleNode = memo(({
 
       {/* Main content – always visible */}
       <div 
-        className="px-5 py-3.5 flex items-center justify-between gap-3 group"
+        className="px-5 py-3 flex flex-col gap-2 group"
       >
         <div 
-          className="flex items-center gap-1.5 min-w-0 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-start gap-1.5"
         >
-          <ChevronDown 
-            size={14} 
-            className={cn("text-muted-foreground transition-transform duration-200 shrink-0 group-hover:text-foreground", isExpanded && "rotate-180")} 
-          />
           {(() => {
             const IconCmp = data.icon ? getIcon(data.icon) : null;
-            return IconCmp ? <IconCmp size={14} className="text-brand-gold shrink-0" /> : null;
+            return IconCmp ? <IconCmp size={14} className="mt-0.5 text-brand-gold shrink-0" /> : null;
           })()}
-          <SimpleTooltip content={data.label} side="top">
-            <span className="text-sm font-semibold tracking-tight text-foreground leading-tight truncate max-w-[160px] select-none">
-              {data.label}
-            </span>
-          </SimpleTooltip>
+          <span className="text-sm font-semibold tracking-tight text-foreground leading-tight select-none">
+            {data.label}
+          </span>
         </div>
 
-        {/* Small dot indicators & Avatars (visible without hover) */}
-        <div className="flex items-center gap-2 shrink-0">
+        {!isExpanded && (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-0.5">
+            <div className="cursor-pointer p-0.5 -ml-1 mr-0.5" onClick={() => setIsExpanded(true)}>
+              <ChevronDown 
+                size={14} 
+                className="text-muted-foreground transition-transform duration-200 shrink-0 hover:text-foreground"
+              />
+            </div>
+            {hasChecklist && (
+              <div className="group/checklist relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <InlineTooltip groupName="checklist">
+                  {t('canvas.hasChecklist')}
+                </InlineTooltip>
+              </div>
+            )}
+            {hasVariables && (
+              <div className="group/variables relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <InlineTooltip groupName="variables">
+                  {t('canvas.collectsVariables')}
+                </InlineTooltip>
+              </div>
+            )}
+            {Boolean(data.maxDuration) && data.maxDuration !== 0 && data.maxDuration !== '0' && (
+              <div className="group/sla relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <InlineTooltip groupName="sla">
+                  SLA: {data.maxDuration}
+                </InlineTooltip>
+              </div>
+            )}
+            {hasCost && (
+              <div className="group/cost relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                <InlineTooltip groupName="cost">
+                  {t('canvas.hasCost')}
+                </InlineTooltip>
+              </div>
+            )}
+            {editors.length > 0 && (
+              <div className="group/editors relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                <InlineTooltip groupName="editors">
+                  {t('canvas.hasEditors')}
+                </InlineTooltip>
+              </div>
+            )}
+            {commentCount > 0 && (
+              <div className="group/comments relative flex items-center justify-center p-1 cursor-help">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                <InlineTooltip groupName="comments">
+                  {commentCount} {commentCount === 1 ? t('canvas.commentOne') : commentCount < 5 ? t('canvas.commentFew') : t('canvas.commentMany')}
+                </InlineTooltip>
+              </div>
+            )}
+          </div>
           
           {uniqueUsers.length > 0 && (
-            <div className="group/avatars relative hover:z-50 cursor-help flex items-center">
+            <div className="group/avatars relative hover:z-50 cursor-help flex items-center shrink-0">
               <div className={cn("flex", uniqueUsers.length > 1 ? "-space-x-1.5" : "")}>
                 {uniqueUsers.slice(0, 3).map((user: NodeGroup, idx: number) => (
                   <GroupAvatar key={idx} group={user} size="xs" className="ring-2 ring-card relative z-10" />
@@ -166,58 +215,8 @@ export const SimpleNode = memo(({
               </InlineTooltip>
             </div>
           )}
-
-          <div className="flex flex-wrap justify-end gap-0.5 max-w-[54px]">
-          {hasChecklist && (
-            <div className="group/checklist relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <InlineTooltip groupName="checklist">
-                {t('canvas.hasChecklist')}
-              </InlineTooltip>
-            </div>
-          )}
-          {hasVariables && (
-            <div className="group/variables relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <InlineTooltip groupName="variables">
-                {t('canvas.collectsVariables')}
-              </InlineTooltip>
-            </div>
-          )}
-          {data.maxDuration && (
-            <div className="group/sla relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <InlineTooltip groupName="sla">
-                SLA: {data.maxDuration}
-              </InlineTooltip>
-            </div>
-          )}
-          {hasCost && (
-            <div className="group/cost relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-              <InlineTooltip groupName="cost">
-                {t('canvas.hasCost')}
-              </InlineTooltip>
-            </div>
-          )}
-          {editors.length > 0 && (
-            <div className="group/editors relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-              <InlineTooltip groupName="editors">
-                {t('canvas.hasEditors')}
-              </InlineTooltip>
-            </div>
-          )}
-          {commentCount > 0 && (
-            <div className="group/comments relative flex items-center justify-center p-1 cursor-help">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-              <InlineTooltip groupName="comments">
-                {commentCount} {commentCount === 1 ? t('canvas.commentOne') : commentCount < 5 ? t('canvas.commentFew') : t('canvas.commentMany')}
-              </InlineTooltip>
-            </div>
-          )}
-          </div>
         </div>
+        )}
       </div>
 
       {/* Source handle on right */}
@@ -357,6 +356,14 @@ export const SimpleNode = memo(({
               </div>
             </div>
           )}
+        </div>
+        
+        {/* Collapse footer */}
+        <div 
+          className="w-full h-6 bg-secondary/20 hover:bg-secondary/60 border-t border-border flex items-center justify-center cursor-pointer transition-colors"
+          onClick={() => setIsExpanded(false)}
+        >
+          <ChevronUp size={14} className="text-muted-foreground" />
         </div>
       </div>
     </div>

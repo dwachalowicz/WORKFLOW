@@ -111,7 +111,7 @@ export const LinterPanel = () => {
   const errorsCount = issues.filter(i => i.type === 'error').length;
 
   return (
-    <div className="absolute top-20 md:top-auto md:bottom-6 z-[100] flex flex-col gap-2 left-6 md:left-[28px] md:[@media(max-height:880px)]:left-[88px] transition-all duration-300" ref={panelRef}>
+    <div className="absolute top-20 md:top-auto md:bottom-6 z-[9999] flex flex-col gap-2 left-6 md:left-[28px] md:[@media(max-height:880px)]:left-[88px] transition-all duration-300" ref={panelRef}>
       {isOpen && (
         <div className="bg-surface-nav border border-border rounded-[2rem] shadow-2xl p-5 w-80 animate-in slide-in-from-top-4 md:slide-in-from-bottom-4 flex flex-col gap-4">
           <div className="flex items-center justify-between">
