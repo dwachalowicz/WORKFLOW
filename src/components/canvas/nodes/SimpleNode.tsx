@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { memo, useEffect, useState } from 'react';
 import { Handle, Position, useUpdateNodeInternals } from '@xyflow/react';
 import { cn } from '@/lib/utils';
-import { Clock, CalendarDays, CheckSquare, Database, ChevronDown, ChevronUp, MessageCircle, Ban, Mail, Webhook, CheckCircle2, Network, MoreHorizontal } from 'lucide-react';
+import { Clock, CalendarDays, CheckSquare, Database, ChevronUp, MessageCircle, Ban, Mail, Webhook, CheckCircle2, Network, MoreHorizontal } from 'lucide-react';
 import { getIcon } from '@/lib/iconMap';
 import { getRotatedHandlePosition, getHandleClass, getDbHandleClass, getSharedNodeClasses } from './nodeUtils';
 import { useHandleActive, useNodeVisualState, useNodeRotation } from './useNodeHooks';
@@ -90,6 +90,8 @@ export const SimpleNode = memo(({
     index === self.findIndex((t) => t.name === user.name)
   ) as NodeGroup[];
 
+  const hasBottomRow = hasChecklist || hasVariables || (Boolean(data.maxDuration) && data.maxDuration !== 0 && data.maxDuration !== '0') || hasCost || editors.length > 0 || commentCount > 0 || uniqueUsers.length > 0;
+
   return (
     <div
       className={getSharedNodeClasses(selected, isSearchActive, isMatch, isSimulating, isActiveInSimulation)}
@@ -109,29 +111,26 @@ export const SimpleNode = memo(({
 
       {/* Main content – always visible */}
       <div 
-        className="px-5 py-3 flex flex-col gap-2 group"
+        className={cn("px-5 py-3 flex flex-col gap-2 group", !isExpanded && "cursor-pointer")}
+        onClick={() => !isExpanded && setIsExpanded(true)}
       >
         <div 
-          className="flex items-start gap-1.5"
+          className="flex items-start justify-between gap-2 w-full"
         >
-          {(() => {
-            const IconCmp = data.icon ? getIcon(data.icon) : null;
-            return IconCmp ? <IconCmp size={14} className="mt-0.5 text-brand-gold shrink-0" /> : null;
-          })()}
-          <span className="text-sm font-semibold tracking-tight text-foreground leading-tight select-none">
-            {data.label}
-          </span>
+          <div className="flex items-center gap-1.5 flex-1 pr-2 min-w-0">
+            {(() => {
+              const IconCmp = data.icon ? getIcon(data.icon) : null;
+              return IconCmp ? <IconCmp size={14} className="text-brand-gold shrink-0" /> : null;
+            })()}
+            <span className="text-sm font-semibold tracking-tight text-foreground leading-tight select-none break-words min-w-0">
+              {data.label}
+            </span>
+          </div>
         </div>
 
-        {!isExpanded && (
+        {!isExpanded && hasBottomRow && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-0.5">
-            <div className="cursor-pointer p-0.5 -ml-1 mr-0.5" onClick={() => setIsExpanded(true)}>
-              <ChevronDown 
-                size={14} 
-                className="text-muted-foreground transition-transform duration-200 shrink-0 hover:text-foreground"
-              />
-            </div>
             {hasChecklist && (
               <div className="group/checklist relative flex items-center justify-center p-1 cursor-help">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />

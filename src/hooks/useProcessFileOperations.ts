@@ -141,5 +141,118 @@ export function useProcessFileOperations() {
     reader.readAsText(file);
   };
 
-  return { fileInputRef, handleExport, handleMarkdownExport, handleImport };
+  const handlePdfExport = async () => {
+    try {
+      const { toJpeg } = await import('html-to-image');
+      const { jsPDF } = await import('jspdf');
+      const { getNodesBounds, getViewportForBounds } = await import('@xyflow/react');
+      
+      const state = useCanvasStore.getState();
+      if (state.nodes.length === 0) {
+        showToast(t('canvas.noNodesToExport') || t('canvas.exportError'), 'error');
+        return;
+      }
+
+      showToast(t('canvas.exportingPdf') || t('common.loading'), 'info');
+
+      const nodesBounds = getNodesBounds(state.nodes);
+      const padding = 100;
+      const imageWidth = nodesBounds.width + padding * 2;
+      const imageHeight = nodesBounds.height + padding * 2;
+      
+      const transform = getViewportForBounds(
+        nodesBounds,
+        imageWidth,
+        imageHeight,
+        0.1,
+        2,
+        0.1
+      );
+      
+      const viewportElement = document.querySelector('.react-flow__viewport') as HTMLElement;
+      if (!viewportElement) throw new Error('Viewport not found');
+
+      // html-to-image allows overriding styles on the cloned node for capture
+      const dataUrl = await toJpeg(viewportElement, {
+        quality: 0.95,
+        pixelRatio: 2.0,
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f1115' : '#ffffff',
+        width: imageWidth,
+        height: imageHeight,
+        style: {
+          width: `${imageWidth}px`,
+          height: `${imageHeight}px`,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom})`,
+        },
+      });
+
+      const pdf = new jsPDF({
+        orientation: imageWidth > imageHeight ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [imageWidth, imageHeight]
+      });
+      
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, imageWidth, imageHeight);
+
+      // Add gryf.ai logo and link
+      try {
+        const svgRes = await fetch('/gryf-ai-logo.svg');
+        if (svgRes.ok) {
+          let svgText = await svgRes.text();
+          // Replace currentColor with brand gold hex if present
+          svgText = svgText.replace(/currentColor/g, '#C4A052');
+          
+          const img = new Image();
+          const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+          
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = url;
+          });
+          
+          if (img.width > 0) {
+            const canvas = document.createElement('canvas');
+            const logoWidth = 24;
+            const logoHeight = (img.height / img.width) * logoWidth || 24;
+            // Higher resolution for canvas to avoid blurriness
+            canvas.width = logoWidth * 4;
+            canvas.height = logoHeight * 4;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.scale(4, 4);
+              ctx.drawImage(img, 0, 0, logoWidth, logoHeight);
+              const pngData = canvas.toDataURL('image/png');
+              
+              const startX = 30;
+              const startY = imageHeight - 40;
+              
+              pdf.addImage(pngData, 'PNG', startX, startY, logoWidth, logoHeight);
+              
+              pdf.setFont('helvetica', 'bold');
+              pdf.setFontSize(18);
+              pdf.setTextColor(196, 160, 82); // #C4A052 (Brand gold)
+              pdf.text('gryf.ai', startX + logoWidth + 8, startY + 18);
+              
+              // Clickable link covering the logo and text
+              pdf.link(startX, startY, logoWidth + 80, Math.max(logoHeight, 24), { url: 'https://gryf.ai' });
+            }
+          }
+          URL.revokeObjectURL(url);
+        }
+      } catch (e) {
+        console.warn('Could not add logo to PDF', e);
+      }
+
+      pdf.save(`${state.processName || 'proces'}.pdf`);
+      
+      showToast(t('canvas.exported'), 'success');
+    } catch (err) {
+      console.error("Error exporting PDF:", err);
+      showToast(t('canvas.exportError'), 'error');
+    }
+  };
+
+  return { fileInputRef, handleExport, handleMarkdownExport, handlePdfExport, handleImport };
 }

@@ -4,7 +4,7 @@ import { FloatingNavBar } from '@/components/layout/FloatingNavBar';
 import { SimulationControl } from '@/components/panels/SimulationControl';
 import { Tutorial } from '@/components/ui/Tutorial';
 import { ReactFlowProvider } from '@xyflow/react';
-import { Save, Download, Upload, Share2, Lock, FileText } from 'lucide-react';
+import { Save, Download, Upload, Share2, Lock, FileText, File } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -42,7 +42,7 @@ export const AppPage = () => {
   const showToast = useToastStore((s) => s.showToast);
 
   const { lockInfo } = useProcessLock(urlProcessId, user?.id);
-  const { fileInputRef, handleExport, handleMarkdownExport, handleImport } = useProcessFileOperations();
+  const { fileInputRef, handleExport, handleMarkdownExport, handlePdfExport, handleImport } = useProcessFileOperations();
 
   const getLockedReasonText = () => {
     switch (lockedReason) {
@@ -169,6 +169,16 @@ export const AppPage = () => {
         />
         <div className="w-px h-5 bg-secondary dark:bg-white/5 hidden sm:block"></div>
         
+        <SimpleTooltip content={t('canvas.importJson')}>
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isViewMode}
+            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Upload size={14} />
+          </button>
+        </SimpleTooltip>
+
         <SimpleTooltip content={t('canvas.exportJson')}>
           <button 
             onClick={handleExport}
@@ -178,6 +188,8 @@ export const AppPage = () => {
             <Download size={14} />
           </button>
         </SimpleTooltip>
+
+        <div className="w-px h-5 bg-secondary dark:bg-white/5 hidden sm:block"></div>
 
         <SimpleTooltip content={t('canvas.exportMd')}>
           <button 
@@ -189,13 +201,16 @@ export const AppPage = () => {
           </button>
         </SimpleTooltip>
 
-        <SimpleTooltip content={t('canvas.importJson')}>
+        <SimpleTooltip content={t('canvas.exportPdf')}>
           <button 
-            onClick={() => fileInputRef.current?.click()}
+            onClick={handlePdfExport}
             disabled={isViewMode}
             className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={14} />
+            <div className="relative flex items-center justify-center">
+              <File size={15} />
+              <span className="absolute text-[5px] font-bold mt-[2px] tracking-tighter">PDF</span>
+            </div>
           </button>
         </SimpleTooltip>
 
@@ -206,6 +221,8 @@ export const AppPage = () => {
           accept=".json"
           onChange={handleImport}
         />
+
+        <div className="w-px h-5 bg-secondary dark:bg-white/5 hidden sm:block"></div>
 
         <SimpleTooltip content={t('canvas.sharePublic')}>
           <button 

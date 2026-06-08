@@ -50,6 +50,8 @@ import {
   Stethoscope, Store, Swords,
   Telescope, TestTube, Ticket, Timer, Tornado,
   Trophy,
+  ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
+  ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
   type LucideIcon
 } from 'lucide-react';
 
@@ -99,6 +101,8 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   Stethoscope, Store, Swords,
   Telescope, TestTube, Ticket, Timer, Tornado,
   Trophy,
+  ArrowLeft, ArrowUp, ArrowDown, ArrowUpRight, ArrowUpLeft, ArrowDownRight, ArrowDownLeft,
+  ChevronLeft, ChevronUp, ChevronDown, MoveLeft, MoveRight, MoveUp, MoveDown, Navigation2,
 };
 
 /**
