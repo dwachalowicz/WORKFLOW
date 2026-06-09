@@ -194,7 +194,7 @@ export function useProcessFileOperations() {
       
       pdf.addImage(dataUrl, 'JPEG', 0, 0, imageWidth, imageHeight);
 
-      // Add gryf.ai logo and link
+      // Add flow.gryf.ai logo and link
       try {
         const svgRes = await fetch('/gryf-ai-logo.svg');
         if (svgRes.ok) {
@@ -233,10 +233,10 @@ export function useProcessFileOperations() {
               pdf.setFont('helvetica', 'bold');
               pdf.setFontSize(18);
               pdf.setTextColor(196, 160, 82); // #C4A052 (Brand gold)
-              pdf.text('gryf.ai', startX + logoWidth + 8, startY + 18);
+              pdf.text('flow.gryf.ai', startX + logoWidth + 8, startY + 18);
               
               // Clickable link covering the logo and text
-              pdf.link(startX, startY, logoWidth + 80, Math.max(logoHeight, 24), { url: 'https://gryf.ai' });
+              pdf.link(startX, startY, logoWidth + 80, Math.max(logoHeight, 24), { url: 'https://flow.gryf.ai' });
             }
           }
           URL.revokeObjectURL(url);

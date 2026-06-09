@@ -97,7 +97,7 @@ export const Footer: React.FC = () => {
             <div className="flex items-center justify-center gap-6 bg-black px-8 py-5 rounded-2xl shrink-0 mt-2 md:mt-0">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 bg-brand-gold" style={{ WebkitMaskImage: 'url(/gryf-ai-logo.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'left', maskImage: 'url(/gryf-ai-logo.svg)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'left' }}></div>
-                <span className="text-white font-extrabold text-xl tracking-tight">gryf.ai</span>
+                <span className="text-white font-extrabold text-xl tracking-tight">flow.gryf.ai</span>
               </div>
               <Handshake className="w-8 h-8 text-white shrink-0" strokeWidth={1.5} />
               <img src="/landingpage/qalcwise_logo_dark.webp" alt="Qalcwise" className="h-8 md:h-9 object-contain" />

@@ -1,5 +1,5 @@
 /**
- * Tier-based limits for the Gryf.ai Workflow platform.
+ * Tier-based limits for the FLOW.GRYF.AI Workflow platform.
  * 
  * Configuration is loaded from PocketBase collection `WORKFLOW_tier_config`.
  * Hardcoded defaults are used as fallback if the DB is unreachable.

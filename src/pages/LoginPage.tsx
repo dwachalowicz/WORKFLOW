@@ -191,7 +191,7 @@ export const LoginPage = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="flex h-14 w-full rounded-full border border-border bg-secondary/30 px-4 py-2 pl-12 text-base text-foreground focus-visible:outline-none focus-visible:border-brand-gold/50 focus-visible:ring-1 focus-visible:ring-brand-gold/50 transition-all placeholder:text-muted-foreground/50"
-                    placeholder="mail@gryf.ai"
+                    placeholder="mail@flow.gryf.ai"
                   />
                 </div>
               </div>
@@ -259,7 +259,7 @@ export const LoginPage = () => {
           <span>·</span>
           <a href="/page/polityka-prywatnosci" className="hover:text-foreground transition-colors">{t('ui.privacy')}</a>
           <span>·</span>
-          <a href="https://www.gryf.ai" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">www.gryf.ai</a>
+          <a href="https://www.flow.gryf.ai" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">www.flow.gryf.ai</a>
         </div>
       </div>
     </div>

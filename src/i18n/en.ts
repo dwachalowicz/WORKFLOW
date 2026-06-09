@@ -102,7 +102,7 @@ export const en = {
     magicLinkVerifyFail: 'Login verification failed. Please try again.',
     magicLinkBroken: 'This login link is broken or incomplete.',
     goToLogin: 'Go to login',
-    magicLinkClickBelow: 'Click below to confirm your login to GRYF.AI',
+    magicLinkClickBelow: 'Click below to confirm your login to FLOW.GRYF.AI',
     tryAgain: 'Try again',
     backChangeEmail: 'Back (Enter different email)',
     deletionWarningIntro: 'Deleting your account is',
@@ -301,7 +301,7 @@ export const en = {
     sendInvitation: 'Send Invitation',
     pendingRegistration: 'Awaiting registration',
     inviteSuccessExisting: 'Invitation sent!',
-    inviteSuccessNew: 'The user doesn\'t have an account yet. The invitation has been saved — they will see it as soon as they register on GRYF.AI.',
+    inviteSuccessNew: 'The user doesn\'t have an account yet. The invitation has been saved — they will see it as soon as they register on FLOW.GRYF.AI.',
     status: 'Status',
     memberApproved: 'Member approved',
   },
@@ -1180,7 +1180,7 @@ export const en = {
     completeness: 'Completeness',
     slaCost: 'SLA / Cost',
     team: 'Team',
-    welcomeTitle: 'Welcome to GRYF.AI',
+    welcomeTitle: 'Welcome to FLOW.GRYF.AI',
     loginSubtitle: 'Sign in securely with one-time code',
     terms: 'Terms',
     privacy: 'Privacy',
@@ -1253,7 +1253,7 @@ export const en = {
 
   // Tutorial
   tutorial: {
-    step1: 'Welcome to GRYF.AI Workflow! We\'ve prepared a short tutorial to show you the most important features of our editor. Ready?',
+    step1: 'Welcome to FLOW.GRYF.AI Workflow! We\'ve prepared a short tutorial to show you the most important features of our editor. Ready?',
     step2: 'This is your main toolbar. Search, Magic Wand (auto-straightens curved paths), <span class="text-brand-gold font-bold">AI</span> Assistant, adding Notes to the canvas, and importing processes.',
     step3: 'Here you can name your process. You can safely save it to the cloud or export it locally as a JSON file.',
     step4: 'This is your Canvas. Right-click anywhere to open the Radial Menu.',
@@ -1372,13 +1372,13 @@ export const en = {
     },
     footer: {
       partner_badge: 'Official Qalcwise Partner',
-      partner_desc: 'Once you map your processes in GRYF.AI, we will gladly design and integrate your custom business applications in Qalcwise. From project implementation apps, through pricing systems and document workflows, to fully custom CRM systems.',
-      "text2": "Create your free account today. Map your first process and see GRYF.AI in action.",
+      partner_desc: 'Once you map your processes in FLOW.GRYF.AI, we will gladly design and integrate your custom business applications in Qalcwise. From project implementation apps, through pricing systems and document workflows, to fully custom CRM systems.',
+      "text2": "Create your free account today. Map your first process and see FLOW.GRYF.AI in action.",
       "text3": "Enter your email",
       "text4": "Get Started",
       "text5": "No credit card required",
       "text6": "Free basic plan",
-      "text8": "A mythical synergy of stability and intelligence. GRYF.AI — the operating system for your workflows, ideas, and business growth.",
+      "text8": "A mythical synergy of stability and intelligence. FLOW.GRYF.AI — the operating system for your workflows, ideas, and business growth.",
       "text9": "Product",
       "text10": "Offer",
       "text11": "Pricing",
@@ -1390,7 +1390,7 @@ export const en = {
       "text17": "Terms of Service",
       "text18": "Privacy Policy",
       "text19": "Cookie Settings",
-      "text20": "Copyright © 2026 GRYF.AI — Go Run Your Flow | Workflow Platform",
+      "text20": "Copyright © 2026 FLOW.GRYF.AI — Go Run Your Flow | Workflow Platform",
       "text1_1": "Launch your workflow",
       "text1_2": "system — powered",
       "text1_3": "by Gryf",
@@ -1413,7 +1413,7 @@ export const en = {
     "offersection": {
       html_title: "Comprehensive support in automation, custom business application development, and digital transformation for your business.",
       "text1": "OFFER",
-      "text2": "All GRYF.AI Services",
+      "text2": "All FLOW.GRYF.AI Services",
       "text4": "Chatbots Demo",
       "text5": "Contact",
       "text6": "Let's talk about your project:",
@@ -1519,7 +1519,7 @@ export const en = {
       html_3_2: " and deploy",
       "text1": "HOW IT WORKS",
       "text2": "Three steps to operational clarity",
-      "text3": "From a blank canvas to a living process map in minutes. This is how GRYF.AI turns complexity into logic and structure.",
+      "text3": "From a blank canvas to a living process map in minutes. This is how FLOW.GRYF.AI turns complexity into logic and structure.",
       "text4": "Step 1",
       "text6": "Create a free account and instantly gain access to your personal Workspace.",
       "text7": "Open a blank canvas that will become the foundation for your future business processes.",
@@ -1590,7 +1590,7 @@ export const en = {
       "title1": "Design and optimize",
       "title2": "processes",
       "title3": "with AI",
-      "subtitle": "GRYF.AI merges the stability of reliable workflows with the limitless power of artificial intelligence. Build a solid foundation for your business, supported by a smart assistant."
+      "subtitle": "FLOW.GRYF.AI merges the stability of reliable workflows with the limitless power of artificial intelligence. Build a solid foundation for your business, supported by a smart assistant."
     },
     "hero": {
       "map": "MAP PROCESSES",
@@ -1630,11 +1630,11 @@ export const en = {
     casessection: {
       text1: 'USE CASES',
       text2: 'Real processes and real results',
-      text3: 'GRYF.AI is a workspace for mapping business processes — from valuation systems to complaint handling. See example flows.'
+      text3: 'FLOW.GRYF.AI is a workspace for mapping business processes — from valuation systems to complaint handling. See example flows.'
     },
     faqpage: {
       text1: 'Frequently Asked Questions',
-      text2: 'Everything you need to know about GRYF.AI - from registration, through AI configuration, to process management.',
+      text2: 'Everything you need to know about FLOW.GRYF.AI - from registration, through AI configuration, to process management.',
       text3: 'Didn\'t find your answer?',
       text4: 'Feel free to contact us - you will receive the necessary help.',
       text5: 'Go to contact',

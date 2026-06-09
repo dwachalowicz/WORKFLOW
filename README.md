@@ -1,4 +1,4 @@
-# Gryf.ai Workflow
+# FLOW.GRYF.AI Workflow
 
 Platforma do tworzenia i zarządzania procesami biznesowymi z wizualnym edytorem (React Flow).
 
@@ -126,4 +126,4 @@ GitHub Actions (`.github/workflows/ci.yml`):
 
 ## Licencja
 
-Proprietary — © Gryf.ai
+Proprietary — © FLOW.GRYF.AI

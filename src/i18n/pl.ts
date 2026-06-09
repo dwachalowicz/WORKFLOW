@@ -106,7 +106,7 @@ export const pl = {
     magicLinkVerifyFail: 'Nie udało się potwierdzić logowania. Spróbuj ponownie.',
     magicLinkBroken: 'Ten link logowania jest uszkodzony lub niekompletny.',
     goToLogin: 'Przejdź do logowania',
-    magicLinkClickBelow: 'Kliknij poniżej, aby potwierdzić logowanie do GRYF.AI',
+    magicLinkClickBelow: 'Kliknij poniżej, aby potwierdzić logowanie do FLOW.GRYF.AI',
     tryAgain: 'Spróbuj ponownie',
     backChangeEmail: 'Powrót (Wpisz inny adres)',
     deletionWarningIntro: 'Usunięcie konta jest',
@@ -312,7 +312,7 @@ export const pl = {
     sendInvitation: 'Wyślij Zaproszenie',
     pendingRegistration: 'Oczekuje rejestracji',
     inviteSuccessExisting: 'Zaproszenie wysłane!',
-    inviteSuccessNew: 'Użytkownik nie ma jeszcze konta. Zaproszenie zostało zapisane — zobaczy je od razu po rejestracji na GRYF.AI.',
+    inviteSuccessNew: 'Użytkownik nie ma jeszcze konta. Zaproszenie zostało zapisane — zobaczy je od razu po rejestracji na FLOW.GRYF.AI.',
     status: 'Status',
     memberApproved: 'Członek zatwierdzony',
   },
@@ -1114,7 +1114,7 @@ export const pl = {
       addStages: 'Zaproponuj dodatkowe etapy, które mogę dodać do tego procesu, aby go ulepszyć. Wygeneruj workflow-json z nowymi węzłami.'
     },
 
-    title: 'Asystent GRYF.AI',
+    title: 'Asystent FLOW.GRYF.AI',
     greeting: 'Cześć!',
     intro: 'Jestem <span class="text-brand-gold font-semibold">Gryf</span> — asystent AI.<br/>Pomogę Ci znaleźć narzędzia, przeanalizować procesy i wygenerować workflow.',
     thinking: 'Gryf myśli...',
@@ -1243,7 +1243,7 @@ export const pl = {
     completeness: 'Kompletność',
     slaCost: 'SLA / Koszt',
     team: 'Zespół',
-    welcomeTitle: 'Witaj w GRYF.AI',
+    welcomeTitle: 'Witaj w FLOW.GRYF.AI',
     loginSubtitle: 'Zaloguj się bezpiecznie jednorazowym kodem',
     terms: 'Regulamin',
     privacy: 'Prywatność',
@@ -1322,7 +1322,7 @@ export const pl = {
 
   // Tutorial
   tutorial: {
-    step1: 'Witaj w GRYF.AI Workflow! Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
+    step1: 'Witaj w FLOW.GRYF.AI Workflow! Przygotowaliśmy krótki samouczek, który pokaże Ci najważniejsze funkcje naszego edytora. Gotowy?',
     step2: 'To jest Twoje główne menu narzędzi. Wyszukiwarka, Magiczna Różdżka (układa automatycznie krzywe ścieżki), Asystent <span class="text-brand-gold font-bold">AI</span>, dodawanie Notatek na płótnie oraz importowanie procesów.',
     step3: 'Tutaj nadasz nazwę swojemu procesowi. Możesz go bezpiecznie zapisać w chmurze lub wyeksportować lokalnie do pliku JSON.',
     step4: 'To Twoje Płótno (Canvas). Kliknij PRAWYM przyciskiem myszy w dowolnym miejscu, aby otworzyć Menu Kołowe (Radial Menu).',
@@ -1441,13 +1441,13 @@ export const pl = {
     },
     footer: {
       partner_badge: 'Oficjalny Partner Qalcwise',
-      partner_desc: 'Gdy zmapujesz już swoje procesy w GRYF.AI, z przyjemnością zaprojektujemy dla Ciebie aplikacje biznesowe w Qalcwise. Od aplikacji wspierających wdrażanie projektów, przez systemy wycen i obieg dokumentów, aż po w pełni customowe systemy CRM.',
-      text2: "Załóż darmowe konto już dziś. Zmapuj swój pierwszy proces i zobacz GRYF.AI w akcji.",
+      partner_desc: 'Gdy zmapujesz już swoje procesy w FLOW.GRYF.AI, z przyjemnością zaprojektujemy dla Ciebie aplikacje biznesowe w Qalcwise. Od aplikacji wspierających wdrażanie projektów, przez systemy wycen i obieg dokumentów, aż po w pełni customowe systemy CRM.',
+      text2: "Załóż darmowe konto już dziś. Zmapuj swój pierwszy proces i zobacz FLOW.GRYF.AI w akcji.",
       text3: "Wpisz swój email",
       text4: "Rozpocznij",
       text5: "Bez karty kredytowej",
       text6: "Darmowy plan",
-      text8: "Mityczna synergia stabilności i inteligencji. GRYF.AI — system operacyjny dla Twoich przepływów pracy, pomysłów i rozwoju biznesu.",
+      text8: "Mityczna synergia stabilności i inteligencji. FLOW.GRYF.AI — system operacyjny dla Twoich przepływów pracy, pomysłów i rozwoju biznesu.",
       text9: "Produkt",
       text10: "Oferta",
       text11: "Cennik",
@@ -1459,7 +1459,7 @@ export const pl = {
       text17: "Regulamin",
       text18: "Polityka Prywatności",
       text19: "Ustawienia Cookie",
-      text20: "Copyright © 2026 GRYF.AI — Go Run Your Flow | Platforma Workflow",
+      text20: "Copyright © 2026 FLOW.GRYF.AI — Go Run Your Flow | Platforma Workflow",
       text1_1: "Uruchom swój system",
       text1_2: "workflow — napędzany",
       text1_3: "przez Gryfa",
@@ -1588,7 +1588,7 @@ export const pl = {
       html_3_2: " i wdrażaj",
       text1: "JAK TO DZIAŁA",
       text2: "Trzy kroki do przejrzystości operacyjnej",
-      text3: "Od pustego płótna do żywej mapy procesów w kilka minut. Tak GRYF.AI zamienia złożoność w logikę i strukturę.",
+      text3: "Od pustego płótna do żywej mapy procesów w kilka minut. Tak FLOW.GRYF.AI zamienia złożoność w logikę i strukturę.",
       text4: "Krok 1",
       text6: "Załóż darmowe konto i natychmiast zyskaj dostęp do własnego obszaru roboczego (Workspace).",
       text7: "Otwórz czyste płótno, które stanie się fundamentem dla Twoich przyszłych procesów biznesowych.",
@@ -1659,7 +1659,7 @@ export const pl = {
       title1: "Projektuj i optymalizuj",
       title2: "procesy",
       title3: "z AI",
-      subtitle: "GRYF.AI łączy stabilność niezawodnych przepływów pracy z nieograniczoną mocą sztucznej inteligencji. Zbuduj solidne fundamenty dla swojego biznesu, wspierane przez inteligentnego asystenta."
+      subtitle: "FLOW.GRYF.AI łączy stabilność niezawodnych przepływów pracy z nieograniczoną mocą sztucznej inteligencji. Zbuduj solidne fundamenty dla swojego biznesu, wspierane przez inteligentnego asystenta."
     },
     hero: {
       map: "MAPUJ PROCESY",
@@ -1699,11 +1699,11 @@ export const pl = {
     casessection: {
       text1: "PRZYKŁADY UŻYCIA",
       text2: "Rzeczywiste procesy i rzeczywiste rezultaty",
-      text3: "GRYF.AI to przestrzeń do mapowania procesów biznesowych — od systemów wyceny po obsługę reklamacji. Zobacz przykładowe przepływy."
+      text3: "FLOW.GRYF.AI to przestrzeń do mapowania procesów biznesowych — od systemów wyceny po obsługę reklamacji. Zobacz przykładowe przepływy."
     },
     faqpage: {
       text1: "Często Zadawane Pytania",
-      text2: "Wszystko, co musisz wiedzieć o GRYF.AI - od rejestracji, przez konfigurację AI, po zarządzanie procesami.",
+      text2: "Wszystko, co musisz wiedzieć o FLOW.GRYF.AI - od rejestracji, przez konfigurację AI, po zarządzanie procesami.",
       text3: "Nie znalazłeś odpowiedzi?",
       text4: "Skontaktuj się z nami - otrzymasz niezbędną pomoc.",
       text5: "Przejdź do kontaktu",

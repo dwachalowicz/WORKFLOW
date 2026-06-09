@@ -18,7 +18,7 @@ const mockGetAccountDeletionInfo = vi.fn().mockResolvedValue({
 beforeEach(() => {
   vi.clearAllMocks();
   useAuthStore.setState({
-    user: { id: 'u1', email: 'test@gryf.ai', name: 'Test', tier: 'PRO' } as any,
+    user: { id: 'u1', email: 'test@flow.gryf.ai', name: 'Test', tier: 'PRO' } as any,
     deleteAccount: mockDeleteAccount,
     getAccountDeletionInfo: mockGetAccountDeletionInfo,
   } as any);

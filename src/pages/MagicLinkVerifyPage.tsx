@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
  * MagicLinkVerifyPage — handles clickable magic link login.
  * 
  * The email template in PocketBase includes a link like:
- *   https://gryf.ai/login/verify?otp={OTP}&otpId={OTP_ID}
+ *   https://flow.gryf.ai/login/verify?otp={OTP}&otpId={OTP_ID}
  * 
  * Important: We do NOT auto-authenticate on page load because email scanners
  * (Gmail, Outlook) often pre-click links, which would consume the OTP.

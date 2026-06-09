@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 // a na koniec go kaskadowo usuwa.
 
 const PB_URL = 'https://pb.gryf.ai';
-const TEST_EMAIL = `e2e_backend_test_${Date.now()}@gryf.ai`;
+const TEST_EMAIL = `e2e_backend_test_${Date.now()}@flow.gryf.ai`;
 const TEST_PASSWORD = 'TestPassword123!';
 
 test.describe.serial('PocketBase Backend Hooks & API (main.pb.js)', () => {

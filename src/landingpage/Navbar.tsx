@@ -14,7 +14,7 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.location.href = '/'}>
         <div className="h-12 w-12 bg-brand-gold" style={{ WebkitMaskImage: 'url(/gryf-ai-logo.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: 'url(/gryf-ai-logo.svg)', maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }}></div>
         <div className="flex flex-col items-start leading-tight">
-          <span className="text-white font-black text-xl tracking-wider">gryf.ai</span>
+          <span className="text-white font-black text-xl tracking-wider">flow.gryf.ai</span>
           <span className="text-white/50 text-[10px] font-bold tracking-[0.2em] uppercase mt-0.5">v0.1.3 Beta</span>
         </div>
       </div>

@@ -43,7 +43,7 @@ export const FloatingDashboardNav = ({ activeTab, setActiveTab, onOpenWorkspaceS
     <div className="absolute top-6 left-6 z-[100] hidden md:block">
       <div className="flex flex-col items-center bg-surface-nav rounded-[2rem] p-2 pb-2 shadow-xl gap-4 border border-transparent dark:border-white/5">
         {/* Logo Section */}
-        <SimpleTooltip content={<span className="text-brand-gold font-extrabold tracking-wider">gryf.ai</span>} side="right">
+        <SimpleTooltip content={<span className="text-brand-gold font-extrabold tracking-wider">flow.gryf.ai</span>} side="right">
           <a 
             href="/"
             className="flex items-center justify-center w-full mt-2 hover:opacity-80 transition-opacity cursor-pointer"

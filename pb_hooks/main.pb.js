@@ -413,7 +413,7 @@ routerAdd("POST", "/api/ai/chat", (e) => {
 
             if (provider === "openrouter") {
                 endpoint = "https://openrouter.ai/api/v1/chat/completions";
-                headers["HTTP-Referer"] = "https://gryf.ai";
+                headers["HTTP-Referer"] = "https://flow.gryf.ai";
                 headers["X-Title"] = "Gryf.ai Workflow Assistant";
             }
 
@@ -852,7 +852,7 @@ onRecordCreateRequest((e) => {
                 + '<tr><td align="center">'
                 + '<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;">'
                 + '<tr><td style="padding:36px 36px 20px;text-align:center;border-bottom:1px solid #f0f0f0;">'
-                + '<img src="https://gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
+                + '<img src="https://flow.gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
                 + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">Zaproszenie do Workspace</h1>'
                 + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Invitation</p>'
                 + '<p style="margin:16px 0 0;font-size:14px;color:#6b7280;line-height:1.5;">' + subtitleText + '</p>'
@@ -875,7 +875,7 @@ onRecordCreateRequest((e) => {
                 + '</table>'
                 + '</td></tr>'
                 + '<tr><td style="padding:4px 36px 36px;text-align:center;">'
-                + '<a href="https://gryf.ai" style="display:inline-block;padding:14px 44px;background:#bc9b59;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.2px;">'
+                + '<a href="https://flow.gryf.ai" style="display:inline-block;padding:14px 44px;background:#bc9b59;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.2px;">'
                 + escapeHtml(ctaText) + '</a>'
                 + '</td></tr>'
                 + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
@@ -1404,7 +1404,7 @@ onRecordDeleteRequest((e) => {
                     + '<tr><td align="center">'
                     + '<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;">'
                     + '<tr><td style="padding:36px 36px 20px;text-align:center;border-bottom:1px solid #f0f0f0;">'
-                    + '<img src="https://gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
+                    + '<img src="https://flow.gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
                     + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">Powiadomienie z Workspace</h1>'
                     + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Workspace Notification</p>'
                     + '</td></tr>'
@@ -2625,7 +2625,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '<tr><td align="center">'
                         + '<table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;">'
                         + '<tr><td style="padding:36px 36px 20px;text-align:center;border-bottom:1px solid #f0f0f0;">'
-                        + '<img src="https://gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
+                        + '<img src="https://flow.gryf.ai/gryf-ai-logo.svg" alt="Gryf.ai" width="44" height="40" style="display:block;margin:0 auto 16px;" />'
                         + '<h1 style="margin:0;font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.3px;">Prośba o dołączenie</h1>'
                         + '<p style="margin:2px 0 0;font-size:14px;color:#9ca3af;font-weight:500;">Join Request</p>'
                         + '<p style="margin:16px 0 0;font-size:14px;color:#6b7280;line-height:1.5;">Ktoś chce dołączyć do Twojego workspace używając kodu. Zaakceptuj go w panelu Członków.<br/><span style="color:#9ca3af;font-size:13px;display:block;margin-top:6px;">Someone wants to join your workspace using the join code. Approve them in the Members panel.</span></p>'
@@ -2644,7 +2644,7 @@ routerAdd("POST", "/api/workspaces/join-by-code", (e) => {
                         + '</table>'
                         + '</td></tr>'
                         + '<tr><td style="padding:4px 36px 36px;text-align:center;">'
-                        + '<a href="https://gryf.ai" style="display:inline-block;padding:14px 44px;background:#bc9b59;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.2px;">Zaakceptuj / Approve</a>'
+                        + '<a href="https://flow.gryf.ai" style="display:inline-block;padding:14px 44px;background:#bc9b59;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.2px;">Zaakceptuj / Approve</a>'
                         + '</td></tr>'
                         + '<tr><td style="padding:20px 36px;border-top:1px solid #f0f0f0;text-align:center;background:#fafaf9;">'
                         + '<p style="margin:0;font-size:11px;color:#c4c4c4;">Ten email został wysłany automatycznie. / This email was sent automatically.</p>'

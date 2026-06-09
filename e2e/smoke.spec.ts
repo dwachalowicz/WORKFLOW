@@ -4,7 +4,7 @@ test.describe('Login Page', () => {
   test('renders login form with branding', async ({ page }) => {
     await page.goto('/login');
     
-    // Should show the Gryf.ai branding heading
+    // Should show the FLOW.GRYF.AI branding heading
     await expect(page.locator('h1')).toBeVisible();
     
     // Should have email input
