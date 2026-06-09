@@ -182,8 +182,7 @@ export const AppPage = () => {
         <SimpleTooltip content={t('canvas.exportJson')}>
           <button 
             onClick={handleExport}
-            disabled={isViewMode}
-            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors"
           >
             <Download size={14} />
           </button>
@@ -194,8 +193,7 @@ export const AppPage = () => {
         <SimpleTooltip content={t('canvas.exportMd')}>
           <button 
             onClick={handleMarkdownExport}
-            disabled={isViewMode}
-            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors"
           >
             <FileText size={14} />
           </button>
@@ -204,8 +202,7 @@ export const AppPage = () => {
         <SimpleTooltip content={t('canvas.exportPdf')}>
           <button 
             onClick={handlePdfExport}
-            disabled={isViewMode}
-            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 rounded-full hidden sm:flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-white/10 transition-colors"
           >
             <div className="relative flex items-center justify-center">
               <File size={15} />

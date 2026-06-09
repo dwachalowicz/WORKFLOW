@@ -114,18 +114,14 @@ export const SimpleNode = memo(({
         className={cn("px-5 py-3 flex flex-col gap-2 group", !isExpanded && "cursor-pointer")}
         onClick={() => !isExpanded && setIsExpanded(true)}
       >
-        <div 
-          className="flex items-start justify-between gap-2 w-full"
-        >
-          <div className="flex items-center gap-1.5 flex-1 pr-2 min-w-0">
-            {(() => {
-              const IconCmp = data.icon ? getIcon(data.icon) : null;
-              return IconCmp ? <IconCmp size={14} className="text-brand-gold shrink-0" /> : null;
-            })()}
-            <span className="text-sm font-semibold tracking-tight text-foreground leading-tight select-none break-words min-w-0">
-              {data.label}
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5 min-w-0">
+          {(() => {
+            const IconCmp = data.icon ? getIcon(data.icon) : null;
+            return IconCmp ? <IconCmp size={14} className="text-brand-gold shrink-0" /> : null;
+          })()}
+          <span className="text-sm font-semibold tracking-tight text-foreground leading-tight select-none break-words min-w-0">
+            {data.label}
+          </span>
         </div>
 
         {!isExpanded && hasBottomRow && (
