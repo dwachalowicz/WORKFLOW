@@ -148,7 +148,7 @@ export const OfferSection: React.FC = () => {
           {!isFormOpen ? (
             <div className="flex flex-col sm:flex-row items-center justify-center flex-wrap sm:flex-nowrap gap-4 w-full">
               <a 
-                href="https://demo.flow.gryf.ai"
+                href="https://gryf.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center whitespace-nowrap gap-2 bg-landing-section border border-white/10 text-white font-semibold text-[14px] px-8 py-3.5 rounded-full transition-all duration-300 hover:bg-brand-gold hover:text-white hover:scale-105 hover:shadow-none hover:border-transparent"
@@ -156,7 +156,7 @@ export const OfferSection: React.FC = () => {
                 {t('landing.offersection.text4')}
               </a>
               <a 
-                href="https://blog.flow.gryf.ai"
+                href="https://blog.gryf.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center whitespace-nowrap gap-2 bg-landing-section border border-white/10 text-white font-semibold text-[14px] px-8 py-3.5 rounded-full transition-all duration-300 hover:bg-brand-gold hover:text-white hover:scale-105 hover:shadow-none hover:border-transparent"
